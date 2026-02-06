@@ -21,8 +21,23 @@ st.markdown("""
     .big-text { color: #FF4B4B; text-shadow: 0 0 15px #FF4B4B; }
     .small-text { color: #00D4FF; text-shadow: 0 0 15px #00D4FF; }
     .share-box { background: linear-gradient(90deg, #FF0000, #990000); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid white; }
-    .stButton>button { width: 100%; border-radius: 15px; height: 50px; font-weight: bold; }
-    .get-btn>div>button { background: #00FF00 !important; color: black !important; font-size: 18px !important; }
+    
+    /* বাটন রেডিয়াস ও জেনারেল স্টাইল */
+    .stButton>button { width: 100%; border-radius: 15px; height: 50px; font-weight: bold; color: white; }
+    
+    /* BIG বাটন সবুজ (লাইন নম্বর পরিবর্তন না করে এখানে CSS এড করা হয়েছে) */
+    div[data-testid="stColumn"]:nth-of-type(1) .stButton>button {
+        background-color: #00FF00 !important;
+        color: black !important;
+    }
+    
+    /* SMALL বাটন লাল */
+    div[data-testid="stColumn"]:nth-of-type(2) .stButton>button {
+        background-color: #FF0000 !important;
+        color: white !important;
+    }
+    
+    .get-btn>div>button { background: #00FFCC !important; color: black !important; font-size: 18px !important; }
     .accuracy-tag { color: #00FFCC; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
     .percentage-bar { color: #FFEB3B; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
     .undo-btn>div>button { border: 1px solid #FF4B4B !important; color: #FF4B4B !important; background: transparent !important; height: 40px !important; }
@@ -144,4 +159,4 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-    
+        
