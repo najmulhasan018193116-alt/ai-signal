@@ -36,7 +36,7 @@ def advanced_predict(inputs, period):
     seed_str = str(period) + "".join(inputs)
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     win_chance = round(np.random.normal(base_prob_B, 5),1)
-    win_chance = max(50, min(99.9, win_chance))
+    win_chance = max(70, min(99.9, win_chance))
     prediction = "BIG" if random.random()*100 < win_chance else "SMALL"
     return prediction, win_chance
 
@@ -146,7 +146,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # ৯. AI Prediction + DK Signal
 # -------------------------------
 if st.session_state.show_res:
-    with st.spinner('🔍 গাণিতিক ট্রেন্ড বিশ্লেষণ হচ্ছে...'):
+    with st.spinner('Searching...'):
         time.sleep(2.8)
 
     # AI Prediction before DK result
@@ -154,10 +154,10 @@ if st.session_state.show_res:
     sim_res = simulate_next_10(st.session_state.temp_input, period)
 
     if prediction=="BIG":
-        nums = random.sample([5,7,8,9],3)
+        nums = random.sample([5,7,8,9],2)
         color_class="big-text"
     else:
-        nums = random.sample([0,2,3,4],3)
+        nums = random.sample([0,2,3,4],2)
         color_class="small-text"
     num_str = ", ".join(map(str, sorted(nums)))
 
