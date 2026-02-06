@@ -36,7 +36,7 @@ def advanced_predict(inputs, period):
     seed_str = str(period) + "".join(inputs)
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     win_chance = round(np.random.normal(base_prob_B, 4),1)  # প্রো লেভেল std dev 4
-    win_chance = max(80, min(99.9, win_chance))  # Win % 80-100%
+    win_chance = max(80,100, min(99.9, win_chance))  # Win % 80-100%
     prediction = "BIG" if random.random()*100 < win_chance else "SMALL"
     return prediction, win_chance
 
@@ -121,11 +121,11 @@ st.subheader("📊 আগের ১০টি রেজাল্ট ইনপু�
 
 c1,c2 = st.columns(2)
 if c1.button("➕ BIG (B)"):
-    if len(st.session_state.temp_input)<10:
+    if len(st.session_state.temp_input)<5:
         st.session_state.temp_input.append("B")
         st.session_state.show_res=False
 if c2.button("➕ SMALL (S)"):
-    if len(st.session_state.temp_input)<10:
+    if len(st.session_state.temp_input)<5:
         st.session_state.temp_input.append("S")
         st.session_state.show_res=False
 
@@ -148,7 +148,7 @@ if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
     if len(st.session_state.temp_input)==10 and period:
         st.session_state.show_res=True
     else:
-        st.warning(f"⚠️ ১০টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
+        st.warning(f"⚠️  5টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
@@ -159,7 +159,7 @@ if st.session_state.show_res:
         time.sleep(2.8)
 
     prediction, win_chance = advanced_predict(st.session_state.temp_input, period)
-    sim_res = simulate_next_10(st.session_state.temp_input, period)
+    sim_res = simulate_next_5(st.session_state.temp_input, period)
 
     if prediction=="BIG":
         nums = random.sample([5,7,8,9],3)
