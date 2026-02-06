@@ -2,7 +2,7 @@ import streamlit as st
 import time
 import random
 
-# ১. প্রফেশনাল থিম ও সেটিংস
+# ১. থিম ও সেটিংস
 st.set_page_config(page_title="NAJMUL VIP SIGNAL", layout="centered")
 
 st.markdown("""
@@ -23,7 +23,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ২. সেশন ডাটা ও সিকিউরিটি
+# ২. সেশন ডাটা
 if "auth" not in st.session_state: st.session_state.auth = False
 if "history" not in st.session_state: st.session_state.history = []
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
@@ -35,42 +35,41 @@ if not st.session_state.auth:
         st.rerun()
     st.stop()
 
-# ৩. ইন্টারফেস
+# ৩. ইন্টারফেস - ৬টি রেজাল্ট ইনপুট সিস্টেম
 st.title("🔥 NAJMUL VIP SIGNAL PRO")
 st.write("🟢 Server: Active | Version: Private Edition")
 
-st.subheader("📊 আগের ৫টি রেজাল্ট দিন (বাটন চাপুন):")
+st.subheader("📊 আগের ৬টি রেজাল্ট দিন (বাটন চাপুন):")
 col_b, col_s, col_c = st.columns([1, 1, 1])
 
 if col_b.button("➕ ADD BIG (B)"):
-    if len(st.session_state.temp_input) < 5:
+    if len(st.session_state.temp_input) < 6:
         st.session_state.temp_input.append("Big")
 if col_s.button("➕ ADD SMALL (S)"):
-    if len(st.session_state.temp_input) < 5:
+    if len(st.session_state.temp_input) < 6:
         st.session_state.temp_input.append("Small")
 if col_c.button("🔄 CLEAR"):
     st.session_state.temp_input = []
 
+# ইনপুট করা ৬টি রেজাল্ট প্রদর্শন
 st.write(f"প্যাটার্ন: **{' ➡️ '.join(st.session_state.temp_input)}**")
 
-# ৪. পিরিয়ড নম্বর ও ইউনিক সিগন্যাল লজিক
-period = st.text_input("বর্তমান পিরিয়ড নম্বর দিন (শেষ ৩ সংখ্যা):", placeholder="উদা: 385")
+# ৪. পিরিয়ড নম্বর ও সিগন্যাল লজিক
+period = st.text_input("বর্তমান পিরিয়ড নম্বর দিন (শেষ ৩ সংখ্যা):", placeholder="উদা: 811")
 
-if period and len(st.session_state.temp_input) == 5:
-    random.seed(period) # পিরিয়ড পরিবর্তন করলেই সিগন্যাল বদলাবে
+if period and len(st.session_state.temp_input) == 6:
+    random.seed(period) # পিরিয়ড পরিবর্তন করলে সিগন্যাল বদলাবে
     
     with st.spinner('NAJMUL VIP AI এনালাইসিস করছে...'):
         time.sleep(1)
     
     prediction = random.choice(["BIG", "SMALL"])
     
-    # আপনার নতুন নম্বর লজিক অনুযায়ী ৩টি নম্বর সিলেকশন
+    # নম্বর লজিক: BIG (5-9), SMALL (0-4)
     if prediction == "BIG":
-        # Big এর জন্য 5, 6, 7, 8, 9 থেকে ৩টি নম্বর
         selected_nums = random.sample([5, 6, 7, 8, 9], 3)
         color_class = "res-big"
     else:
-        # Small এর জন্য 0, 1, 2, 3, 4 থেকে ৩টি নম্বর
         selected_nums = random.sample([0, 1, 2, 3, 4], 3)
         color_class = "res-small"
     
@@ -98,5 +97,4 @@ st.subheader("🕒 VIP Signal History")
 for item in st.session_state.history[:5]:
     if "WIN" in item: st.success(item)
     else: st.error(item)
-
     
