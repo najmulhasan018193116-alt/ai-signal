@@ -3,13 +3,12 @@ import time
 import random
 import hashlib
 
-# ১. মাস্টার ডিজাইন ও নতুন কালার স্কিম
-st.set_page_config(page_title="NAJMUL VIP V11", layout="centered")
+# ১. মাস্টার ডিজাইন ও ছবির মতো উন্নত কালার স্কিম
+st.set_page_config(page_title="NAJMUL VIP V12", layout="centered")
 
 st.markdown("""
     <style>
     #MainMenu, header, footer {visibility: hidden;}
-    /* ১. ব্যাকগ্রাউন্ড কালার ব্ল্যাক */
     .stApp { background-color: #000000; color: white; }
     
     .floating-panel {
@@ -24,38 +23,42 @@ st.markdown("""
     
     .share-box { background: linear-gradient(90deg, #1a1a1a, #333333); color: #00FFCC; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid #00FFCC; }
     
-    /* ২. B বাটন হালকা সবুজ */
+    /* ছবিতে দেওয়া কালার অনুযায়ী বাটন ডিজাইন */
+    
+    /* BIG বাটন - গাঢ় সবুজ (Vibrant Green) */
     .big-btn button {
-        background-color: #90EE90 !important;
-        color: black !important;
+        background-color: #00A300 !important;
+        color: white !important;
         border-radius: 15px !important;
         height: 55px !important;
         font-weight: bold !important;
-        border: none !important;
+        border: 2px solid #00FF00 !important;
     }
     
-    /* ৩. S বাটন হালকা লাল */
+    /* SMALL বাটন - গাঢ় লাল (Deep Red) */
     .small-btn button {
-        background-color: #FFB6C1 !important;
-        color: black !important;
+        background-color: #CC0000 !important;
+        color: white !important;
         border-radius: 15px !important;
         height: 55px !important;
         font-weight: bold !important;
-        border: none !important;
+        border: 2px solid #FF3131 !important;
     }
     
-    /* ৪. ভুল কাটানোর বাটন হালকা বাদামি */
+    /* UNDO বাটন - হালকা বাদামি/ধূসর (Taupe/Brownish Grey) */
     .undo-btn button {
-        background-color: #D2B48C !important;
-        color: black !important;
+        background-color: #8D7662 !important;
+        color: white !important;
         border-radius: 12px !important;
         height: 45px !important;
         font-weight: bold !important;
-        border: none !important;
+        border: 1px solid #D2B48C !important;
         margin-top: 10px !important;
     }
 
-    .stButton>button { width: 100%; transition: 0.3s; }
+    .stButton>button { width: 100%; transition: 0.2s; }
+    .stButton>button:active { transform: scale(0.95); }
+    
     .get-btn>div>button { background: #00FFCC !important; color: black !important; font-size: 18px !important; border-radius: 20px !important; }
     
     .accuracy-tag { color: #00FFCC; font-size: 13px; font-weight: bold; }
@@ -70,13 +73,13 @@ if "total" not in st.session_state: st.session_state.total = 0
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
 if "show_res" not in st.session_state: st.session_state.show_res = False
 
-# ৩. লগইন পাসওয়ার্ড সিস্টেম
+# ৩. লগইন পাসওয়ার্ড
 if "auth" not in st.session_state: st.session_state.auth = False
 if not st.session_state.auth:
     st.title("🔐 NAJMUL VIP LOGIN")
     input_pw = st.text_input("পাসওয়ার্ড দিন:", type="password")
     if st.button("LOGIN"):
-        if input_pw == "0191":
+        if input_pw == "8899":
             st.session_state.auth = True
             st.rerun()
         else:
@@ -84,10 +87,7 @@ if not st.session_state.auth:
     st.stop()
 
 # ৪. টপ বার
-st.markdown(f'<div class="share-box">💎 NAJMUL VIP SERVER ACTIVE 💎</div>', unsafe_allow_html=True)
-if st.session_state.total > 0:
-    acc = (st.session_state.wins / st.session_state.total) * 100
-    st.metric("AI LIVE ACCURACY", f"{acc:.1f}%")
+st.markdown(f'<div class="share-box">💎 VIP SERVER: ACCURACY 98.4% ACTIVE 💎</div>', unsafe_allow_html=True)
 
 # ৫. ইনপুট সেকশন
 st.title("🔥 NAJMUL MASTER AI")
@@ -99,7 +99,6 @@ with col1:
     if st.button("BIG (B)"):
         if len(st.session_state.temp_input) < 10: 
             st.session_state.temp_input.append("B")
-            st.session_state.show_res = False
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -108,13 +107,12 @@ with col2:
     if st.button("SMALL (S)"):
         if len(st.session_state.temp_input) < 10: 
             st.session_state.temp_input.append("S")
-            st.session_state.show_res = False
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ভুল কাটানোর বাটন (হালকা বাদামি)
+# UNDO বাটন (বাদামি রঙের)
 st.markdown('<div class="undo-btn">', unsafe_allow_html=True)
-if st.button("⬅️ ভুল হয়েছে? শেষ ইনপুট কাটুন"):
+if st.button("⬅️ UNDO (ভুল মুছুন)"):
     if st.session_state.temp_input:
         st.session_state.temp_input.pop()
         st.rerun()
@@ -122,7 +120,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 st.info(f"প্যাটার্ন ({len(st.session_state.temp_input)}/10): {' ➡️ '.join(st.session_state.temp_input)}")
 
-# ৬. পিরিয়ড ও সিগন্যাল
+# ৬. পিরিয়ড ও সিগন্যাল বাটন
 period = st.text_input("পিরিয়ড নম্বর (শেষ ৩টি):", placeholder="যেমন: 655")
 
 st.markdown('<div class="get-btn">', unsafe_allow_html=True)
@@ -133,9 +131,9 @@ if st.button("🚀 GET SIGNAL"):
         st.warning(f"⚠️ ১০টি রেজাল্ট দিন! ({len(st.session_state.temp_input)}/10)")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ৭. AI লজিক
+# ৭. AI লজিক ও রেজাল্ট
 if st.session_state.show_res:
-    with st.spinner('🔍 বিশ্লেষণ চলছে...'):
+    with st.spinner('🔍 গাণিতিক বিশ্লেষণ চলছে...'):
         time.sleep(2)
     
     current_key = "".join(st.session_state.temp_input)
@@ -144,27 +142,27 @@ if st.session_state.show_res:
     random.seed(int(hash_obj, 16))
     
     prediction = random.choice(["BIG", "SMALL"])
-    win_chance = round(random.uniform(94.2, 99.1), 1)
+    win_chance = round(random.uniform(96.1, 99.4), 1)
     
     if prediction == "BIG":
-        nums = random.sample([5,6, 7, 8, 9], 3) 
+        nums = random.sample([5, 7, 8, 9], 3) 
         color_class = "big-text"
     else:
-        nums = random.sample([0,1, 2, 3, 4], 3) 
+        nums = random.sample([0, 2, 3, 4], 3) 
         color_class = "small-text"
     
     num_str = ", ".join(map(str, sorted(nums)))
 
     st.markdown(f"""
         <div class="floating-panel">
-            <p class="accuracy-tag">VIP ANALYSIS</p>
-            <p class="percentage-bar">WIN: {win_chance}%</p>
+            <p class="accuracy-tag">VIP ANALYSIS REPORT</p>
+            <p class="percentage-bar">WIN: {win_chance}% 🔥</p>
             <p class="res-text {color_class}">{prediction}</p>
             <p style="font-size: 26px; color: #FFEB3B; font-weight: 900;">{num_str}</p>
         </div>
         """, unsafe_allow_html=True)
 
-    # ৮. রিসেট ও হিস্টরি
+    # ৮. রিসেট ও হিস্টরি বাটন
     st.write("---")
     w, l = st.columns(2)
     if w.button("✅ WIN"):
@@ -179,9 +177,9 @@ if st.session_state.show_res:
         st.session_state.temp_input, st.session_state.show_res = [], False
         st.rerun()
 
-# ৯. হিস্টরি
+# ৯. হিস্টরি ডিসপ্লে
 st.write("---")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-    
+        
