@@ -53,13 +53,12 @@ def simulate_next_10(inputs, period, runs=1000):
 st.set_page_config(page_title="NAJMUL VIP V10 PRO", layout="centered")
 st.markdown("""
 <style>
-#MainMenu, header, footer {visibility: hidden;}
-.stApp { 
-    background-color: #040608; 
-    color: white; 
-    overflow: hidden;  /* স্ক্রোল বন্ধ */
-    height: 100vh;     /* পুরো ভিউপোর্টে দেখাবে */
+html, body, .main { 
+    overflow: hidden !important;   /* স্ক্রোল বন্ধ */
+    height: 100vh !important;      /* পুরো ভিউপোর্টে দেখাবে */
 }
+#MainMenu, header, footer { visibility: hidden; }
+.stApp { background-color: #040608; color: white; }
 .floating-panel { position: fixed; top: 80px; right: 10px; width: 210px;
     background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
     box-shadow: 0 0 35px rgba(0,255,204,0.6);}
