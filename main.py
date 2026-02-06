@@ -89,3 +89,4 @@ st.write("---")
 st.subheader("🕒 Live Win/Loss History")
 for item in st.session_state.history[:5]:
     st.success(item) if "WIN" in item else st.error(item)
+    
