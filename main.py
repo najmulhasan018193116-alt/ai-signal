@@ -178,4 +178,5 @@ if st.session_state.show_res:
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
+
     
