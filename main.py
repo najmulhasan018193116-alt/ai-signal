@@ -3,7 +3,7 @@ import time
 import random
 import hashlib
 
-# ১. ইন্টারফেস সেটিংস
+# ১. সেটিংস ও ডিজাইন
 st.set_page_config(page_title="NAJMUL VIP SIGNAL", layout="centered")
 
 st.markdown("""
@@ -32,60 +32,57 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ২. সেশন ডাটা ম্যানেজমেন্ট
+# ২. সেশন ডাটা
 if "auth" not in st.session_state: st.session_state.auth = False
 if "history" not in st.session_state: st.session_state.history = []
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
 
 if not st.session_state.auth:
     st.title("🔐 NAJMUL VIP SERVER")
-    if st.text_input("পাসওয়ার্ড প্রবেশ করান:", type="password") == "8899":
+    if st.text_input("পাসওয়ার্ড:", type="password") == "8899":
         st.session_state.auth = True
         st.rerun()
     st.stop()
 
-# ৩. শেয়ার বক্স
+# ৩. টপ লিঙ্ক
 st.markdown(f'<div class="share-box">🔗 VIP LINK: https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app</div>', unsafe_allow_html=True)
 
-# ৪. ইনপুট সেকশন
+# ৪. ইনপুট বাটন (এখানে কোনো এআই বিশ্লেষণ হবে না)
 st.title("🔥 NAJMUL VIP SIGNAL")
-st.write("🟢 AI Status: Deep Learning Active | Accuracy: 99.9%")
+st.write("🟢 AI Status: Standby | Waiting for Period")
 
-st.subheader("📊 আগের ৬টি রেজাল্ট ইনপুট দিন:")
-col_b, col_s = st.columns(2) 
-if col_b.button("➕ BIG (B)"):
+st.subheader("📊 ৬টি রেজাল্ট দিন:")
+c1, c2 = st.columns(2)
+if c1.button("➕ BIG (B)"):
     if len(st.session_state.temp_input) < 6: st.session_state.temp_input.append("Big")
-if col_s.button("➕ SMALL (S)"):
+if c2.button("➕ SMALL (S)"):
     if len(st.session_state.temp_input) < 6: st.session_state.temp_input.append("Small")
 
-st.info(f"বর্তমান প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
+# বর্তমান প্যাটার্ন বক্স
+st.info(f"প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
 # ৫. পিরিয়ড নম্বর বক্স
-period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", key="period_box", placeholder="উদা: 648")
+period = st.text_input("পিরিয়ড নম্বর দিন (টাইপ করুন):", value="", placeholder="উদা: 650")
 
-# ৬. সিগন্যাল জেনারেশন লজিক (নিখুঁত শর্ত যোগ করা হয়েছে)
-# এখানে চেক করা হচ্ছে: ৬টি ইনপুট আছে কি না এবং পিরিয়ড বক্স খালি কি না
-if len(st.session_state.temp_input) == 6 and period.strip() != "":
+# ৬. সিগন্যাল লজিক: পিরিয়ড টাইপ না করলে কিছুই হবে না
+if len(st.session_state.temp_input) == 6 and len(period) > 0:
+    
+    # পিরিয়ড নম্বর টাইপ করা মাত্রই এআই বিশ্লেষণ শুরু হবে
+    with st.spinner('🚀 AI বিশ্লেষণ করছে...'):
+        time.sleep(1.5)
+        
     seed_str = period + "".join(st.session_state.temp_input)
     unique_seed = int(hashlib.sha256(seed_str.encode()).hexdigest(), 16) % (10**8)
     random.seed(unique_seed)
     
-    with st.spinner('🚀 AI বিশ্লেষণ করছে...'):
-        time.sleep(1)
-    
     prediction = random.choice(["BIG", "SMALL"])
     
-    # ৩টি নম্বর জেনারেশন
-    if prediction == "BIG":
-        nums = random.sample([5, 6, 7, 8, 9], 3)
-        color_class = "big-text"
-    else:
-        nums = random.sample([0, 1, 2, 3, 4], 3)
-        color_class = "small-text"
-    
+    # ৩টি নম্বর লজিক
+    nums = random.sample([5,6,7,8,9], 3) if prediction == "BIG" else random.sample([0,1,2,3,4], 3)
+    color_class = "big-text" if prediction == "BIG" else "small-text"
     num_str = ", ".join(map(str, sorted(nums)))
 
-    # ভাসমান প্যানেলে রেজাল্ট
+    # ভাসমান সিগন্যাল ভেসে উঠবে
     st.markdown(f"""
         <div class="floating-panel">
             <p style="font-size: 11px; color: #00ff00; margin:0;">NAJMUL HACK V2</p>
@@ -95,19 +92,18 @@ if len(st.session_state.temp_input) == 6 and period.strip() != "":
         </div>
         """, unsafe_allow_html=True)
 
-    # ৭. ফলাফল বাটন ও অটো-আপডেট সিস্টেম
-    st.write("---")
-    w_btn, l_btn = st.columns(2)
-    if w_btn.button("✅ WIN"):
+    # ৭. ফলাফল আপডেট ও অটো-রিসেট
+    w, l = st.columns(2)
+    if w.button("✅ WIN"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ✅")
-        st.session_state.temp_input = [] # ৬টি রেজাল্ট অটো ক্লিয়ার
-        st.rerun() # স্ক্রিন রিফ্রেশ করে পিরিয়ড বক্স খালি করবে
-    if l_btn.button("❌ LOSS"):
+        st.session_state.temp_input = [] # অটো ক্লিয়ার
+        st.rerun()
+    if l.button("❌ LOSS"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ❌")
-        st.session_state.temp_input = [] # অটো ক্লিয়ার
+        st.session_state.temp_input = [] # অটো ক্লিয়ার
         st.rerun()
 
-# ৮. হিস্টরি সেকশন
+# ৮. হিস্টরি
 st.write("---")
 st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
