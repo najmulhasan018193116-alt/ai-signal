@@ -57,7 +57,7 @@ if not st.session_state.auth:
     st.title("🔐 NAJMUL VIP LOGIN")
     input_pw = st.text_input("পাসওয়ার্ড দিন:", type="password")
     if st.button("LOGIN"):
-        if input_pw == "8899":
+        if input_pw == "0191":
             st.session_state.auth = True
             st.rerun()
         else:
@@ -86,7 +86,7 @@ if c2.button("➕ SMALL (S)"):
 
 # UNDO বাটন
 st.markdown('<div class="undo-btn">', unsafe_allow_html=True)
-if st.button("⬅️ ভুল হয়েছে? শেষ ইনপুট কাটুন (UNDO)"):
+if st.button("⬅️  (UNDO)"):
     if st.session_state.temp_input:
         st.session_state.temp_input.pop()
         st.rerun()
@@ -106,7 +106,7 @@ if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
 
 # ৭. ৯৮% প্রো-লেভেল AI লজিক (Dynamic Win Percentage সহ)
 if st.session_state.show_res:
-    with st.spinner('🔍 গাণিতিক ট্রেন্ড ও উইন পার্সেন্টেজ বিশ্লেষণ করা হচ্ছে...'):
+    with st.spinner('🔍High accuracy searching...'):
         time.sleep(2.8)
     
     current_key = "".join(st.session_state.temp_input)
