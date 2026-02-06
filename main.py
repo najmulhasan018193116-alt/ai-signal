@@ -52,7 +52,7 @@ st.markdown(f'<div class="share-box">🔗 VIP LINK: https://ai-signal-7w9ghbcvq7
 st.title("🔥 NAJMUL VIP SIGNAL")
 st.write("🟢 AI Status: Deep Learning Active | Accuracy: 99.9%")
 
-st.subheader("📊 আগের ৬টি রেজাল্ট দিন:")
+st.subheader("📊 আগের ৬টি রেজাল্ট ইনপুট দিন:")
 c1, c2, c3 = st.columns(3)
 if c1.button("➕ BIG (B)"):
     if len(st.session_state.temp_input) < 6: st.session_state.temp_input.append("Big")
@@ -63,10 +63,11 @@ if c3.button("🔄 RESET"): st.session_state.temp_input = []
 # বর্তমান প্যাটার্ন বক্স
 st.info(f"বর্তমান প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
-# ৫. পিরিয়ড নম্বর (এটি দিলে তবেই সিগন্যাল আসবে)
-period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", placeholder="উদা: 540")
+# ৫. পিরিয়ড নম্বর বক্স
+period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", value="", placeholder="উদা: 648")
 
-# ৬. সিগন্যাল জেনারেশন লজিক
+# ৬. সিগন্যাল জেনারেশন লজিক (সংশোধিত লাইন ৭৭)
+# এখানে checking করা হয়েছে পিরিয়ড বক্স খালি কি না
 if len(st.session_state.temp_input) == 6 and period.strip() != "":
     # SHA-256 দিয়ে ইউনিক রেজাল্ট জেনারেশন
     seed_str = period + "".join(st.session_state.temp_input)
@@ -99,7 +100,6 @@ if len(st.session_state.temp_input) == 6 and period.strip() != "":
         """, unsafe_allow_html=True)
 
     # ৭. উইন/লস বাটন ও অটো-ক্লিয়ার
-    st.write("### ফলাফল আপডেট:")
     w_btn, l_btn = st.columns(2)
     if w_btn.button("✅ WIN"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ✅")
@@ -116,4 +116,4 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-    
+        
