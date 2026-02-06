@@ -27,7 +27,7 @@ st.markdown("""
     /* ২. B বাটন হালকা সবুজ */
     .big-btn button {
         background-color: #90EE90 !important;
-        color: black !important;
+        color: Light green  !important;
         border-radius: 15px !important;
         height: 55px !important;
         font-weight: bold !important;
@@ -37,7 +37,7 @@ st.markdown("""
     /* ৩. S বাটন হালকা লাল */
     .small-btn button {
         background-color: #FFB6C1 !important;
-        color: black !important;
+        color: Light red !important;
         border-radius: 15px !important;
         height: 55px !important;
         font-weight: bold !important;
@@ -47,7 +47,7 @@ st.markdown("""
     /* ৪. ভুল কাটানোর বাটন হালকা বাদামি */
     .undo-btn button {
         background-color: #D2B48C !important;
-        color: black !important;
+        color: Black light !important;
         border-radius: 12px !important;
         height: 45px !important;
         font-weight: bold !important;
@@ -114,7 +114,7 @@ with col2:
 
 # ভুল কাটানোর বাটন (হালকা বাদামি)
 st.markdown('<div class="undo-btn">', unsafe_allow_html=True)
-if st.button("⬅️ ভুল হয়েছে? শেষ ইনপুট কাটুন"):
+if st.button("⬅️ Repeat "):
     if st.session_state.temp_input:
         st.session_state.temp_input.pop()
         st.rerun()
@@ -123,7 +123,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.info(f"প্যাটার্ন ({len(st.session_state.temp_input)}/10): {' ➡️ '.join(st.session_state.temp_input)}")
 
 # ৬. পিরিয়ড ও সিগন্যাল
-period = st.text_input("পিরিয়ড নম্বর (শেষ ৩টি):", placeholder="যেমন: 655")
+period = st.text_input("পিরিয়ড নম্বর (শেষ ৩টি):", placeholder="যেমন: 123")
 
 st.markdown('<div class="get-btn">', unsafe_allow_html=True)
 if st.button("🚀 GET SIGNAL"):
@@ -135,7 +135,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # ৭. AI লজিক
 if st.session_state.show_res:
-    with st.spinner('🔍 বিশ্লেষণ চলছে...'):
+    with st.spinner('🔍 Searching ...'):
         time.sleep(2)
     
     current_key = "".join(st.session_state.temp_input)
@@ -147,10 +147,10 @@ if st.session_state.show_res:
     win_chance = round(random.uniform(94.2, 99.1), 1)
     
     if prediction == "BIG":
-        nums = random.sample([5, 7, 8, 9], 3) 
+        nums = random.sample([5,6 ,7, 8, 9], 3) 
         color_class = "big-text"
     else:
-        nums = random.sample([0, 2, 3, 4], 3) 
+        nums = random.sample([0, 1,2, 3, 4], 3) 
         color_class = "small-text"
     
     num_str = ", ".join(map(str, sorted(nums)))
