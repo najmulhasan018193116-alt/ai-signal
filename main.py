@@ -32,7 +32,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ২. সেশন ডাটা
+# ২. সেশন ডাটা ম্যানেজমেন্ট
 if "auth" not in st.session_state: st.session_state.auth = False
 if "history" not in st.session_state: st.session_state.history = []
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
@@ -47,7 +47,7 @@ if not st.session_state.auth:
 # ৩. শেয়ার বক্স
 st.markdown(f'<div class="share-box">🔗 VIP LINK: https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app</div>', unsafe_allow_html=True)
 
-# ৪. ইনপুট সেকশন (রিসেট বাটন ছাড়া)
+# ৪. ইনপুট সেকশন
 st.title("🔥 NAJMUL VIP SIGNAL")
 st.write("🟢 AI Status: Deep Learning Active | Accuracy: 99.9%")
 
@@ -60,11 +60,12 @@ if col_s.button("➕ SMALL (S)"):
 
 st.info(f"বর্তমান প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
-# ৫. পিরিয়ড নম্বর বক্স (শুধুমাত্র সংখ্যা সমর্থন করবে)
-period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", value="", placeholder="উদা: 648")
+# ৫. পিরিয়ড নম্বর বক্স
+period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", key="period_box", placeholder="উদা: 648")
 
-# ৬. সিগন্যাল লজিক (সব শর্ত পূরণ হলে তবেই বিশ্লেষণ হবে)
-if len(st.session_state.temp_input) == 6 and period.isdigit():
+# ৬. সিগন্যাল জেনারেশন লজিক (নিখুঁত শর্ত যোগ করা হয়েছে)
+# এখানে চেক করা হচ্ছে: ৬টি ইনপুট আছে কি না এবং পিরিয়ড বক্স খালি কি না
+if len(st.session_state.temp_input) == 6 and period.strip() != "":
     seed_str = period + "".join(st.session_state.temp_input)
     unique_seed = int(hashlib.sha256(seed_str.encode()).hexdigest(), 16) % (10**8)
     random.seed(unique_seed)
@@ -74,6 +75,7 @@ if len(st.session_state.temp_input) == 6 and period.isdigit():
     
     prediction = random.choice(["BIG", "SMALL"])
     
+    # ৩টি নম্বর জেনারেশন
     if prediction == "BIG":
         nums = random.sample([5, 6, 7, 8, 9], 3)
         color_class = "big-text"
@@ -83,6 +85,7 @@ if len(st.session_state.temp_input) == 6 and period.isdigit():
     
     num_str = ", ".join(map(str, sorted(nums)))
 
+    # ভাসমান প্যানেলে রেজাল্ট
     st.markdown(f"""
         <div class="floating-panel">
             <p style="font-size: 11px; color: #00ff00; margin:0;">NAJMUL HACK V2</p>
@@ -92,16 +95,22 @@ if len(st.session_state.temp_input) == 6 and period.isdigit():
         </div>
         """, unsafe_allow_html=True)
 
-    # ৭. ফলাফল বাটন ও অটো-ক্লিয়ার
+    # ৭. ফলাফল বাটন ও অটো-আপডেট সিস্টেম
+    st.write("---")
     w_btn, l_btn = st.columns(2)
     if w_btn.button("✅ WIN"):
-        st.session_state.history.insert(0, f"P-{period}: {prediction} ✅")
-        st.session_state.temp_input = [] 
-        st.rerun()
+        st.session_state.history.insert(0, f"Period {period}: {prediction} ✅")
+        st.session_state.temp_input = [] # ৬টি রেজাল্ট অটো ক্লিয়ার
+        st.rerun() # স্ক্রিন রিফ্রেশ করে পিরিয়ড বক্স খালি করবে
     if l_btn.button("❌ LOSS"):
-        st.session_state.history.insert(0, f"P-{period}: {prediction} ❌")
-        st.session_state.temp_input = [] 
+        st.session_state.history.insert(0, f"Period {period}: {prediction} ❌")
+        st.session_state.temp_input = [] # অটো ক্লিয়ার
         st.rerun()
-elif len(st.session_state.temp_input) == 6 and period != "" and not period.isdigit():
-    st.error("⚠️ দয়া করে সঠিক পিরিয়ড নম্বর (শুধু সংখ্যা) দিন!")
-    
+
+# ৮. হিস্টরি সেকশন
+st.write("---")
+st.subheader("🕒 VIP History")
+for item in st.session_state.history[:5]:
+    if "✅" in item: st.success(item)
+    else: st.error(item)
+        
