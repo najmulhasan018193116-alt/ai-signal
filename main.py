@@ -42,7 +42,7 @@ if not st.session_state.auth:
     st.title("🔐 NAJMUL VIP LOGIN")
     input_pw = st.text_input("পাসওয়ার্ড দিন:", type="password")
     if st.button("LOGIN"):
-        if input_pw == "8899":
+        if input_pw == "0191":
             st.session_state.auth = True
             st.rerun()
         else:
