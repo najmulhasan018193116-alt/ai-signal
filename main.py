@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Advanced Prediction
+# ২. Pro-Level Advanced Prediction
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
@@ -35,8 +35,8 @@ def advanced_predict(inputs, period):
     base_prob_B = max(10, min(90, base_prob_B))
     seed_str = str(period) + "".join(inputs)
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
-    win_chance = round(np.random.normal(base_prob_B, 5),1)
-    win_chance = max(50, min(99.9, win_chance))  # আগের মতো
+    win_chance = round(np.random.normal(base_prob_B, 4),1)  # প্রো লেভেল std dev 4
+    win_chance = max(80, min(99.9, win_chance))  # Win % 80-100%
     prediction = "BIG" if random.random()*100 < win_chance else "SMALL"
     return prediction, win_chance
 
@@ -48,33 +48,9 @@ def simulate_next_10(inputs, period, runs=1000):
     return {k: round(v/runs*100,1) for k,v in results.items()}
 
 # -------------------------------
-# ৩. Streamlit UI + Styles
+# ৩. Streamlit Session + CSS
 # -------------------------------
 st.set_page_config(page_title="NAJMUL VIP V10 PRO", layout="centered")
-st.markdown("""
-<style>
-html, body, .main { 
-    overflow: hidden !important;   /* স্ক্রোল বন্ধ */
-    height: 100vh !important;      /* পুরো ভিউপোর্টে দেখাবে */
-}
-#MainMenu, header, footer { visibility: hidden; }
-.stApp { background-color: #040608; color: white; }
-.floating-panel { position: fixed; top: 80px; right: 10px; width: 210px;
-    background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
-    box-shadow: 0 0 35px rgba(0,255,204,0.6);}
-.res-text { font-size: 34px; font-weight: 900; margin: 5px 0; }
-.big-text { color: #FF4B4B; text-shadow: 0 0 15px #FF4B4B; }
-.small-text { color: #00D4FF; text-shadow: 0 0 15px #00D4FF; }
-.share-box { background: linear-gradient(90deg, #FF0000, #990000); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid white; }
-.stButton>button { width: 100%; border-radius: 15px; height: 50px; font-weight: bold; color: white; }
-div[data-testid="stColumn"]:nth-of-type(1) .stButton>button { background-color: #00FF00 !important; color: black !important; }
-div[data-testid="stColumn"]:nth-of-type(2) .stButton>button { background-color: #FF0000 !important; color: white !important; }
-.get-btn>div>button { background: #00FFCC !important; color: black !important; font-size: 18px !important; }
-.accuracy-tag { color: #00FFCC; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
-.percentage-bar { color: #FFEB3B; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-.undo-btn>div>button { border: 1px solid #FF4B4B !important; color: #FF4B4B !important; background: transparent !important; height: 40px !important; }
-</style>
-""", unsafe_allow_html=True)
 
 # -------------------------------
 # ৪. Session State
@@ -101,17 +77,46 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. Top Bar
+# ৬. Home Page CSS (Scroll বন্ধ)
 # -------------------------------
-st.markdown(f'<div class="share-box">🔗 VIP SERVER ACTIVE: NAJMUL-AI-V10-STABLE</div>', unsafe_allow_html=True)
+if st.session_state.auth:
+    st.markdown("""
+    <style>
+    html, body, .main { 
+        overflow: hidden !important;   
+        height: 100vh !important;      
+    }
+    #MainMenu, header, footer { visibility: hidden; }
+    .stApp { background-color: #040608; color: white; }
+    .floating-panel { position: fixed; top: 80px; right: 10px; width: 220px;
+        background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
+        box-shadow: 0 0 35px rgba(0,255,204,0.6);}
+    .res-text { font-size: 34px; font-weight: 900; margin: 5px 0; }
+    .big-text { color: #FF4B4B; text-shadow: 0 0 15px #FF4B4B; }
+    .small-text { color: #00D4FF; text-shadow: 0 0 15px #00D4FF; }
+    .share-box { background: linear-gradient(90deg, #FF0000, #990000); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid white; }
+    .stButton>button { width: 100%; border-radius: 15px; height: 50px; font-weight: bold; color: white; }
+    div[data-testid="stColumn"]:nth-of-type(1) .stButton>button { background-color: #00FF00 !important; color: black !important; }
+    div[data-testid="stColumn"]:nth-of-type(2) .stButton>button { background-color: #FF0000 !important; color: white !important; }
+    .get-btn>div>button { background: #00FFCC !important; color: black !important; font-size: 18px !important; }
+    .accuracy-tag { color: #00FFCC; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
+    .percentage-bar { color: #FFEB3B; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+    .undo-btn>div>button { border: 1px solid #FF4B4B !important; color: #FF4B4B !important; background: transparent !important; height: 40px !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# -------------------------------
+# ৭. Top Bar
+# -------------------------------
+st.markdown(f'<div class="share-box">🔗 VIP SERVER ACTIVE: NAJMUL-AI-V10-PRO</div>', unsafe_allow_html=True)
 if st.session_state.total > 0:
     acc = (st.session_state.wins / st.session_state.total) * 100
     st.metric("AI LIVE ACCURACY", f"{acc:.1f}%")
 
 # -------------------------------
-# ৭. Input Section
+# ৮. Input Section
 # -------------------------------
-st.title("🔥 NAJMUL MASTER AI V10")
+st.title("🔥 NAJMUL MASTER AI V10 PRO")
 st.subheader("📊 আগের ১০টি রেজাল্ট ইনপুট দিন:")
 
 c1,c2 = st.columns(2)
@@ -134,7 +139,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.info(f"প্যাটার্ন ({len(st.session_state.temp_input)}/10): {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
 # -------------------------------
-# ৮. Period Input
+# ৯. Period Input
 # -------------------------------
 period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", placeholder="যেমন: 655")
 
@@ -147,7 +152,7 @@ if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
-# ৯. AI Prediction + DK Signal
+# ১০. AI Prediction + DK Signal
 # -------------------------------
 if st.session_state.show_res:
     with st.spinner('🔍 গাণিতিক ট্রেন্ড বিশ্লেষণ হচ্ছে...'):
@@ -203,7 +208,7 @@ if st.session_state.show_res:
         st.rerun()
 
 # -------------------------------
-# ১০. History
+# ১১. History
 # -------------------------------
 st.write("---")
 st.subheader("🕒 VIP History")
