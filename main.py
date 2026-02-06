@@ -36,7 +36,7 @@ def advanced_predict(inputs, period):
     seed_str = str(period) + "".join(inputs)
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     win_chance = round(np.random.normal(base_prob_B, 4),1)  # প্রো লেভেল std dev 4
-    win_chance = max(80,100, min(99.9, win_chance))  # Win % 80-100%
+    win_chance = max(80, min(99.9, win_chance))  # Win % 80-100%
     prediction = "BIG" if random.random()*100 < win_chance else "SMALL"
     return prediction, win_chance
 
@@ -148,7 +148,7 @@ if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
     if len(st.session_state.temp_input)==10 and period:
         st.session_state.show_res=True
     else:
-        st.warning(f"⚠️  10টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
+        st.warning(f"⚠️ ১০টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
@@ -159,13 +159,13 @@ if st.session_state.show_res:
         time.sleep(2.8)
 
     prediction, win_chance = advanced_predict(st.session_state.temp_input, period)
-    sim_res = simulate_next_5(st.session_state.temp_input, period)
+    sim_res = simulate_next_10(st.session_state.temp_input, period)
 
     if prediction=="BIG":
-        nums = random.sample([5,6,7,8,9],3)
+        nums = random.sample([5,7,8,9],3)
         color_class="big-text"
     else:
-        nums = random.sample([0,1,2,3,4],3)
+        nums = random.sample([0,2,3,4],3)
         color_class="small-text"
     num_str = ", ".join(map(str, sorted(nums)))
 
