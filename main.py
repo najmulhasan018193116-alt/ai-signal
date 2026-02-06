@@ -10,6 +10,17 @@ st.markdown("""
     <style>
     #MainMenu, header, footer {visibility: hidden;}
     .stApp { background-color: #05070A; color: white; }
+    # ৩. পাসওয়ার্ড প্রটেকশন (পুনরায় যোগ করা হয়েছে)
+if not st.session_state.auth:
+    st.title("🔐 NAJMUL VIP SERVER")
+    pw = st.text_input("পাসওয়ার্ড প্রবেশ করান:", type="password")
+    if st.button("LOGIN"):
+        if pw == "8899":
+            st.session_state.auth = True
+            st.rerun()
+        else:
+            st.error("❌ ভুল পাসওয়ার্ড!")
+    st.stop()
     
     /* ভাসমান রেজাল্ট বক্স - আরও উজ্জ্বল ডিজাইন */
     .floating-panel {
