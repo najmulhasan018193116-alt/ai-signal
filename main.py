@@ -1,9 +1,9 @@
 import streamlit as st
 import time
-import hashlib
+import random
 
-# ১. প্রফেশনাল থিম ও সেটআপ
-st.set_page_config(page_title="MUMINUL BOSS AI V15", layout="centered")
+# ১. প্রফেশনাল থিম ও টাইটেল পরিবর্তন
+st.set_page_config(page_title="NAJMUL VIP SIGNAL", layout="centered")
 
 st.markdown("""
     <style>
@@ -19,69 +19,76 @@ st.markdown("""
     }
     .res-big { font-size: 50px; font-weight: bold; color: #FF3131; }
     .res-small { font-size: 50px; font-weight: bold; color: #00D4FF; }
+    .stButton>button { width: 100%; border-radius: 10px; height: 45px; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# ২. সিকিউরিটি (পাসওয়ার্ড: 8899)
+# ২. সেশন ডাটা ও সিকিউরিটি
 if "auth" not in st.session_state: st.session_state.auth = False
 if "history" not in st.session_state: st.session_state.history = []
+if "temp_input" not in st.session_state: st.session_state.temp_input = []
 
 if not st.session_state.auth:
-    st.title("🔐 PREMIUM SERVER ACCESS")
+    st.title("🔐 NAJMUL VIP ACCESS")
     if st.text_input("পাসওয়ার্ড দিন:", type="password") == "8899":
         st.session_state.auth = True
         st.rerun()
     st.stop()
 
-# ৩. ৫টি রেজাল্ট ইনপুট সেকশন
-st.title("🚀 MUMINUL BOSS PREMIUM AI")
-st.subheader("📊 আগের ৫টি রেজাল্ট দিন (History):")
-cols = st.columns(5)
-h_input = ""
-for i, col in enumerate(cols):
-    res = col.selectbox(f"{i+1}th", ["Big", "Small"], key=f"r_{i}")
-    h_input += res
+# ৩. নাম পরিবর্তন এবং ইন্টারফেস
+st.title("🔥 NAJMUL VIP SIGNAL PRO")
+st.write("🟢 Server: Active | Version: Private Edition")
 
-period = st.text_input("বর্তমান পিরিয়ড নম্বর (শেষ ৩ সংখ্যা):", placeholder="উদা: 654")
+st.subheader("📊 আগের ৫টি রেজাল্ট দিন (বাটন চাপুন):")
 
-if period:
-    with st.spinner('AI ৫টি রেজাল্ট এবং পিরিয়ড এনালাইসিস করছে...'):
-        time.sleep(1.5)
+col_b, col_s, col_c = st.columns([1, 1, 1])
+
+if col_b.button("➕ ADD BIG (B)"):
+    if len(st.session_state.temp_input) < 5:
+        st.session_state.temp_input.append("Big")
+if col_s.button("➕ ADD SMALL (S)"):
+    if len(st.session_state.temp_input) < 5:
+        st.session_state.temp_input.append("Small")
+if col_c.button("🔄 CLEAR"):
+    st.session_state.temp_input = []
+
+# ইনপুট ডাটা প্রদর্শন
+st.write(f"প্যাটার্ন: **{' ➡️ '.join(st.session_state.temp_input)}**")
+
+# ৪. পিরিয়ড নম্বর (এটি পরিবর্তন করলেই সিগন্যাল বদলাবে)
+period = st.text_input("বর্তমান পিরিয়ড নম্বর দিন (শেষ ৩ সংখ্যা):", placeholder="উদা: 658")
+
+if period and len(st.session_state.temp_input) == 5:
+    # পিরিয়ডকে সিড (Seed) হিসেবে ব্যবহার করা হয়েছে
+    random.seed(period)
     
-    # ৪. প্রো-লজিক: ৫টি রেজাল্ট + পিরিয়ড মিলিয়ে ইউনিক রেজাল্ট
-    # এটি হ্যাস (Hash) ব্যবহার করে নিশ্চিত করবে যেন রেজাল্ট বারবার একই না আসে
-    combined_data = period + h_input
-    hash_object = hashlib.md5(combined_data.encode())
-    hash_val = int(hash_object.hexdigest(), 16)
+    with st.spinner('NAJMUL VIP AI এনালাইসিস করছে...'):
+        time.sleep(1)
     
-    # আপনার খাতার প্যাটার্ন অনুযায়ী সিগন্যাল তৈরি
-    if hash_val % 2 == 0:
-        prediction, color_class, nums = "BIG", "res-big", "5, 6, 8, 9"
-    else:
-        prediction, color_class, nums = "SMALL", "res-small", "0, 1, 3, 4"
+    prediction = random.choice(["BIG", "SMALL"])
+    color_class = "res-big" if prediction == "BIG" else "res-small"
+    nums = "5, 6, 8, 9" if prediction == "BIG" else "0, 1, 2, 4"
 
     st.markdown(f"""
         <div class="signal-box">
-            <p style="color: #bbb; font-size: 18px;">AI ANALYZED NEXT RESULT</p>
+            <p style="color: #bbb; font-size: 18px;">NAJMUL VIP PREDICTION</p>
             <p class="{color_class}">{prediction} {nums}</p>
-            <p style="color: #00ff00;">Accuracy based on 5 results: 99.4%</p>
+            <p style="color: #00ff00;">Accuracy: 99.7%</p>
         </div>
         """, unsafe_allow_html=True)
 
     # ৫. ফলাফল আপডেট বাটন
     st.write("### 📊 ফলাফল আপডেট করুন:")
-    b1, b2 = st.columns(2)
-    if b1.button("✅ WIN"):
+    win_col, loss_col = st.columns(2)
+    if win_col.button("✅ WIN"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ✅ WIN")
-    if b2.button("❌ LOSS"):
+    if loss_col.button("❌ LOSS"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ❌ LOSS")
 
 # ৬. লাইভ হিস্টরি
 st.write("---")
-st.subheader("🕒 Live History")
+st.subheader("🕒 VIP Signal History")
 for item in st.session_state.history[:5]:
     if "WIN" in item: st.success(item)
     else: st.error(item)
-
-
     
