@@ -3,7 +3,7 @@ import time
 import random
 import hashlib
 
-# ১. সেটিংস ও ইন্টারফেস ক্লিন করা
+# ১. থিম ও ইন্টারফেস সেটিংস
 st.set_page_config(page_title="NAJMUL VIP SIGNAL", layout="centered")
 
 st.markdown("""
@@ -11,7 +11,7 @@ st.markdown("""
     #MainMenu, header, footer {visibility: hidden;}
     .stApp { background-color: #0E1117; color: white; }
     
-    /* ভাসমান প্যানেল ডিজাইন */
+    /* ভাসমান সিগন্যাল প্যানেল */
     .floating-panel {
         position: fixed;
         top: 85px;
@@ -33,7 +33,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ২. সেশন ডাটা ম্যানেজমেন্ট
+# ২. সেশন ডাটা (এরর ফ্রি হিস্টরি)
 if "auth" not in st.session_state: st.session_state.auth = False
 if "history" not in st.session_state: st.session_state.history = []
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
@@ -48,28 +48,25 @@ if not st.session_state.auth:
 # ৩. শেয়ার বক্স
 st.markdown(f'<div class="share-box">🔗 VIP LINK: https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app</div>', unsafe_allow_html=True)
 
-# ৪. ৬টি রেজাল্ট ইনপুট
+# ৪. ইনপুট সেকশন (রিসেট বাটন ছাড়া)
 st.title("🔥 NAJMUL VIP SIGNAL")
 st.write("🟢 AI Status: Deep Learning Active | Accuracy: 99.9%")
 
 st.subheader("📊 আগের ৬টি রেজাল্ট ইনপুট দিন:")
-c1, c2, c3 = st.columns(3)
-if c1.button("➕ BIG (B)"):
+col_b, col_s = st.columns(2) # শুধু BIG এবং SMALL বাটন রাখা হয়েছে
+if col_b.button("➕ BIG (B)"):
     if len(st.session_state.temp_input) < 6: st.session_state.temp_input.append("Big")
-if c2.button("➕ SMALL (S)"):
+if col_s.button("➕ SMALL (S)"):
     if len(st.session_state.temp_input) < 6: st.session_state.temp_input.append("Small")
-if c3.button("🔄 RESET"): st.session_state.temp_input = []
 
-# বর্তমান প্যাটার্ন বক্স
+# বর্তমান প্যাটার্ন প্রদর্শন
 st.info(f"বর্তমান প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
 # ৫. পিরিয়ড নম্বর বক্স
 period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", value="", placeholder="উদা: 648")
 
-# ৬. সিগন্যাল জেনারেশন লজিক (সংশোধিত লাইন ৭৭)
-# এখানে checking করা হয়েছে পিরিয়ড বক্স খালি কি না
+# ৬. সিগন্যাল লজিক (পিরিয়ড নম্বর দিলে তবেই কাজ করবে)
 if len(st.session_state.temp_input) == 6 and period.strip() != "":
-    # SHA-256 দিয়ে ইউনিক রেজাল্ট জেনারেশন
     seed_str = period + "".join(st.session_state.temp_input)
     unique_seed = int(hashlib.sha256(seed_str.encode()).hexdigest(), 16) % (10**8)
     random.seed(unique_seed)
@@ -79,7 +76,7 @@ if len(st.session_state.temp_input) == 6 and period.strip() != "":
     
     prediction = random.choice(["BIG", "SMALL"])
     
-    # নম্বর সিলেকশন লজিক (০-৪ Small, ৫-৯ Big)
+    # ৩টি নম্বর জেনারেশন
     if prediction == "BIG":
         nums = random.sample([5, 6, 7, 8, 9], 3)
         color_class = "big-text"
@@ -89,7 +86,7 @@ if len(st.session_state.temp_input) == 6 and period.strip() != "":
     
     num_str = ", ".join(map(str, sorted(nums)))
 
-    # ভাসমান প্যানেলে রেজাল্ট প্রদর্শন
+    # ভাসমান প্যানেলে সিগন্যাল
     st.markdown(f"""
         <div class="floating-panel">
             <p style="font-size: 11px; color: #00ff00; margin:0;">NAJMUL HACK V2</p>
@@ -99,15 +96,15 @@ if len(st.session_state.temp_input) == 6 and period.strip() != "":
         </div>
         """, unsafe_allow_html=True)
 
-    # ৭. উইন/লস বাটন ও অটো-ক্লিয়ার
+    # ৭. ফলাফল বাটন ও অটো-ক্লিয়ার
     w_btn, l_btn = st.columns(2)
     if w_btn.button("✅ WIN"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ✅")
-        st.session_state.temp_input = [] # রিসেট
+        st.session_state.temp_input = [] # অটো রিসেট
         st.rerun()
     if l_btn.button("❌ LOSS"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ❌")
-        st.session_state.temp_input = [] # রিসেট
+        st.session_state.temp_input = [] # অটো রিসেট
         st.rerun()
 
 # ৮. হিস্টরি সেকশন
