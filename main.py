@@ -37,7 +37,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ৩. AI সিগন্যাল জেনারেটর লজিক
-st.title("🚀 MUMINUL BOSS PREMIUM AI")
+st.title("🚀 Najmul premium hack")
 st.write("● AI Server Connected")
 
 period = st.text_input("Enter Period Number (Last 3 Digits):", placeholder="e.g. 650")
