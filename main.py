@@ -3,7 +3,7 @@ import time
 import random
 import hashlib
 
-# ১. সেটিংস ও ডিজাইন
+# ১. প্রিমিয়াম ডিজাইন ও সেটিংস
 st.set_page_config(page_title="NAJMUL VIP SIGNAL", layout="centered")
 
 st.markdown("""
@@ -29,13 +29,23 @@ st.markdown("""
     .small-text { color: #00D4FF; text-shadow: 0 0 10px #00D4FF; }
     .share-box { background-color: #ff0000; color: white; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px; font-weight: bold; }
     .stButton>button { width: 100%; border-radius: 12px; height: 45px; font-weight: bold; }
-    .get-btn>div>button { background-color: #00ff00 !important; color: black !important; font-size: 18px !important; }
+    
+    /* উইন রেট মিটার স্টাইল */
+    .win-meter {
+        background: #1E1E2E;
+        padding: 15px;
+        border-radius: 15px;
+        border-left: 5px solid #00ff00;
+        margin: 10px 0;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 # ২. সেশন ডাটা ম্যানেজমেন্ট
 if "auth" not in st.session_state: st.session_state.auth = False
 if "history" not in st.session_state: st.session_state.history = []
+if "wins" not in st.session_state: st.session_state.wins = 0
+if "total" not in st.session_state: st.session_state.total = 0
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
 if "show_res" not in st.session_state: st.session_state.show_res = False
 
@@ -49,39 +59,41 @@ if not st.session_state.auth:
 # ৩. টপ লিঙ্ক
 st.markdown(f'<div class="share-box">🔗 VIP LINK: https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app</div>', unsafe_allow_html=True)
 
-# ৪. ইনপুট বাটন (এখানে কোনো এআই বিশ্লেষণ আসবে না)
-st.title("🔥 NAJMUL VIP SIGNAL")
-st.write("🟢 AI Status: Standby")
+# ৪. উইন রেট মিটার (উপরে দেখাবে)
+if st.session_state.total > 0:
+    win_percentage = (st.session_state.wins / st.session_state.total) * 100
+    st.markdown(f"""
+        <div class="win-meter">
+            <p style="margin:0; color:#bbb;">Live Win Rate Accuracy</p>
+            <h2 style="margin:0; color:#00ff00;">{win_percentage:.1f}%</h2>
+        </div>
+    """, unsafe_allow_html=True)
 
+# ৫. ইনপুট সেকশন (বিশ্লেষণ ছাড়া)
+st.title("🔥 NAJMUL VIP SIGNAL")
 st.subheader("📊 আগের ৬টি রেজাল্ট দিন:")
 c1, c2 = st.columns(2)
 if c1.button("➕ BIG (B)"):
     if len(st.session_state.temp_input) < 6: 
         st.session_state.temp_input.append("Big")
-        st.session_state.show_res = False # নতুন ইনপুট দিলে আগের রেজাল্ট হাইড হবে
+        st.session_state.show_res = False
 if c2.button("➕ SMALL (S)"):
     if len(st.session_state.temp_input) < 6: 
         st.session_state.temp_input.append("Small")
         st.session_state.show_res = False
 
-# বর্তমান প্যাটার্ন প্রদর্শন
-st.info(f"প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
+st.info(f"বর্তমান প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
-# ৫. পিরিয়ড নম্বর ও রেজাল্ট বাটন
+# ৬. পিরিয়ড ও সিগন্যাল বাটন
 period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", placeholder="যেমন: 650")
 
-# ৬. সিগন্যাল ট্রিগার বাটন (এটি চাপলেই সিগন্যাল আসবে)
-st.markdown('<div class="get-btn">', unsafe_allow_html=True)
-get_signal = st.button("🚀 GET SIGNAL (বিশ্লেষণ করুন)")
-st.markdown('</div>', unsafe_allow_html=True)
-
-if get_signal:
+if st.button("🚀 GET SIGNAL (বিশ্লেষণ করুন)", type="primary"):
     if len(st.session_state.temp_input) == 6 and period:
         st.session_state.show_res = True
     else:
-        st.error("⚠️ দয়া করে ৬টি রেজাল্ট এবং পিরিয়ড নম্বর দিন!")
+        st.error("⚠️ ৬টি রেজাল্ট এবং পিরিয়ড নম্বর দিন!")
 
-# ৭. সিগন্যাল প্রদর্শন লজিক
+# ৭. সিগন্যাল ও ৩টি নম্বর প্রদর্শন
 if st.session_state.show_res:
     with st.spinner('🚀 AI বিশ্লেষণ করছে...'):
         time.sleep(1.2)
@@ -95,7 +107,6 @@ if st.session_state.show_res:
     color_class = "big-text" if prediction == "BIG" else "small-text"
     num_str = ", ".join(map(str, sorted(nums)))
 
-    # ভাসমান সিগন্যাল
     st.markdown(f"""
         <div class="floating-panel">
             <p style="font-size: 11px; color: #00ff00; margin:0;">NAJMUL HACK V2</p>
@@ -110,13 +121,16 @@ if st.session_state.show_res:
     w, l = st.columns(2)
     if w.button("✅ WIN"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ✅")
-        st.session_state.temp_input = [] # ক্লিয়ার
-        st.session_state.show_res = False # হাইড
+        st.session_state.wins += 1
+        st.session_state.total += 1
+        st.session_state.temp_input = []
+        st.session_state.show_res = False
         st.rerun()
     if l.button("❌ LOSS"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ❌")
-        st.session_state.temp_input = [] # ক্লিয়ার
-        st.session_state.show_res = False # হাইড
+        st.session_state.total += 1
+        st.session_state.temp_input = []
+        st.session_state.show_res = False
         st.rerun()
 
 # ৮. হিস্টরি
@@ -125,4 +139,4 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-            
+        
