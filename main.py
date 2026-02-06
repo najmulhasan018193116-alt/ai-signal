@@ -27,7 +27,7 @@ st.markdown("""
     /* ২. B বাটন হালকা সবুজ */
     .big-btn button {
         background-color: #143d21 !important;
-        color: Light green  !important;
+        color: #00FF00  !important;
         border-radius: 15px !important;
         height: 55px !important;
         font-weight: bold !important;
