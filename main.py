@@ -36,7 +36,7 @@ def advanced_predict(inputs, period):
     seed_str = str(period) + "".join(inputs)
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     win_chance = round(np.random.normal(base_prob_B, 5),1)
-    win_chance = max(70, min(99.9, win_chance))
+    win_chance = max(50, min(99.9, win_chance))  # আগের মতো
     prediction = "BIG" if random.random()*100 < win_chance else "SMALL"
     return prediction, win_chance
 
@@ -54,7 +54,12 @@ st.set_page_config(page_title="NAJMUL VIP V10 PRO", layout="centered")
 st.markdown("""
 <style>
 #MainMenu, header, footer {visibility: hidden;}
-.stApp { background-color: #040608; color: white; }
+.stApp { 
+    background-color: #040608; 
+    color: white; 
+    overflow: hidden;  /* স্ক্রোল বন্ধ */
+    height: 100vh;     /* পুরো ভিউপোর্টে দেখাবে */
+}
 .floating-panel { position: fixed; top: 80px; right: 10px; width: 210px;
     background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
     box-shadow: 0 0 35px rgba(0,255,204,0.6);}
@@ -146,18 +151,17 @@ st.markdown('</div>', unsafe_allow_html=True)
 # ৯. AI Prediction + DK Signal
 # -------------------------------
 if st.session_state.show_res:
-    with st.spinner('Searching...'):
+    with st.spinner('🔍 গাণিতিক ট্রেন্ড বিশ্লেষণ হচ্ছে...'):
         time.sleep(2.8)
 
-    # AI Prediction before DK result
     prediction, win_chance = advanced_predict(st.session_state.temp_input, period)
     sim_res = simulate_next_10(st.session_state.temp_input, period)
 
     if prediction=="BIG":
-        nums = random.sample([5,7,8,9],2)
+        nums = random.sample([5,7,8,9],3)
         color_class="big-text"
     else:
-        nums = random.sample([0,2,3,4],2)
+        nums = random.sample([0,2,3,4],3)
         color_class="small-text"
     num_str = ", ".join(map(str, sorted(nums)))
 
@@ -185,7 +189,6 @@ if st.session_state.show_res:
         st.session_state.wins+=1
         st.session_state.total+=1
         st.session_state.temp_input, st.session_state.show_res=[],False
-
         c.execute("INSERT INTO history (period,prediction,win_chance,result) VALUES (?,?,?,?)",
                   (period,prediction,win_chance,"WIN"))
         conn.commit()
@@ -195,7 +198,6 @@ if st.session_state.show_res:
         st.session_state.history.insert(0,f"Period {period}: {prediction} ({win_chance}%) ❌")
         st.session_state.total+=1
         st.session_state.temp_input, st.session_state.show_res=[],False
-
         c.execute("INSERT INTO history (period,prediction,win_chance,result) VALUES (?,?,?,?)",
                   (period,prediction,win_chance,"LOSS"))
         conn.commit()
