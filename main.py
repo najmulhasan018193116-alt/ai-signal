@@ -121,11 +121,11 @@ st.subheader("📊 আগের ১০টি রেজাল্ট ইনপু�
 
 c1,c2 = st.columns(2)
 if c1.button("➕ BIG (B)"):
-    if len(st.session_state.temp_input)<5:
+    if len(st.session_state.temp_input)<10:
         st.session_state.temp_input.append("B")
         st.session_state.show_res=False
 if c2.button("➕ SMALL (S)"):
-    if len(st.session_state.temp_input)<5:
+    if len(st.session_state.temp_input)<10:
         st.session_state.temp_input.append("S")
         st.session_state.show_res=False
 
@@ -148,7 +148,7 @@ if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
     if len(st.session_state.temp_input)==10 and period:
         st.session_state.show_res=True
     else:
-        st.warning(f"⚠️  5টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
+        st.warning(f"⚠️  10টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
@@ -162,10 +162,10 @@ if st.session_state.show_res:
     sim_res = simulate_next_5(st.session_state.temp_input, period)
 
     if prediction=="BIG":
-        nums = random.sample([5,7,8,9],3)
+        nums = random.sample([5,6,7,8,9],3)
         color_class="big-text"
     else:
-        nums = random.sample([0,2,3,4],3)
+        nums = random.sample([0,1,2,3,4],3)
         color_class="small-text"
     num_str = ", ".join(map(str, sorted(nums)))
 
