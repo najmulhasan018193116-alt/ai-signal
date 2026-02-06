@@ -83,4 +83,5 @@ for item in st.session_state.history[:5]:
     if "WIN" in item: st.success(item)
     else: st.error(item)
 
+
     
