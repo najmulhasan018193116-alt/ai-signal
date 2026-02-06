@@ -75,7 +75,7 @@ if len(st.session_state.temp_input) == 6 and period.strip() != "":
     random.seed(unique_seed)
     
     with st.spinner('🚀 AI বিশ্লেষণ করছে...'):
-        time.sleep(1)
+        time.sleep(0)
     
     prediction = random.choice(["BIG", "SMALL"])
     
