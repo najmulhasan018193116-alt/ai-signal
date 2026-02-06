@@ -2,11 +2,29 @@ import streamlit as st
 import time
 import random
 
-# ১. থিম ও সেটিংস
+# ১. থিম, সেটিংস এবং মেনুবার হাইড করা
 st.set_page_config(page_title="NAJMUL VIP SIGNAL", layout="centered")
 
 st.markdown("""
     <style>
+    /* মেনুবার এবং ফুটার লুকানোর জন্য */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* শেয়ার বক্সের স্টাইল (লাল বক্স) */
+    .share-box {
+        background-color: #ff0000;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+        border: 2px solid white;
+    }
+    
+    /* মূল ডিজাইন */
     .stApp { background-color: #0E1117; color: white; }
     .signal-box {
         background-color: #1a1c24;
@@ -35,7 +53,16 @@ if not st.session_state.auth:
         st.rerun()
     st.stop()
 
-# ৩. ইন্টারফেস - ৬টি রেজাল্ট ইনপুট সিস্টেম
+# ৩. শেয়ার বক্স (লাল বক্সের ভিতরে লিঙ্ক)
+app_link = "https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app"
+st.markdown(f"""
+    <div class="share-box">
+        📢 অ্যাপটি সবার সাথে শেয়ার করুন:<br>
+        <span style="font-size: 14px;">{app_link}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ৪. ইন্টারফেস - ৬টি রেজাল্ট ইনপুট
 st.title("🔥 NAJMUL VIP SIGNAL PRO")
 st.write("🟢 Server: Active | Version: Private Edition")
 
@@ -51,21 +78,19 @@ if col_s.button("➕ ADD SMALL (S)"):
 if col_c.button("🔄 CLEAR"):
     st.session_state.temp_input = []
 
-# ইনপুট করা ৬টি রেজাল্ট প্রদর্শন
 st.write(f"প্যাটার্ন: **{' ➡️ '.join(st.session_state.temp_input)}**")
 
-# ৪. পিরিয়ড নম্বর ও সিগন্যাল লজিক
+# ৫. পিরিয়ড নম্বর ও নম্বর লজিক
 period = st.text_input("বর্তমান পিরিয়ড নম্বর দিন (শেষ ৩ সংখ্যা):", placeholder="উদা: 811")
 
 if period and len(st.session_state.temp_input) == 6:
-    random.seed(period) # পিরিয়ড পরিবর্তন করলে সিগন্যাল বদলাবে
+    random.seed(period)
     
     with st.spinner('NAJMUL VIP AI এনালাইসিস করছে...'):
         time.sleep(1)
     
     prediction = random.choice(["BIG", "SMALL"])
     
-    # নম্বর লজিক: BIG (5-9), SMALL (0-4)
     if prediction == "BIG":
         selected_nums = random.sample([5, 6, 7, 8, 9], 3)
         color_class = "res-big"
@@ -83,7 +108,7 @@ if period and len(st.session_state.temp_input) == 6:
         </div>
         """, unsafe_allow_html=True)
 
-    # ৫. ফলাফল আপডেট বাটন
+    # ৬. ফলাফল আপডেট বাটন
     st.write("### 📊 ফলাফল আপডেট করুন:")
     win_col, loss_col = st.columns(2)
     if win_col.button("✅ WIN"):
@@ -91,11 +116,10 @@ if period and len(st.session_state.temp_input) == 6:
     if loss_col.button("❌ LOSS"):
         st.session_state.history.insert(0, f"Period {period}: {prediction} ❌ LOSS")
 
-# ৬. লাইভ হিস্টরি
+# ৭. লাইভ হিস্টরি
 st.write("---")
 st.subheader("🕒 VIP Signal History")
 for item in st.session_state.history[:5]:
     if "WIN" in item: st.success(item)
     else: st.error(item)
-
     
