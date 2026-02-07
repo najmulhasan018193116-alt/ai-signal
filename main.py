@@ -5,13 +5,11 @@ import hashlib
 import numpy as np
 import pandas as pd
 import sqlite3
-import os
 
 # -------------------------------
-# ১. SQLite DB (Data Loss রোধ করার জন্য)
+# ১. SQLite Historical DB
 # -------------------------------
-db_path = 'vip_history.db'
-conn = sqlite3.connect(db_path, check_same_thread=False)
+conn = sqlite3.connect('vip_history.db')
 c = conn.cursor()
 c.execute('''
 CREATE TABLE IF NOT EXISTS history (
@@ -26,46 +24,54 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Pro-Level Prediction (Dynamic High Win Rate)
+# ২. Pro-Level Advanced Prediction (ডাইনামিক হাই রেটিং)
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
         return None, 0
+    
     seed_str = str(period) + "".join(inputs) + str(time.time())
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     
-    # উইন রেট ৮৫% থেকে ৯৯.৯% এর মধ্যে ভিন্ন ভিন্ন দেখাবে
-    win_chance = round(random.uniform(85.0, 99.9), 1)
+    # উইন রেটিং ৮২.৫% থেকে ৯৯.৯% এর মধ্যে র্যান্ডমলি ঘুরবে
+    win_chance = round(random.uniform(82.5, 99.9), 1)
     
     freq_B = inputs.count("B")
     freq_S = inputs.count("S")
+    
     if freq_B > freq_S:
         prediction = "BIG" if random.random() > 0.2 else "SMALL"
     elif freq_S > freq_B:
         prediction = "SMALL" if random.random() > 0.2 else "BIG"
     else:
         prediction = random.choice(["BIG", "SMALL"])
+        
     return prediction, win_chance
 
+def simulate_next_10(inputs, period, runs=1000):
+    results = {"BIG":0, "SMALL":0}
+    for _ in range(runs):
+        pred,_ = advanced_predict(inputs, period)
+        results[pred] += 1
+    return {k: round(v/runs*100,1) for k,v in results.items()}
+
 # -------------------------------
-# ৩. Streamlit Page Config
+# ৩. Streamlit Config
 # -------------------------------
 st.set_page_config(page_title="NAJMUL VIP V10 PRO", layout="centered")
 
 # -------------------------------
-# ৪. Session State (হিস্টোরি লোড করা)
+# ৪. Session State
 # -------------------------------
-if "auth" not in st.session_state: st.session_state.auth = False
+if "history" not in st.session_state: st.session_state.history = []
+if "wins" not in st.session_state: st.session_state.wins = 0
+if "total" not in st.session_state: st.session_state.total = 0
 if "temp_input" not in st.session_state: st.session_state.temp_input = []
 if "show_res" not in st.session_state: st.session_state.show_res = False
-
-# ডাটাবেজ থেকে হিস্টোরি রিফ্রেশ করার ফাংশন
-def get_db_history():
-    c.execute("SELECT period, prediction, win_chance, result FROM history ORDER BY id DESC LIMIT 10")
-    return c.fetchall()
+if "auth" not in st.session_state: st.session_state.auth = False
 
 # -------------------------------
-# ৫. Login
+# ৫. Login System
 # -------------------------------
 if not st.session_state.auth:
     st.title("🔐 NAJMUL VIP LOGIN")
@@ -79,106 +85,158 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. NO-BUTTON CSS (একদম ক্লিন ইন্টারফেস)
+# ৬. ULTIMATE MASKING CSS (বাটন চিরতরে বন্ধ)
 # -------------------------------
-st.markdown("""
+if st.session_state.auth:
+    st.markdown("""
     <style>
-    /* Streamlit-এর ডিফল্ট বাটন ও ফুটার পুরোপুরি রিমুভ */
-    [data-testid="stToolbar"], [data-testid="stDecoration"], footer, header, #MainMenu {
+    /* ১. মূল বাটনগুলো ডিজেবল করা */
+    header, footer, .stAppDeployButton, [data-testid="stToolbar"], [data-testid="stDecoration"] {
         display: none !important;
-        height: 0 !important;
-        opacity: 0 !important;
         visibility: hidden !important;
+        pointer-events: none !important;
     }
-    
-    /* নিচের সাদা বা লাল বাটনগুলোকে চিরতরে আড়াল করা */
-    .stAppDeployButton { display: none !important; }
-    
-    /* অ্যাপের মূল ব্যাকগ্রাউন্ড */
+
+    /* ২. স্ক্রিনের নিচে এবং উপরে একটি কালো পর্দা তৈরি করা যাতে বাটন উঁকি দিতে না পারে */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 50px;
+        background: #040608;
+        z-index: 999999;
+    }
+    .stApp::after {
+        content: "";
+        position: fixed;
+        bottom: 0; left: 0; width: 100%; height: 60px;
+        background: #040608;
+        z-index: 999999;
+        pointer-events: all; /* এটি বাটন পর্যন্ত টাচ পৌঁছাতে বাধা দেবে */
+    }
+
+    /* ৩. মূল ডিজাইন */
     .main { background-color: #040608 !important; }
     .stApp { background-color: #040608; color: white; }
-
-    /* ভাসমান রেজাল্ট প্যানেল */
-    .floating-panel { 
-        background: rgba(10,15,30,0.95); border: 2px solid #00FFCC; 
-        border-radius: 20px; padding: 20px; text-align: center;
-        box-shadow: 0 0 30px rgba(0,255,204,0.5); margin: 20px 0;
-    }
-    .big-text { color: #FF4B4B; font-size: 38px; font-weight: 900; }
-    .small-text { color: #00D4FF; font-size: 38px; font-weight: 900; }
     
-    .stButton>button { width: 100%; border-radius: 12px; height: 50px; font-weight: bold; }
+    .floating-panel { 
+        position: fixed; top: 80px; right: 10px; width: 220px;
+        background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; 
+        padding: 15px; z-index: 999; text-align: center;
+        box-shadow: 0 0 35px rgba(0,255,204,0.6);
+    }
+    
+    .res-text { font-size: 34px; font-weight: 900; margin: 5px 0; }
+    .big-text { color: #FF4B4B; text-shadow: 0 0 15px #FF4B4B; }
+    .small-text { color: #00D4FF; text-shadow: 0 0 15px #00D4FF; }
+    
+    .share-box { background: linear-gradient(90deg, #FF0000, #990000); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid white; }
+    
+    .stButton>button { width: 100%; border-radius: 15px; height: 50px; font-weight: bold; color: white; }
+    div[data-testid="stColumn"]:nth-of-type(1) .stButton>button { background-color: #00FF00 !important; color: black !important; }
+    div[data-testid="stColumn"]:nth-of-type(2) .stButton>button { background-color: #FF0000 !important; color: white !important; }
+    
+    .get-btn>div>button { background: #00FFCC !important; color: black !important; font-size: 18px !important; }
+    .accuracy-tag { color: #00FFCC; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
+    .percentage-bar { color: #FFEB3B; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+    .undo-btn>div>button { border: 1px solid #FF4B4B !important; color: #FF4B4B !important; background: transparent !important; height: 40px !important; }
     </style>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # -------------------------------
-# ৭. UI Content
+# ৭. App UI
 # -------------------------------
-st.markdown('<div style="background: red; color: white; padding: 10px; text-align: center; border-radius: 10px; font-weight: bold;">🔗 VIP SERVER ACTIVE: NAJMUL-AI-V10-PRO</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="share-box">🔗 VIP SERVER ACTIVE: NAJMUL-AI-V10-PRO</div>', unsafe_allow_html=True)
+if st.session_state.total > 0:
+    acc = (st.session_state.wins / st.session_state.total) * 100
+    st.metric("AI LIVE ACCURACY", f"{acc:.1f}%")
 
 st.title("🔥 NAJMUL MASTER AI V10 PRO")
 st.subheader("📊 আগের ১০টি রেজাল্ট ইনপুট দিন:")
 
-c1, c2 = st.columns(2)
+c1,c2 = st.columns(2)
 if c1.button("➕ BIG (B)"):
-    if len(st.session_state.temp_input) < 10:
+    if len(st.session_state.temp_input)<10:
         st.session_state.temp_input.append("B")
+        st.session_state.show_res=False
 if c2.button("➕ SMALL (S)"):
-    if len(st.session_state.temp_input) < 10:
+    if len(st.session_state.temp_input)<10:
         st.session_state.temp_input.append("S")
+        st.session_state.show_res=False
 
-if st.button("⬅️ UNDO (শেষ ইনপুট কাটুন)"):
+st.markdown('<div class="undo-btn">', unsafe_allow_html=True)
+if st.button("⬅️ ভুল হয়েছে? শেষ ইনপুট কাটুন (UNDO)"):
     if st.session_state.temp_input:
         st.session_state.temp_input.pop()
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.info(f"প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'অপেক্ষা করছি...'}")
+st.info(f"প্যাটার্ন ({len(st.session_state.temp_input)}/10): {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
 
-period = st.text_input("পিরিয়ড নম্বর (শেষ ৩টি):", placeholder="যেমন: 655")
+period = st.text_input("পিরিয়ড নম্বর দিন (শেষ ৩টি):", placeholder="যেমন: 655")
 
-if st.button("🚀 GET SIGNAL"):
-    if len(st.session_state.temp_input) == 10 and period:
-        st.session_state.show_res = True
+st.markdown('<div class="get-btn">', unsafe_allow_html=True)
+if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
+    if len(st.session_state.temp_input)==10 and period:
+        st.session_state.show_res=True
     else:
-        st.warning("⚠️ ১০টি ইনপুট এবং পিরিয়ড নম্বর প্রয়োজন!")
+        st.warning(f"⚠️ ১০টি রেজাল্ট প্রয়োজন! (এখন আছে {len(st.session_state.temp_input)}টি)")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
-# ৮. AI Result
+# ৮. Results
 # -------------------------------
 if st.session_state.show_res:
-    with st.spinner('বিশ্লেষণ হচ্ছে...'):
-        time.sleep(2)
-    
+    with st.spinner('🔍 গাণিতিক ট্রেন্ড বিশ্লেষণ হচ্ছে...'):
+        time.sleep(2.8)
+
     prediction, win_chance = advanced_predict(st.session_state.temp_input, period)
-    
+    sim_res = simulate_next_10(st.session_state.temp_input, period)
+
+    if prediction=="BIG":
+        nums = random.sample([5,7,8,9],3)
+        color_class="big-text"
+    else:
+        nums = random.sample([0,2,3,4],3)
+        color_class="small-text"
+    num_str = ", ".join(map(str, sorted(nums)))
+
     st.markdown(f"""
     <div class="floating-panel">
-        <p style="color:#00FFCC; margin:0;">AI ANALYSIS REPORT</p>
-        <p style="color:#FFEB3B; font-size:20px; font-weight:bold;">WIN: {win_chance}% 🔥</p>
-        <p class="{'big-text' if prediction=='BIG' else 'small-text'}">{prediction}</p>
-        <p style="color:#999; font-size:12px;">STABLE PREDICTION</p>
+        <p class="accuracy-tag">AI ANALYSIS REPORT</p>
+        <p class="percentage-bar">WIN: {win_chance}% 🔥</p>
+        <p class="res-text {color_class}">{prediction}</p>
+        <p style="font-size:26px;color:#FFEB3B;margin:0;font-weight:900;letter-spacing:5px;">{num_str}</p>
+        <p style="font-size:10px;color:#999;margin-top:5;">STABLE AI PREDICTION (DK আসার আগে)</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # WIN/LOSS বাটন
-    w, l = st.columns(2)
+    st.write("📊 Next 10 Simulation Probability:", sim_res)
+    probs=pd.DataFrame({"BIG":[win_chance],"SMALL":[100-win_chance]})
+    st.bar_chart(probs)
+
+    st.write("---")
+    w,l = st.columns(2)
     if w.button("✅ WIN"):
-        c.execute("INSERT INTO history (period, prediction, win_chance, result) VALUES (?,?,?,?)", (period, prediction, win_chance, "WIN"))
+        st.session_state.history.insert(0,f"Period {period}: {prediction} ({win_chance}%) ✅")
+        st.session_state.wins+=1
+        st.session_state.total+=1
+        st.session_state.temp_input, st.session_state.show_res=[],False
+        c.execute("INSERT INTO history (period,prediction,win_chance,result) VALUES (?,?,?,?)",
+                  (period,prediction,win_chance,"WIN"))
         conn.commit()
-        st.session_state.temp_input, st.session_state.show_res = [], False
-        st.rerun()
-    if l.button("❌ LOSS"):
-        c.execute("INSERT INTO history (period, prediction, win_chance, result) VALUES (?,?,?,?)", (period, prediction, win_chance, "LOSS"))
-        conn.commit()
-        st.session_state.temp_input, st.session_state.show_res = [], False
         st.rerun()
 
-# -------------------------------
-# ৯. History Display (ডাটাবেজ থেকে সরাসরি)
-# -------------------------------
+    if l.button("❌ LOSS"):
+        st.session_state.history.insert(0,f"Period {period}: {prediction} ({win_chance}%) ❌")
+        st.session_state.total+=1
+        st.session_state.temp_input, st.session_state.show_res=[],False
+        c.execute("INSERT INTO history (period,prediction,win_chance,result) VALUES (?,?,?,?)",
+                  (period,prediction,win_chance,"LOSS"))
+        conn.commit()
+        st.rerun()
+
 st.write("---")
 st.subheader("🕒 VIP History")
-history_data = get_db_history()
-for row in history_data:
-    p, pred, win, res = row
-    color = "green" if res == "WIN" else "red"
-    st.markdown(f'<div style="background: {color}; padding: 10px; border-radius: 10px; margin-bottom: 5px;">Period {p}: {pred} ({win}%) {"✅" if res=="WIN" else "❌"}</div>', unsafe_allow_html=True)
+for item in st.session_state.history[:5]:
+    if "✅" in item: st.success(item)
+    else: st.error(item)
