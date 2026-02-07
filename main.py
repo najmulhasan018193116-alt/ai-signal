@@ -24,21 +24,18 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Pro-Level Advanced Prediction (Win Rate ডাইনামিক করা হয়েছে)
+# ২. Pro-Level Advanced Prediction (Win Rate Dynamic)
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
         return None, 0
     
-    # ইনপুট এবং সময়ের ওপর ভিত্তি করে ইউনিক সিড জেনারেশন
-    # এর ফলে প্রতিবার নতুন নতুন পার্সেন্টেজ দেখাবে
     seed_str = str(period) + "".join(inputs) + str(time.time())
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     
-    # উইন রেট ৮২.৫% থেকে ৯৯.৯% এর মধ্যে র্যান্ডমলি পরিবর্তন হবে
+    # প্রতিবার নতুন এবং হাই রেটিং (৮২.৫% থেকে ৯৯.৯%)
     win_chance = round(random.uniform(82.5, 99.9), 1)
     
-    # মার্কেট ট্রেন্ড এনালাইসিস
     freq_B = inputs.count("B")
     freq_S = inputs.count("S")
     
@@ -88,32 +85,32 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. Home Page CSS (সব টুলবার এবং বাটন রিমুভ করার জন্য)
+# ৬. Home Page CSS (Disable Toolbar Clicks & Hide)
 # -------------------------------
 if st.session_state.auth:
     st.markdown("""
     <style>
-    /* নিচের টুলবার, 'Hosted with Streamlit', এবং সেটিংস বাটন রিমুভ */
-    #MainMenu {visibility: hidden; display: none !important;}
-    footer {visibility: hidden; display: none !important;}
-    header {visibility: hidden; display: none !important;}
-    [data-testid="stToolbar"] {visibility: hidden; display: none !important;}
-    .stAppDeployButton {display: none !important;}
-    [data-testid="stDecoration"] {display: none !important;}
-    [data-testid="stStatusWidget"] {display: none !important;}
-    
-    /* পেজের স্ক্রল এবং নিচের অতিরিক্ত জায়গা ফিক্স */
+    /* ১. টুলবার এবং বাটনগুলোর ক্লিক অফ করা এবং হাইড করা */
+    [data-testid="stToolbar"], .stAppDeployButton, footer, header, #MainMenu, [data-testid="stDecoration"] {
+        visibility: hidden !important;
+        display: none !important;
+        pointer-events: none !important; /* ক্লিক কাজ করবে না */
+        user-select: none !important;
+    }
+
+    /* ২. পুরো পেজের স্ক্রল কন্ট্রোল */
     .block-container {
         padding-bottom: 0rem !important;
+        padding-top: 2rem !important;
     }
-    
+
     html, body, .main { 
-        overflow-x: hidden !important;   
+        overflow-x: hidden !important;
         background-color: #040608;
     }
     .stApp { background-color: #040608; color: white; }
-    
-    /* ফ্লোটিং প্যানেল ডিজাইন */
+
+    /* ৩. ফ্লোটিং প্যানেল এবং অন্যান্য ডিজাইন */
     .floating-panel { position: fixed; top: 80px; right: 10px; width: 220px;
         background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
         box-shadow: 0 0 35px rgba(0,255,204,0.6);}
@@ -182,7 +179,7 @@ if st.button("🚀 GET SIGNAL (AI বিশ্লেষণ করুন)"):
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
-# ১০. AI Prediction + DK Signal
+# ১০. AI Prediction
 # -------------------------------
 if st.session_state.show_res:
     with st.spinner('🔍 গাণিতিক ট্রেন্ড বিশ্লেষণ হচ্ছে...'):
@@ -213,9 +210,6 @@ if st.session_state.show_res:
     probs=pd.DataFrame({"BIG":[win_chance],"SMALL":[100-win_chance]})
     st.bar_chart(probs)
 
-    # -------------------
-    # WIN / LOSS Buttons
-    # -------------------
     st.write("---")
     w,l = st.columns(2)
     if w.button("✅ WIN"):
