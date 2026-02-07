@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Pro-Level Advanced Prediction (Updated)
+# ২. Pro-Level Advanced Prediction
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
@@ -84,38 +84,42 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. Home Page CSS (নিচের বাটন রিমুভ সহ)
+# ৬. Home Page CSS (Force Hide Toolbar)
 # -------------------------------
 if st.session_state.auth:
     st.markdown("""
     <style>
-    /* সব ডিফল্ট মেনু এবং বাটন হাইড করার জন্য */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    div[data-testid="stStatusWidget"] {visibility: hidden;}
-    .stAppDeployButton {display:none;}
-    button[title="View source"] {display:none;}
+    /* ১. নিচের মেনু এবং টুলবার পুরোপুরি রিমুভ করার জন্য */
+    [data-testid="stToolbar"] {display: none !important;}
+    footer {display: none !important;}
+    header {display: none !important;}
     
-    /* নিচের লাল গোল মার্ক করা বাটনগুলো সরানোর মেইন কোড */
-    div[data-testid="stToolbar"] {visibility: hidden; display: none !important;}
-    div[data-testid="stDecoration"] {display:none;}
+    /* ২. মোবাইল ভিউতে ডানদিকের বাটনগুলো লুকানোর জন্য */
+    #MainMenu {display: none !important;}
+    .stAppDeployButton {display: none !important;}
+    .stDecoration {display: none !important;}
     
+    /* ৩. অ্যাপের ওভারঅল ডিজাইন */
     html, body, .main { 
-        overflow: hidden !important;   
-        height: 100vh !important;      
+        overflow-x: hidden !important;
+        background-color: #040608;
     }
     .stApp { background-color: #040608; color: white; }
+    
     .floating-panel { position: fixed; top: 80px; right: 10px; width: 220px;
         background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
         box-shadow: 0 0 35px rgba(0,255,204,0.6);}
+    
     .res-text { font-size: 34px; font-weight: 900; margin: 5px 0; }
     .big-text { color: #FF4B4B; text-shadow: 0 0 15px #FF4B4B; }
     .small-text { color: #00D4FF; text-shadow: 0 0 15px #00D4FF; }
+    
     .share-box { background: linear-gradient(90deg, #FF0000, #990000); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid white; }
+    
     .stButton>button { width: 100%; border-radius: 15px; height: 50px; font-weight: bold; color: white; }
     div[data-testid="stColumn"]:nth-of-type(1) .stButton>button { background-color: #00FF00 !important; color: black !important; }
     div[data-testid="stColumn"]:nth-of-type(2) .stButton>button { background-color: #FF0000 !important; color: white !important; }
+    
     .get-btn>div>button { background: #00FFCC !important; color: black !important; font-size: 18px !important; }
     .accuracy-tag { color: #00FFCC; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
     .percentage-bar { color: #FFEB3B; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
@@ -230,4 +234,3 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-           
