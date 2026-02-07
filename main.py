@@ -24,20 +24,31 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Pro-Level Advanced Prediction
+# ২. Pro-Level Advanced Prediction (Updated)
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
         return None, 0
+    
+    # ইনপুট এবং সময়ের ওপর ভিত্তি করে ইউনিক সিড জেনারেশন
+    # এর ফলে প্রতিবার নতুন নতুন পার্সেন্টেজ দেখাবে
+    seed_str = str(period) + "".join(inputs) + str(time.time())
+    random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
+    
+    # উইন রেট ৮২.৫% থেকে ৯৯.৯% এর মধ্যে র্যান্ডমলি পরিবর্তন হবে
+    win_chance = round(random.uniform(82.5, 99.9), 1)
+    
+    # মার্কেট ট্রেন্ড এনালাইসিস
     freq_B = inputs.count("B")
     freq_S = inputs.count("S")
-    base_prob_B = 50 + (freq_B - freq_S) * 5
-    base_prob_B = max(10, min(90, base_prob_B))
-    seed_str = str(period) + "".join(inputs)
-    random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
-    win_chance = round(np.random.normal(base_prob_B, 4),1)  # প্রো লেভেল std dev 4
-    win_chance = max(80, min(99.9, win_chance))  # Win % 80-100%
-    prediction = "BIG" if random.random()*100 < win_chance else "SMALL"
+    
+    if freq_B > freq_S:
+        prediction = "BIG" if random.random() > 0.2 else "SMALL"
+    elif freq_S > freq_B:
+        prediction = "SMALL" if random.random() > 0.2 else "BIG"
+    else:
+        prediction = random.choice(["BIG", "SMALL"])
+        
     return prediction, win_chance
 
 def simulate_next_10(inputs, period, runs=1000):
@@ -215,3 +226,4 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
+    
