@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Pro-Level Advanced Prediction (Win Rate Dynamic)
+# ২. Pro-Level Advanced Prediction (ডাইনামিক রেটিং)
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
@@ -33,7 +33,7 @@ def advanced_predict(inputs, period):
     seed_str = str(period) + "".join(inputs) + str(time.time())
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     
-    # প্রতিবার নতুন এবং হাই রেটিং (৮২.৫% থেকে ৯৯.৯%)
+    # হাই রেটিং ৮২.৫% থেকে ৯৯.৯% এর মধ্যে ভিন্ন ভিন্ন দেখাবে
     win_chance = round(random.uniform(82.5, 99.9), 1)
     
     freq_B = inputs.count("B")
@@ -85,32 +85,31 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. Home Page CSS (Disable Toolbar Clicks & Hide)
+# ৬. Home Page CSS (একদম শেষ চেষ্টা - ফুল মাস্কিং)
 # -------------------------------
 if st.session_state.auth:
     st.markdown("""
     <style>
-    /* ১. টুলবার এবং বাটনগুলোর ক্লিক অফ করা এবং হাইড করা */
-    [data-testid="stToolbar"], .stAppDeployButton, footer, header, #MainMenu, [data-testid="stDecoration"] {
-        visibility: hidden !important;
+    /* ১. টুলবার ও বাটন রিমুভ করার জন্য ফোর্স কোড */
+    header, footer, .stAppDeployButton, [data-testid="stToolbar"], [data-testid="stDecoration"] {
         display: none !important;
-        pointer-events: none !important; /* ক্লিক কাজ করবে না */
-        user-select: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
 
-    /* ২. পুরো পেজের স্ক্রল কন্ট্রোল */
+    /* ২. স্ক্রিনের নিচের অংশ যেন কালো থাকে এবং বাটন ঢেকে যায় */
+    .main {
+        background-color: #040608 !important;
+    }
+    
     .block-container {
-        padding-bottom: 0rem !important;
-        padding-top: 2rem !important;
+        padding-bottom: 5rem !important; /* নিচে জায়গা বাড়িয়ে বাটনকে আড়ালে রাখা */
     }
 
-    html, body, .main { 
-        overflow-x: hidden !important;
-        background-color: #040608;
-    }
-    .stApp { background-color: #040608; color: white; }
-
-    /* ৩. ফ্লোটিং প্যানেল এবং অন্যান্য ডিজাইন */
+    /* ৩. অন্যান্য ডিজাইন */
     .floating-panel { position: fixed; top: 80px; right: 10px; width: 220px;
         background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
         box-shadow: 0 0 35px rgba(0,255,204,0.6);}
@@ -130,6 +129,14 @@ if st.session_state.auth:
     .percentage-bar { color: #FFEB3B; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
     .undo-btn>div>button { border: 1px solid #FF4B4B !important; color: #FF4B4B !important; background: transparent !important; height: 40px !important; }
     </style>
+    
+    <script>
+    // জাভাস্ক্রিপ্ট দিয়ে বাটন রিমুভ করার ট্রাই
+    var elements = window.parent.document.querySelectorAll('.stAppDeployButton, footer, #MainMenu');
+    for (var i=0; i < elements.length; i++) {
+        elements[i].style.display = 'none';
+    }
+    </script>
     """, unsafe_allow_html=True)
 
 # -------------------------------
