@@ -1,4 +1,4 @@
-Import streamlit as st
+import streamlit as st
 import time
 import random
 import hashlib
@@ -240,4 +240,4 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-এই কোড এর সাথে এড করে দেও
+        
