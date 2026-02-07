@@ -24,17 +24,21 @@ CREATE TABLE IF NOT EXISTS history (
 conn.commit()
 
 # -------------------------------
-# ২. Pro-Level Advanced Prediction
+# ২. Pro-Level Advanced Prediction (Win Rate ডাইনামিক করা হয়েছে)
 # -------------------------------
 def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
         return None, 0
     
+    # ইনপুট এবং সময়ের ওপর ভিত্তি করে ইউনিক সিড জেনারেশন
+    # এর ফলে প্রতিবার নতুন নতুন পার্সেন্টেজ দেখাবে
     seed_str = str(period) + "".join(inputs) + str(time.time())
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     
+    # উইন রেট ৮২.৫% থেকে ৯৯.৯% এর মধ্যে র্যান্ডমলি পরিবর্তন হবে
     win_chance = round(random.uniform(82.5, 99.9), 1)
     
+    # মার্কেট ট্রেন্ড এনালাইসিস
     freq_B = inputs.count("B")
     freq_S = inputs.count("S")
     
@@ -84,28 +88,32 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. Home Page CSS (Force Hide Toolbar)
+# ৬. Home Page CSS (সব টুলবার এবং বাটন রিমুভ করার জন্য)
 # -------------------------------
 if st.session_state.auth:
     st.markdown("""
     <style>
-    /* ১. নিচের মেনু এবং টুলবার পুরোপুরি রিমুভ করার জন্য */
-    [data-testid="stToolbar"] {display: none !important;}
-    footer {display: none !important;}
-    header {display: none !important;}
-    
-    /* ২. মোবাইল ভিউতে ডানদিকের বাটনগুলো লুকানোর জন্য */
-    #MainMenu {display: none !important;}
+    /* নিচের টুলবার, 'Hosted with Streamlit', এবং সেটিংস বাটন রিমুভ */
+    #MainMenu {visibility: hidden; display: none !important;}
+    footer {visibility: hidden; display: none !important;}
+    header {visibility: hidden; display: none !important;}
+    [data-testid="stToolbar"] {visibility: hidden; display: none !important;}
     .stAppDeployButton {display: none !important;}
-    .stDecoration {display: none !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
     
-    /* ৩. অ্যাপের ওভারঅল ডিজাইন */
+    /* পেজের স্ক্রল এবং নিচের অতিরিক্ত জায়গা ফিক্স */
+    .block-container {
+        padding-bottom: 0rem !important;
+    }
+    
     html, body, .main { 
-        overflow-x: hidden !important;
+        overflow-x: hidden !important;   
         background-color: #040608;
     }
     .stApp { background-color: #040608; color: white; }
     
+    /* ফ্লোটিং প্যানেল ডিজাইন */
     .floating-panel { position: fixed; top: 80px; right: 10px; width: 220px;
         background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
         box-shadow: 0 0 35px rgba(0,255,204,0.6);}
@@ -205,6 +213,9 @@ if st.session_state.show_res:
     probs=pd.DataFrame({"BIG":[win_chance],"SMALL":[100-win_chance]})
     st.bar_chart(probs)
 
+    # -------------------
+    # WIN / LOSS Buttons
+    # -------------------
     st.write("---")
     w,l = st.columns(2)
     if w.button("✅ WIN"):
