@@ -30,15 +30,11 @@ def advanced_predict(inputs, period):
     if not inputs or len(inputs) != 10:
         return None, 0
     
-    # ইনপুট এবং সময়ের ওপর ভিত্তি করে ইউনিক সিড জেনারেশন
-    # এর ফলে প্রতিবার নতুন নতুন পার্সেন্টেজ দেখাবে
     seed_str = str(period) + "".join(inputs) + str(time.time())
     random.seed(int(hashlib.sha256(seed_str.encode()).hexdigest(), 16))
     
-    # উইন রেট ৮২.৫% থেকে ৯৯.৯% এর মধ্যে র্যান্ডমলি পরিবর্তন হবে
     win_chance = round(random.uniform(82.5, 99.9), 1)
     
-    # মার্কেট ট্রেন্ড এনালাইসিস
     freq_B = inputs.count("B")
     freq_S = inputs.count("S")
     
@@ -88,16 +84,27 @@ if not st.session_state.auth:
     st.stop()
 
 # -------------------------------
-# ৬. Home Page CSS (Scroll বন্ধ)
+# ৬. Home Page CSS (নিচের বাটন রিমুভ সহ)
 # -------------------------------
 if st.session_state.auth:
     st.markdown("""
     <style>
+    /* সব ডিফল্ট মেনু এবং বাটন হাইড করার জন্য */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    div[data-testid="stStatusWidget"] {visibility: hidden;}
+    .stAppDeployButton {display:none;}
+    button[title="View source"] {display:none;}
+    
+    /* নিচের লাল গোল মার্ক করা বাটনগুলো সরানোর মেইন কোড */
+    div[data-testid="stToolbar"] {visibility: hidden; display: none !important;}
+    div[data-testid="stDecoration"] {display:none;}
+    
     html, body, .main { 
         overflow: hidden !important;   
         height: 100vh !important;      
     }
-    #MainMenu, header, footer { visibility: hidden; }
     .stApp { background-color: #040608; color: white; }
     .floating-panel { position: fixed; top: 80px; right: 10px; width: 220px;
         background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px; padding: 15px; z-index: 9999; text-align: center;
@@ -194,9 +201,6 @@ if st.session_state.show_res:
     probs=pd.DataFrame({"BIG":[win_chance],"SMALL":[100-win_chance]})
     st.bar_chart(probs)
 
-    # -------------------
-    # WIN / LOSS Buttons
-    # -------------------
     st.write("---")
     w,l = st.columns(2)
     if w.button("✅ WIN"):
@@ -226,4 +230,4 @@ st.subheader("🕒 VIP History")
 for item in st.session_state.history[:5]:
     if "✅" in item: st.success(item)
     else: st.error(item)
-    
+           
