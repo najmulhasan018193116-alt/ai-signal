@@ -7,7 +7,7 @@ import pandas as pd
 import sqlite3
 
 # --- আপনার দেওয়া লোগো এবং লিঙ্ক সেটিংস ---
-LOGO_URL = "https://i.ibb.co/vzYm8Ym/najmul-logo.png" 
+LOGO_URL = "https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app-logo.png" 
 TELEGRAM_LINK = "https://t.me/your_telegram_link"
 
 # -------------------------------
@@ -254,3 +254,4 @@ for item in st.session_state.history[:5]:
 # ৯. Telegram Link (নতুন যোগ করা হয়েছে)
 # -------------------------------
 st.markdown(f'<a href="{TELEGRAM_LINK}" target="_blank" class="telegram-btn">✈️ JOIN OUR TELEGRAM CHANNEL</a>', unsafe_allow_html=True)
+        
