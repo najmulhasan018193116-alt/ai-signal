@@ -146,7 +146,7 @@ if st.session_state.auth:
     
     <div class="custom-header">
         <img src="{LOGO_URL}" class="header-logo">
-        <div class="header-url">www.najmul-ai-v10.pro</div>
+        <div class="header-url">🔗 VIP SERVER ACTIVE: https://ai-signal-7w9ghbcvq7szvy5vuth2gw.streamlit.app</div>
     </div>
     """, unsafe_allow_html=True)
 
