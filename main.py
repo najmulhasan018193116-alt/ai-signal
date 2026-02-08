@@ -18,8 +18,8 @@ MASTER_TRENDS = {
     "reversal_rate": 0.82 
 }
 
-# --- SQLite Historical DB ---
-conn = sqlite3.connect('vip_history.db')
+# --- SQLite Historical DB (হিস্টরি এখানে সুরক্ষিত থাকবে) ---
+conn = sqlite3.connect('vip_history.db', check_same_thread=False)
 c = conn.cursor()
 c.execute('''
 CREATE TABLE IF NOT EXISTS history (
@@ -85,76 +85,60 @@ if not st.session_state.auth:
             st.error("❌ ভুল পাসওয়ার্ড!")
     st.stop()
 
-# --- CSS MASKING & CUSTOM BUTTON COLORS ---
+# --- CSS & Individual Button Colors ---
 st.markdown(f"""
 <style>
-    .custom-header {{
-        position: fixed; top: 0; left: 0; width: 100%; height: 65px;
-        background: #0a0f1e; display: flex; align-items: center; justify-content: space-between;
-        padding: 0 15px; z-index: 999999; border-bottom: 2px solid #00FFCC;
-    }}
-    .header-logo {{ width: 45px; height: 45px; border-radius: 50%; border: 1px solid #00FFCC; }}
-    .header-url {{ color: #00FFCC; font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; }}
-    
     header, footer, .stAppDeployButton, [data-testid="stToolbar"] {{ visibility: hidden !important; }}
     .main {{ background-color: #040608 !important; padding-top: 75px !important; }}
+    
+    /* সারি আকারে বাটনগুলোর ভিন্ন ভিন্ন রঙ */
+    div[data-testid="stHorizontalBlock"] div:nth-child(1) button {{ background-color: #4CAF50 !important; color: white !important; }}
+    div[data-testid="stHorizontalBlock"] div:nth-child(2) button {{ background-color: #2196F3 !important; color: white !important; }}
+    div[data-testid="stHorizontalBlock"] div:nth-child(3) button {{ background-color: #FFEB3B !important; color: black !important; }}
+    div[data-testid="stHorizontalBlock"] div:nth-child(4) button {{ background-color: #9C27B0 !important; color: white !important; }}
+    div[data-testid="stHorizontalBlock"] div:nth-child(5) button {{ background-color: #FF9800 !important; color: white !important; }}
 
-    /* Individual Button Colors using CSS */
-    div[data-testid="stHorizontalBlock"] div:nth-child(1) button {{ background-color: #4CAF50 !important; color: white !important; }} /* Green */
-    div[data-testid="stHorizontalBlock"] div:nth-child(2) button {{ background-color: #2196F3 !important; color: white !important; }} /* Blue */
-    div[data-testid="stHorizontalBlock"] div:nth-child(3) button {{ background-color: #FFEB3B !important; color: black !important; }} /* Yellow */
-    div[data-testid="stHorizontalBlock"] div:nth-child(4) button {{ background-color: #9C27B0 !important; color: white !important; }} /* Purple */
-    div[data-testid="stHorizontalBlock"] div:nth-child(5) button {{ background-color: #FF9800 !important; color: white !important; }} /* Orange */
-
+    .stButton>button {{ width: 100% !important; border-radius: 10px; font-weight: bold; }}
     .floating-panel {{
         position: fixed; top: 100px; right: 10px; width: 220px;
         background: rgba(10,15,30,0.98); border: 2px solid #00FFCC; border-radius: 20px;
         padding: 15px; z-index: 999; text-align: center;
         box-shadow: 0 0 35px rgba(0,255,204,0.6);
     }}
-    .res-text {{ font-size: 34px; font-weight: 900; margin: 5px 0; }}
 </style>
-<div class="custom-header">
-    <img src="{LOGO_URL}" class="header-logo">
-    <div class="header-url">www.najmul-ai-v10.pro</div>
-</div>
 """, unsafe_allow_html=True)
 
 # --- App UI ---
-st.markdown('<div style="background:red; color:white; text-align:center; padding:10px; border-radius:10px;">🔗 VIP SERVER ACTIVE</div>', unsafe_allow_html=True)
-
 st.title("🔥 NAJMUL MASTER AI V10 PRO")
 st.subheader("📊 আগের ১০টি রেজাল্ট ইনপুট দিন:")
 
-# --- BIG (Sari Layout) ---
+# --- BIG SECTION (Row) ---
 st.markdown("🟢 **BIG (5-9)**")
-cols_big = st.columns(5)
-big_nums = [5, 6, 7, 8, 9]
-for i, num in enumerate(big_nums):
-    if cols_big[i].button(f"{num}", key=f"big_{num}"):
-        if len(st.session_state.temp_input) < 10:
-            st.session_state.temp_input.append(f"B-{num}")
-            st.rerun()
+c1, c2, c3, c4, c5 = st.columns(5)
+for i, num in enumerate([5, 6, 7, 8, 9]):
+    with [c1, c2, c3, c4, c5][i]:
+        if st.button(f"{num}", key=f"B{num}"):
+            if len(st.session_state.temp_input) < 10:
+                st.session_state.temp_input.append(f"B-{num}")
+                st.rerun()
 
-# --- SMALL (Sari Layout) ---
+# --- SMALL SECTION (Row) ---
 st.markdown("🔴 **SMALL (0-4)**")
-cols_small = st.columns(5)
-small_nums = [0, 1, 2, 3, 4]
-for i, num in enumerate(small_nums):
-    if cols_small[i].button(f"{num}", key=f"small_{num}"):
-        if len(st.session_state.temp_input) < 10:
-            st.session_state.temp_input.append(f"S-{num}")
-            st.rerun()
+s1, s2, s3, s4, s5 = st.columns(5)
+for i, num in enumerate([0, 1, 2, 3, 4]):
+    with [s1, s2, s3, s4, s5][i]:
+        if st.button(f"{num}", key=f"S{num}"):
+            if len(st.session_state.temp_input) < 10:
+                st.session_state.temp_input.append(f"S-{num}")
+                st.rerun()
 
-# --- Control Buttons ---
 if st.button("⬅️ UNDO"):
     if st.session_state.temp_input:
         st.session_state.temp_input.pop()
         st.rerun()
 
-st.info(f"প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input) if st.session_state.temp_input else 'ইনপুট দিন...'}")
-
-period = st.text_input("পিরিয়ড নম্বর:", placeholder="যেমন: 655")
+st.info(f"প্যাটার্ন: {' ➡️ '.join(st.session_state.temp_input)}")
+period = st.text_input("পিরিয়ড নম্বর (শেষ ৩টি):", placeholder="যেমন: 655")
 
 if st.button("🚀 GET SIGNAL"):
     if len(st.session_state.temp_input) == 10 and period:
@@ -162,10 +146,36 @@ if st.button("🚀 GET SIGNAL"):
     else:
         st.warning("⚠️ ১০টি রেজাল্ট প্রয়োজন!")
 
-# --- Results ---
+# --- Results & HISTORY (সম্পূর্ণ লজিক এখানে আছে) ---
 if st.session_state.show_res:
     prediction, win_chance = advanced_predict(st.session_state.temp_input, period)
-    st.success(f"Prediction: {prediction} ({win_chance}%)")
-    # (বাকি রেজাল্ট লজিক আপনার মূল কোড অনুযায়ী চলবে...)
+    st.markdown(f"### Result: {prediction} ({win_chance}%)")
+    
+    w, l = st.columns(2)
+    if w.button("✅ WIN"):
+        st.session_state.history.insert(0, f"Period {period}: {prediction} ✅")
+        st.session_state.wins += 1
+        st.session_state.total += 1
+        c.execute("INSERT INTO history (period,prediction,win_chance,result) VALUES (?,?,?,?)", (period, prediction, win_chance, "WIN"))
+        conn.commit()
+        st.session_state.temp_input, st.session_state.show_res = [], False
+        st.rerun()
 
-st.markdown(f'<a href="{TELEGRAM_LINK}" target="_blank" style="display:block; background:#0088cc; color:white; text-align:center; padding:12px; border-radius:12px; text-decoration:none; font-weight:bold; margin-top:20px;">✈️ JOIN TELEGRAM</a>', unsafe_allow_html=True)
+    if l.button("❌ LOSS"):
+        st.session_state.history.insert(0, f"Period {period}: {prediction} ❌")
+        st.session_state.total += 1
+        c.execute("INSERT INTO history (period,prediction,win_chance,result) VALUES (?,?,?,?)", (period, prediction, win_chance, "LOSS"))
+        conn.commit()
+        st.session_state.temp_input, st.session_state.show_res = [], False
+        st.rerun()
+
+st.subheader("🕒 VIP History (Master Database)")
+# ডাটাবেস থেকে হিস্টরি নিয়ে আসা
+c.execute("SELECT period, prediction, result FROM history ORDER BY id DESC LIMIT 5")
+db_history = c.fetchall()
+for row in db_history:
+    status = "✅" if row[2] == "WIN" else "❌"
+    st.write(f"Period {row[0]}: {row[1]} {status}")
+
+st.markdown(f'<a href="{TELEGRAM_LINK}" target="_blank" class="telegram-btn">✈️ JOIN TELEGRAM</a>', unsafe_allow_html=True)
+    
