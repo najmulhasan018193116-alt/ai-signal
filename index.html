@@ -84,13 +84,14 @@
         <p onclick="showLogin()">Back to Login</p>
     </div>
 </div>
+
 <script type="module">
-    // ১. Firebase লাইব্রেরিগুলো ইমপোর্ট করুন
+    // ১. প্রয়োজনীয় Firebase লাইব্রেরি ইমপোর্ট (CDN ব্যবহার করা হয়েছে)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
-    // ২. আপনার নতুন Firebase কনফিগারেশন এখানে বসান
+    // ২. আপনার নতুন Firebase কনফিগারেশন আপডেট করা হয়েছে
     const firebaseConfig = {
       apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
       authDomain: "ai-signal-75e73.firebaseapp.com",
@@ -101,35 +102,22 @@
       measurementId: "G-8S74TM917W"
     };
 
-    // ৩. Firebase ইনিশিয়ালাইজ করুন
+    // ৩. Firebase ইনিশিয়ালাইজেশন (ডুপ্লিকেট রিমুভ করা হয়েছে)
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const analytics = getAnalytics(app);
 
-    // --- এরপর আপনার বাকি সব ফাংশন (loginUser, registerUser ইত্যাদি) থাকবে ---
-    
-    window.onload = function() {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'normal',
-            'callback': (response) => { console.log("Captcha solved"); }
-        });
-    };
-
-    // ... বাকি কোড অপরিবর্তিত থাকবে ...
-        
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    window.onload = function() {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'normal',
-            'callback': (response) => { console.log("Captcha solved"); }
-        });
-    };
-
     let confirmationResult;
 
+    // ৪. reCAPTCHA সেটআপ
+    window.onload = function() {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'normal',
+            'callback': (response) => { console.log("Captcha solved"); }
+        });
+    };
+
+    // ৫. UI ফাংশনগুলো (Login/Register ট্যাব সুইচ)
     window.showRegister = function() {
         document.getElementById("loginPage").classList.add("hidden");
         document.getElementById("registerPage").classList.remove("hidden");
@@ -151,6 +139,7 @@
         document.getElementById("pageTitle").innerText = "Reset Password";
     }
 
+    // ৬. রেজিস্ট্রেশন লজিক
     window.registerUser = function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
@@ -173,6 +162,7 @@
         showLogin();
     }
 
+    // ৭. লগইন লজিক এবং Home Page রিডাইরেক্ট
     window.loginUser = function() {
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
@@ -182,13 +172,14 @@
 
         if(user) {
             alert("Login Successful!");
-            // সফলভাবে লগইন হলে home.html এ নিয়ে যাবে
+            // সফল লগইনের পর home.html-এ নিয়ে যাবে
             window.location.href = "home.html"; 
         } else {
             alert("Incorrect Phone or Password");
         }
     }
 
+    // ৮. OTP পাঠানোর লজিক
     window.sendOTP = function() {
         let phoneField = document.getElementById("resetPhone").value.trim();
         if(!phoneField) { alert("Enter phone number first"); return; }
@@ -205,6 +196,7 @@
             });
     }
 
+    // ৯. পাসওয়ার্ড রিসেট লজিক
     window.resetPassword = function() {
         const code = document.getElementById("otpInput").value.trim();
         const newPass = document.getElementById("newPass").value;
@@ -232,4 +224,3 @@
 </script>
 </body>
 </html>
-
