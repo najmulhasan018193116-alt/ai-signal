@@ -6,29 +6,41 @@
 <title>Pro Gaming Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-    /* আপনার দেওয়া সব স্টাইল এখানে থাকবে (পরিবর্তন করার প্রয়োজন নেই) */
     * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: #00ff6a; min-height: 100vh; overflow-x: hidden; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); }
-    .header-btn { color: white; text-decoration: none; font-size: 20px; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: 0.3s; }
+    
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0, 0, 0, 0.1); backdrop-filter: blur(5px); }
+    .header-btn { color: white; text-decoration: none; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+
     .container { width: 100%; padding: 0 20px 100px 20px; }
+
+    /* Slider Style */
     .slider-container { width: 100%; height: 180px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin: 15px 0; }
     .slider { display: flex; width: 300%; height: 100%; animation: slide 10s infinite; }
     .slider img { width: 33.33%; height: 100%; object-fit: cover; }
     @keyframes slide { 0% { transform: translateX(0); } 30% { transform: translateX(0); } 33% { transform: translateX(-33.33%); } 63% { transform: translateX(-33.33%); } 66% { transform: translateX(-66.66%); } 96% { transform: translateX(-66.66%); } 100% { transform: translateX(0); } }
-    .notice-board { background: rgba(0, 0, 0, 0.2); color: white; padding: 10px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+
+    /* Notice Board */
+    .notice-board { background: rgba(0, 0, 0, 0.4); color: white; padding: 10px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
     .notice-board marquee { flex: 1; font-weight: 500; }
+
+    /* Game Grid */
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
-    .game-btn { height:110px; border-radius:20px; display:flex; flex-direction: column; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white; text-decoration: none; box-shadow:0 8px 15px rgba(0,0,0,0.2); text-align: center; transition: 0.2s; border: 2px solid rgba(255,255,255,0.1); }
+    .game-btn { height:110px; border-radius:20px; display:flex; flex-direction: column; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white; text-decoration: none; box-shadow:0 8px 15px rgba(0,0,0,0.2); text-align: center; transition: 0.2s; border: 2px solid rgba(255,255,255,0.2); }
     .game-btn i { font-size: 30px; margin-bottom: 8px; }
     .lottery { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
     .head { background: linear-gradient(135deg, #fce38a, #f38181); color: #333; }
     .big { background: linear-gradient(135deg, #f09819, #edde5d); }
     .redgreen { background: linear-gradient(135deg, #38ef7d, #11998e); }
-    .mlm-container { margin-top: 25px; display: flex; justify-content: center; }
-    .mlm-btn { width: 100%; height: 75px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 117, 252, 0.5); border: 2px solid rgba(255,255,255,0.3); transition: 0.3s; }
-    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; background: white; padding: 10px 0; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 1000; }
-    .nav-item { text-align: center; color: #888; text-decoration: none; flex: 1; transition: 0.3s; }
+
+    /* MLM Button Style */
+    .mlm-container { margin-top: 25px; }
+    .mlm-btn { width: 100%; height: 80px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: white; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 117, 252, 0.4); border: 2px solid rgba(255,255,255,0.3); transition: 0.3s; }
+    .mlm-btn:active { transform: scale(0.95); }
+
+    /* Bottom Nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; background: white; padding: 12px 0; border-top-left-radius: 25px; border-top-right-radius: 25px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 1000; }
+    .nav-item { text-align: center; color: #888; text-decoration: none; flex: 1; }
     .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
     .nav-item span { font-size: 12px; font-weight: 600; }
     .nav-item.active { color: #00c853; }
@@ -38,12 +50,8 @@
 <body>
 
     <div class="header">
-        <a href="alarm.html" class="header-btn">
-            <i class="fas fa-bell"></i> Alarm
-        </a>
-        <a href="download.html" class="header-btn">
-            <i class="fas fa-download"></i> Download
-        </a>
+        <a href="alarm.html" class="header-btn"><i class="fas fa-bell"></i> Alarm</a>
+        <a href="download.html" class="header-btn"><i class="fas fa-download"></i> Download</a>
     </div>
 
     <div class="container">
@@ -57,7 +65,7 @@
 
         <div class="notice-board">
             <i class="fas fa-volume-up"></i>
-            <marquee id="dynamicNotice">আমাদের গেমিং প্ল্যাটফর্মে আপনাকে স্বাগতম! লগইন করার জন্য ধন্যবাদ।</marquee>
+            <marquee id="dynamicNotice">Loading user info...</marquee>
         </div>
 
         <div class="grid">
@@ -68,7 +76,9 @@
         </div>
 
         <div class="mlm-container">
-            <a href="mlm.html" class="mlm-btn"><i class="fas fa-users" style="margin-right: 10px;"></i> MLM SYSTEM</a>
+            <a href="mlm-system.html" class="mlm-btn">
+                <i class="fas fa-users-gear" style="margin-right: 12px;"></i> MLM SYSTEM
+            </a>
         </div>
     </div>
 
@@ -81,22 +91,20 @@
 
     <script>
         window.onload = function() {
-            // ১. চেক করা হচ্ছে ইউজার লগইন করা কি না
+            // ১. চেক করা হচ্ছে ইউজার লগইন করা কি না (userPhone দিয়ে চেক করা MLM এর জন্য জরুরি)
+            const userPhone = localStorage.getItem("userPhone");
             const isLoggedIn = localStorage.getItem("isLoggedIn");
-            const loggedUser = localStorage.getItem("loggedUser");
 
-            if (isLoggedIn !== "true" || !loggedUser) {
-                // ২. যদি লগইন না থাকে, তবে index.html (লগইন পেজে) পাঠিয়ে দেবে
+            if (isLoggedIn !== "true" || !userPhone) {
                 alert("Security Alert: Please login first!");
-                window.location.replace("index.html");
+                window.location.replace("index.html"); // আপনার লগইন পেজের নাম দিন
             } else {
-                console.log("Welcome back, " + loggedUser);
-                // ৩. নোটিশ বোর্ডে ইউজারের নম্বর দেখানো (ঐচ্ছিক)
-                document.getElementById("dynamicNotice").innerText = "স্বাগতম " + loggedUser + "! আমাদের গেমিং প্ল্যাটফর্মে আজই গেম খেলুন।";
+                // ২. নোটিশ বোর্ডে ইউজারের নম্বর দেখানো
+                document.getElementById("dynamicNotice").innerText = "স্বাগতম " + userPhone + "! আপনার গেমিং যাত্রা শুরু করুন।";
             }
         };
 
-        // ৪. লগআউট করার ফাংশন (প্রয়োজন হলে Account পেজে ব্যবহার করবেন)
+        // ৩. লগআউট ফাংশন (প্রয়োজন হলে)
         function logout() {
             localStorage.clear();
             window.location.replace("index.html");
