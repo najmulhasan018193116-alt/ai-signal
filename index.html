@@ -89,7 +89,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // আপনার Firebase কনফিগারেশন ঠিক আছে
     const firebaseConfig = {
         apiKey: "AIzaSyCALYxA2M4BwIXq5KC3VMGsZpAFh8nL3fo",
         authDomain: "bengal-east-company-limited.firebaseapp.com",
@@ -102,7 +101,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // reCAPTCHA initialization
     window.onload = function() {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'normal',
@@ -112,7 +110,6 @@
 
     let confirmationResult;
 
-    // UI Functions
     window.showRegister = function() {
         document.getElementById("loginPage").classList.add("hidden");
         document.getElementById("registerPage").classList.remove("hidden");
@@ -129,11 +126,11 @@
 
     window.showReset = function() {
         document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("registerPage").classList.add("hidden");
         document.getElementById("resetPage").classList.remove("hidden");
         document.getElementById("pageTitle").innerText = "Reset Password";
     }
 
-    // Register User
     window.registerUser = function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
@@ -156,7 +153,6 @@
         showLogin();
     }
 
-    // Login User
     window.loginUser = function() {
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
@@ -166,18 +162,16 @@
 
         if(user) {
             alert("Login Successful!");
-            // window.location.href = "home.html"; // আপনার হোম পেজের লিঙ্ক এখানে দিন
+            // সফলভাবে লগইন হলে home.html এ নিয়ে যাবে
+            window.location.href = "home.html"; 
         } else {
             alert("Incorrect Phone or Password");
         }
     }
 
-    // Firebase OTP Send
     window.sendOTP = function() {
         let phoneField = document.getElementById("resetPhone").value.trim();
         if(!phoneField) { alert("Enter phone number first"); return; }
-        
-        // বাংলাদেশি নাম্বারের জন্য ফরম্যাট ঠিক করা
         const phoneNumber = "+88" + phoneField;
         const appVerifier = window.recaptchaVerifier;
 
@@ -191,7 +185,6 @@
             });
     }
 
-    // Reset Password with OTP
     window.resetPassword = function() {
         const code = document.getElementById("otpInput").value.trim();
         const newPass = document.getElementById("newPass").value;
@@ -219,3 +212,4 @@
 </script>
 </body>
 </html>
+
