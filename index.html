@@ -127,7 +127,6 @@
         document.getElementById("pageTitle").innerText = "Reset Password";
     }
 
-    // রেজিস্ট্রেশন ফাংশন: এখন এটি Realtime Database এ ০ ব্যালেন্সসহ ডাটা সেভ করবে
     window.registerUser = async function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
@@ -150,7 +149,7 @@
             await set(userRef, { 
                 phone: phone, 
                 pass: pass, 
-                balance: 0, // নতুন একাউন্টে অটো ০ ব্যালেন্স
+                balance: 0, 
                 createdAt: new Date().toISOString() 
             });
 
@@ -159,7 +158,6 @@
         } catch (e) { alert("Error: " + e.message); }
     }
 
-    // লগইন ফাংশন: এটি ডাটা চেক করবে এবং LocalStorage এ নম্বর সেভ করবে
     window.loginUser = async function() {
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
@@ -170,8 +168,12 @@
 
             if (snapshot.exists() && snapshot.val().pass === pass) {
                 alert("Login Successful!");
+                
+                // --- MLM SYSTEM এর জন্য নিচে এই ৩টি লাইন যোগ করা হয়েছে ---
                 localStorage.setItem("isLoggedIn", "true");
                 localStorage.setItem("loggedUser", phone); 
+                localStorage.setItem("userPhone", phone); // MLM পেজ এই নম্বরটিই ব্যবহার করবে
+                
                 window.location.replace("home.html"); 
             } else { 
                 alert("Incorrect Phone or Password"); 
