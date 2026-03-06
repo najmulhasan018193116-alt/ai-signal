@@ -12,7 +12,6 @@
     .tabs button { background: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; color: #555; padding: 5px 10px; border-bottom: 2px solid transparent; }
     .tabs button.active { border-bottom: 2px solid #e52e71; color: #e52e71; }
     
-    /* পাসওয়ার্ড বক্স ও আইকন ডিজাইন */
     .input-group { position: relative; width: 100%; }
     input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
     .toggle-pass { position: absolute; right: 10px; top: 18px; cursor: pointer; color: #777; font-size: 18px; }
@@ -73,12 +72,13 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
       authDomain: "ai-signal-75e73.firebaseapp.com",
       projectId: "ai-signal-75e73",
+      databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com",
       storageBucket: "ai-signal-75e73.firebasestorage.app",
       messagingSenderId: "610985325221",
       appId: "1:610985325221:web:09032de2788a18a6ae534c"
@@ -86,7 +86,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db = getDatabase(app);
 
     let confirmationResult;
 
@@ -97,7 +97,6 @@
         });
     };
 
-    // পাসওয়ার্ড দেখানো বা লুকানোর ফাংশন
     window.togglePass = function(id) {
         const input = document.getElementById(id);
         input.type = input.type === "password" ? "text" : "password";
@@ -128,6 +127,7 @@
         document.getElementById("pageTitle").innerText = "Reset Password";
     }
 
+    // রেজিস্ট্রেশন ফাংশন: এখন এটি Realtime Database এ ০ ব্যালেন্সসহ ডাটা সেভ করবে
     window.registerUser = async function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
@@ -139,33 +139,43 @@
         if(!agree) { alert("Please agree to privacy policy"); return; }
 
         try {
-            const userRef = doc(db, "users", phone);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) { alert("Phone already registered!"); return; }
+            const userRef = ref(db, "users/" + phone);
+            const snapshot = await get(userRef);
+            
+            if (snapshot.exists()) { 
+                alert("Phone already registered!"); 
+                return; 
+            }
 
-            await setDoc(userRef, { phone, pass, createdAt: new Date() });
-            alert("Registration Successful!");
+            await set(userRef, { 
+                phone: phone, 
+                pass: pass, 
+                balance: 0, // নতুন একাউন্টে অটো ০ ব্যালেন্স
+                createdAt: new Date().toISOString() 
+            });
+
+            alert("Registration Successful! Now Login.");
             showLogin();
         } catch (e) { alert("Error: " + e.message); }
     }
 
+    // লগইন ফাংশন: এটি ডাটা চেক করবে এবং LocalStorage এ নম্বর সেভ করবে
     window.loginUser = async function() {
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
         
         try {
-            const userRef = doc(db, "users", phone);
-            const userSnap = await getDoc(userRef);
+            const userRef = ref(db, "users/" + phone);
+            const snapshot = await get(userRef);
 
-            if (userSnap.exists() && userSnap.data().pass === pass) {
+            if (snapshot.exists() && snapshot.val().pass === pass) {
                 alert("Login Successful!");
-                // এই দুটি লাইন যোগ করুন
-localStorage.setItem("isLoggedIn", "true");
-localStorage.setItem("loggedUser", phone);
-                
-                // এটি আপনাকে সরাসরি home.html-এ নিয়ে যাবে
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("loggedUser", phone); 
                 window.location.replace("home.html"); 
-            } else { alert("Incorrect Phone or Password"); }
+            } else { 
+                alert("Incorrect Phone or Password"); 
+            }
         } catch (e) { alert("Database Error: " + e.message); }
     }
 
@@ -183,9 +193,10 @@ localStorage.setItem("loggedUser", phone);
         const newPass = document.getElementById("newPass").value;
         const phone = document.getElementById("resetPhone").value.trim();
         if(!confirmationResult) { alert("Send OTP first"); return; }
+        
         confirmationResult.confirm(code).then(async () => {
-            const userRef = doc(db, "users", phone);
-            await updateDoc(userRef, { pass: newPass });
+            const userRef = ref(db, "users/" + phone);
+            await update(userRef, { pass: newPass });
             alert("Password Updated!");
             showLogin();
         }).catch(() => alert("Invalid OTP"));
