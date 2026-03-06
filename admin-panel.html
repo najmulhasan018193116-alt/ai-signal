@@ -37,7 +37,7 @@
         th { background: #f8f9fa; color: #666; }
 
         .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-success { background: #28a745; color: white; }
+        .btn-success { background: #28a745; color: white; margin-right: 5px; }
         .btn-danger { background: #dc3545; color: white; }
         
         .input-group { margin-bottom: 15px; text-align: left; }
@@ -170,7 +170,7 @@
         });
     }
 
-    // --- Deposit Data Loader (With Reject Button) ---
+    // --- Deposit Management with Reject ---
     database.ref('deposits').on('value', snapshot => {
         const depBody = document.getElementById('depositBody');
         const depHist = document.getElementById('depHistoryBody');
@@ -191,6 +191,7 @@
         updateStats();
     });
 
+    // --- Withdraw Management with Reject ---
     database.ref('withdraws').on('value', snapshot => {
         const withBody = document.getElementById('withdrawBody');
         const withHist = document.getElementById('withHistoryBody');
@@ -211,7 +212,7 @@
         updateStats();
     });
 
-    // --- Action Functions ---
+    // --- Logic Functions ---
     function approveDep(id, user, amt) {
         database.ref('users/'+user+'/balance').once('value').then(s => {
             let nBal = (parseFloat(s.val())||0) + parseFloat(amt);
@@ -220,15 +221,10 @@
         });
     }
 
-    // New Deposit Reject Function
     function rejectDep(id) {
         let reason = prompt("রিজেক্ট করার কারণ লিখুন:");
         if(reason) {
-            database.ref('deposits/'+id).update({ 
-                status: "Rejected", 
-                note: reason,
-                time: new Date().toLocaleString() 
-            });
+            database.ref('deposits/'+id).update({ status: "Rejected", note: reason, time: new Date().toLocaleString() });
             alert("Deposit Rejected!");
         }
     }
@@ -256,7 +252,7 @@
         .then(() => alert("Numbers Updated!"));
     }
 
-    database.ref('admin_settings/numbers').once('value', s => {
+    database.ref('admin_settings/numbers').on('value', s => {
         const d = s.val();
         if(d) {
             document.getElementById('setBkash').value = d.bkash || "";
