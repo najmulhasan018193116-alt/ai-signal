@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secure Login & Register</title>
-<style>
-    body { font-family: Arial, sans-serif; background: linear-gradient(135deg,#4facfe,#00f2fe); display: flex; justify-content: center; align-items: center; height: 100vh; margin:0; }
-    .container { width: 350px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
-    .logo { font-size: 50px; margin-bottom: 10px; }
-    .tabs { display: flex; justify-content: space-around; margin-bottom: 20px; }
-    .tabs button { background: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; color: #555; padding: 5px 10px; border-bottom: 2px solid transparent; }
-    .tabs button.active { border-bottom: 2px solid #e52e71; color: #e52e71; }
-    
-    .input-group { position: relative; width: 100%; }
-    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-    .toggle-pass { position: absolute; right: 10px; top: 18px; cursor: pointer; color: #777; font-size: 18px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login & Register</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg,#4facfe,#00f2fe); display: flex; justify-content: center; align-items: center; height: 100vh; margin:0; }
+        .container { width: 350px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
+        .logo { font-size: 50px; margin-bottom: 10px; }
+        .tabs { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .tabs button { background: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; color: #555; padding: 5px 10px; border-bottom: 2px solid transparent; }
+        .tabs button.active { border-bottom: 2px solid #e52e71; color: #e52e71; }
+        
+        .input-group { position: relative; width: 100%; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        .toggle-pass { position: absolute; right: 10px; top: 18px; cursor: pointer; color: #777; font-size: 18px; }
 
-    button.main { width: 100%; padding: 12px; border: none; border-radius: 25px; background: linear-gradient(90deg,#ff8a00,#e52e71); color: white; font-size: 16px; cursor: pointer; margin-top: 10px; }
-    .hidden { display: none; }
-    p { cursor: pointer; color: #ff8a00; margin-top: 15px; font-size: 14px; }
-    #recaptcha-container { margin: 10px 0; }
-</style>
+        button.main { width: 100%; padding: 12px; border: none; border-radius: 25px; background: linear-gradient(90deg,#ff8a00,#e52e71); color: white; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .hidden { display: none; }
+        p { cursor: pointer; color: #ff8a00; margin-top: 15px; font-size: 14px; }
+        #recaptcha-container { margin: 10px 0; }
+    </style>
 </head>
 <body>
 
@@ -74,7 +74,7 @@
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    // আপনার Firebase কনফিগারেশন
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
       authDomain: "ai-signal-75e73.firebaseapp.com",
@@ -91,12 +91,7 @@
 
     let confirmationResult;
 
-    window.onload = function() {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'normal'
-        });
-    };
-
+    // UI Toggle functions
     window.togglePass = function(id) {
         const input = document.getElementById(id);
         input.type = input.type === "password" ? "text" : "password";
@@ -120,44 +115,102 @@
         document.getElementById("regTab").classList.remove("active");
     }
 
+    window.showReset = function() {
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("registerPage").classList.add("hidden");
+        document.getElementById("resetPage").classList.remove("hidden");
+        document.getElementById("pageTitle").innerText = "Reset Password";
+    }
+
+    // --- Firebase Logic Starts Here ---
+
+    // Login Function
     window.loginUser = async function() {
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
         
+        if(!phone || !pass) { alert("Please enter phone and password"); return; }
+
         try {
             const userRef = ref(db, "users/" + phone);
             const snapshot = await get(userRef);
 
             if (snapshot.exists() && snapshot.val().pass === pass) {
-                alert("Login Successful!");
-                
-                // --- MLM SYSTEM এর জন্য লোকাল স্টোরেজ আপডেট ---
-                localStorage.setItem("userPhone", phone); 
+                // সেশন ডাটা সেভ করা
                 localStorage.setItem("isLoggedIn", "true");
-                
-                // আপনার ড্যাশবোর্ড পেজ (যদি home.html হয়)
-                window.location.replace("home.html"); 
+                localStorage.setItem("loggedUser", phone); 
+                localStorage.setItem("userPhone", phone); 
+
+                alert("Login Successful!");
+                window.location.href = "home.html"; 
             } else { 
                 alert("Incorrect Phone or Password"); 
             }
-        } catch (e) { alert("Database Error: " + e.message); }
+        } catch (e) { 
+            console.error(e);
+            alert("Database Error: " + e.message); 
+        }
     }
 
-    // রেজিস্ট্রেশন এবং পাসওয়ার্ড রিসেট ফাংশনগুলো অপরিবর্তিত রাখা হয়েছে...
+    // Register Function
     window.registerUser = async function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
         let confirm = document.getElementById("regConfirm").value;
-        if(phone.length < 11) { alert("Invalid Phone"); return; }
-        if(pass !== confirm) { alert("Mismatch!"); return; }
+        let agree = document.getElementById("agree").checked;
+
+        if(phone.length < 11) { alert("Invalid Phone Number"); return; }
+        if(pass !== confirm) { alert("Passwords do not match"); return; }
+        if(!agree) { alert("Please agree to privacy policy"); return; }
 
         try {
             const userRef = ref(db, "users/" + phone);
-            await set(userRef, { phone, pass, balance: 0, createdAt: new Date().toISOString() });
-            alert("Registered!"); showLogin();
-        } catch (e) { alert(e.message); }
+            const checkUser = await get(userRef);
+            if(checkUser.exists()) { alert("User already registered!"); return; }
+
+            await set(userRef, { 
+                phone: phone, 
+                pass: pass, 
+                balance: 0, 
+                createdAt: new Date().toISOString() 
+            });
+
+            alert("Registration Successful! Now Login.");
+            showLogin();
+        } catch (e) { alert("Error: " + e.message); }
     }
+
+    // OTP and Password Reset
+    window.sendOTP = function() {
+        let phoneField = document.getElementById("resetPhone").value.trim();
+        if(!phoneField) { alert("Enter phone number first"); return; }
+        const phoneNumber = "+88" + phoneField;
+        signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
+            .then((result) => { confirmationResult = result; alert("OTP Sent!"); })
+            .catch((error) => { alert("Error: " + error.message); });
+    }
+
+    window.resetPassword = function() {
+        const code = document.getElementById("otpInput").value.trim();
+        const newPass = document.getElementById("newPass").value;
+        const phone = document.getElementById("resetPhone").value.trim();
+        if(!confirmationResult) { alert("Send OTP first"); return; }
+        
+        confirmationResult.confirm(code).then(async () => {
+            const userRef = ref(db, "users/" + phone);
+            await update(userRef, { pass: newPass });
+            alert("Password Updated!");
+            showLogin();
+        }).catch(() => alert("Invalid OTP"));
+    }
+
+    // Initializing Recaptcha on Load
+    window.onload = function() {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'normal'
+        });
+    };
 </script>
+
 </body>
-    </html>
-    
+</html>
