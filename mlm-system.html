@@ -44,16 +44,16 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
-        // লগইন চেক
+        // ১. সেশন চেক: ইউজার লগইন না থাকলে ইনডেক্স পেজে পাঠিয়ে দেবে
         const userPhone = localStorage.getItem("userPhone");
         if (!userPhone) {
-            alert("Session expired. Please login again.");
-            window.location.href = "index.html";
+            alert("Security Alert: Please login first!");
+            window.location.replace("index.html");
         }
 
-        // ডাটা লোড করা
+        // ২. ডাটা লোড ফাংশন (এডমিন প্যানেলের সাথে সরাসরি কানেক্টেড)
         function initApp() {
-            // ব্যালেন্স আপডেট
+            // ব্যালেন্স রিয়েল-টাইম আপডেট
             database.ref('users/' + userPhone).on('value', snapshot => {
                 const userData = snapshot.val();
                 if(userData) {
@@ -61,12 +61,12 @@
                 }
             });
 
-            // প্যাকেজ লোড
+            // প্যাকেজ রিয়েল-টাইম লোড (এডমিন যা সেট করবেন তাই এখানে দেখাবে)
             database.ref('packages').on('value', snapshot => {
                 const display = document.getElementById('packageDisplay');
                 display.innerHTML = "";
                 if(!snapshot.exists()) {
-                    display.innerHTML = "<p style='text-align:center;'>No plans available now.</p>";
+                    display.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>No plans available now.</p>";
                     return;
                 }
                 snapshot.forEach(child => {
@@ -85,35 +85,35 @@
                 });
             });
 
-            // অটো ইনকাম চেক
+            // প্রতিদিনের অটো-ইনকাম চেক করা
             checkDailyIncome();
         }
 
-        // প্যাকেজ ক্রয় লজিক
+        // ৩. প্যাকেজ কেনার লজিক
         window.buyPackage = function(pkgId, price, daily, validity) {
             database.ref('users/' + userPhone).once('value', snapshot => {
                 const balance = snapshot.val().balance || 0;
                 if(balance >= price) {
-                    if(confirm(`Confirm purchase of ${price} Taka plan?`)) {
+                    if(confirm(`আপনি কি ৳ ${price} দিয়ে এই প্ল্যানটি কিনতে চান?`)) {
                         const startTime = Date.now();
-                        // ব্যালেন্স কমানো
+                        // ইউজার ব্যালেন্স থেকে টাকা কেটে নেওয়া
                         database.ref('users/' + userPhone).update({ balance: balance - price });
-                        // সাবস্ক্রিপশন রেকর্ড
+                        // সাবস্ক্রিপশন রেকর্ড সেভ করা
                         database.ref('user_subscriptions/' + userPhone + '/' + pkgId).set({
                             daily_income: daily,
                             last_claim: startTime,
                             expire_time: startTime + (validity * 24 * 60 * 60 * 1000),
                             status: "active"
                         });
-                        alert("Plan activated! Your income will start automatically.");
+                        alert("অভিনন্দন! প্ল্যানটি সফলভাবে একটিভ হয়েছে।");
                     }
                 } else {
-                    alert("Insufficient Balance! Please deposit first.");
+                    alert("আপনার ব্যালেন্স যথেষ্ট নয়। দয়া করে রিচার্জ করুন।");
                 }
             });
         }
 
-        // অটোমেটিক ইনকাম ক্যালকুলেশন
+        // ৪. অটোমেটিক ইনকাম ক্যালকুলেশন লজিক
         function checkDailyIncome() {
             database.ref('user_subscriptions/' + userPhone).once('value', snapshot => {
                 snapshot.forEach(pkg => {
@@ -121,13 +121,14 @@
                     const now = Date.now();
                     const oneDay = 24 * 60 * 60 * 1000;
 
+                    // যদি এক্সপায়ার না হয় এবং ২৪ ঘণ্টা পার হয়
                     if (now < data.expire_time && (now - data.last_claim) >= oneDay) {
                         const daysToPay = Math.floor((now - data.last_claim) / oneDay);
                         const totalBonus = daysToPay * data.daily_income;
 
-                        // ব্যালেন্স বাড়ানো
+                        // ইউজারের মূল ব্যালেন্স বাড়ানো
                         database.ref('users/' + userPhone + '/balance').transaction(current => (current || 0) + totalBonus);
-                        // লাস্ট ক্লেইম আপডেট
+                        // শেষ ইনকাম নেওয়ার সময় আপডেট করা
                         database.ref('user_subscriptions/' + userPhone + '/' + pkg.key).update({
                             last_claim: data.last_claim + (daysToPay * oneDay)
                         });
@@ -136,6 +137,7 @@
             });
         }
 
+        // অ্যাপ্লিকেশন চালু করা
         initApp();
     </script>
 </body>
