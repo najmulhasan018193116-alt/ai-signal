@@ -16,17 +16,9 @@
         .header h3 { font-size: 18px; font-weight: 600; }
         .header a { color: #333; text-decoration: none; }
 
-        .balance-card {
-            background: linear-gradient(135deg, #FFD700, #FDB931);
-            margin: 15px; padding: 25px; border-radius: 16px; color: #222;
-            box-shadow: 0 8px 20px rgba(253, 185, 49, 0.3);
-        }
-        .balance-card h2 { font-size: 32px; margin-top: 5px; font-weight: 700; }
-
         .container { padding: 0 15px; }
         .section-title { font-size: 15px; font-weight: 700; margin: 20px 0 12px; color: #444; display: flex; align-items: center; gap: 8px; }
 
-        /* পেমেন্ট মেথড বাটনগুলো - ৪টি অপশন */
         .methods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .method-card {
             background: white; padding: 12px 5px; border-radius: 12px;
@@ -72,11 +64,6 @@
         <a href="history.html" style="font-size: 13px; color: #666;">Deposit history</a>
     </div>
 
-    <div class="balance-card">
-        <p><i class="fas fa-wallet"></i> Total Balance</p>
-        <h2>৳ <span id="currentBalance">24.57</span></h2>
-    </div>
-
     <div class="container">
         <p class="section-title"><i class="fas fa-university" style="color: #FDB931;"></i> Select Method</p>
         <div class="methods">
@@ -117,6 +104,10 @@
                 <label>আপনার নম্বর দিন</label>
                 <input type="number" id="userNumber" placeholder="যে নম্বর থেকে পাঠাবেন" oninput="validateForm()">
             </div>
+            <div class="input-box">
+                <label>Transaction ID (TrxID)</label>
+                <input type="text" id="trxID" placeholder="TrxID এখানে দিন" oninput="validateForm()">
+            </div>
         </div>
     </div>
 
@@ -125,10 +116,26 @@
             <p>Method:</p>
             <b id="selectedMethodDisplay">Nagad Fast</b>
         </div>
-        <button id="depositBtn" class="submit-btn" onclick="goToPayment()" disabled>Deposit</button>
+        <button id="depositBtn" class="submit-btn" onclick="sendDepositRequest()" disabled>Deposit</button>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script>
+        // আপনার ফায়ারবেস কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+            authDomain: "ai-signal-75e73.firebaseapp.com",
+            projectId: "ai-signal-75e73",
+            databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com",
+            storageBucket: "ai-signal-75e73.firebasestorage.app",
+            messagingSenderId: "610985325221",
+            appId: "1:610985325221:web:09032de2788a18a6ae534c"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let selectedMethod = "Nagad";
 
         function selectMethod(el, m) {
@@ -149,8 +156,10 @@
         function validateForm() {
             const amt = document.getElementById('amountInput').value;
             const num = document.getElementById('userNumber').value;
+            const trx = document.getElementById('trxID').value;
             const btn = document.getElementById('depositBtn');
-            if(amt >= 100 && amt <= 25000 && num.length >= 11) {
+            
+            if(amt >= 100 && num.length >= 11 && trx.length >= 6) {
                 btn.classList.add('active');
                 btn.disabled = false;
             } else {
@@ -159,11 +168,31 @@
             }
         }
 
-        function goToPayment() {
-            localStorage.setItem("dep_amt", document.getElementById('amountInput').value);
-            localStorage.setItem("dep_method", selectedMethod);
-            localStorage.setItem("user_num", document.getElementById('userNumber').value);
-            window.location.href = "payment_details.html";
+        // অটোমেটিক ডিপোজিট ফাংশন
+        function sendDepositRequest() {
+            const loggedUser = localStorage.getItem("loggedUser"); 
+            const amount = document.getElementById("amountInput").value;
+            const trxID = document.getElementById("trxID").value;
+            const senderNumber = document.getElementById("userNumber").value; 
+
+            if (loggedUser && amount && trxID) {
+                database.ref('deposits').push({
+                    user: loggedUser, // অ্যাডমিন প্যানেল এই আইডিতে টাকা যোগ করবে
+                    sender_no: senderNumber, 
+                    amount: amount,
+                    method: selectedMethod,
+                    trxID: trxID,
+                    status: "Pending",
+                    time: new Date().toLocaleString()
+                }).then(() => {
+                    alert("আপনার ডিপোজিট রিকোয়েস্ট পেন্ডিং আছে। অ্যাডমিন অ্যাপ্রুভ করলে ব্যালেন্স যোগ হবে।");
+                    window.location.href = "history.html"; // হিস্ট্রি পেজে নিয়ে যাবে
+                }).catch((error) => {
+                    alert("ভুল হয়েছে: " + error.message);
+                });
+            } else {
+                alert("অনুগ্রহ করে আগে লগইন করুন এবং সব ঘর পূরণ করুন।");
+            }
         }
     </script>
 </body>
