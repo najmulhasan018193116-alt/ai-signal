@@ -159,6 +159,10 @@
 
             if (userSnap.exists() && userSnap.data().pass === pass) {
                 alert("Login Successful!");
+                // এই দুটি লাইন যোগ করুন
+localStorage.setItem("isLoggedIn", "true");
+localStorage.setItem("loggedUser", phone);
+                
                 // এটি আপনাকে সরাসরি home.html-এ নিয়ে যাবে
                 window.location.replace("home.html"); 
             } else { alert("Incorrect Phone or Password"); }
