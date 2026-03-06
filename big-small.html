@@ -10,9 +10,7 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background: var(--dx-bg); overflow-x: hidden; }
 
-        /* Title Updated to Big Small Lottery Game */
         .header-box { background: var(--dx-yellow); padding: 15px; text-align: center; font-weight: bold; font-size: 18px; color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
         .wallet-card { background: white; margin: -10px 15px 20px; padding: 20px; text-align: center; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .wallet-card h2 { font-size: 30px; color: #333; }
 
@@ -116,7 +114,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // আপনার নিজের Firebase Config এখানে বসান
         const firebaseConfig = { apiKey: "YOUR_API_KEY", databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -129,7 +126,6 @@
         let gameData = [];
         let myData = [];
 
-        // Balance Update
         db.ref('users/' + userPhone + '/balance').on('value', s => {
             document.getElementById('balanceDisplay').innerText = parseFloat(s.val() || 0).toFixed(2);
         });
@@ -152,22 +148,15 @@
             document.getElementById('lockOverlay').style.display = (remain <= 5) ? 'flex' : 'none';
         }
 
-        // Improved Balanced Randomness to prevent long streaks
         function processResult(pid) {
             const num = Math.floor(Math.random() * 10);
             const size = (num >= 5) ? "Big" : "Small";
             const color = (num === 0 || num === 5) ? "Violet" : ([1,3,7,9].includes(num) ? "Green" : "Red");
 
-            // Save result to DB
             db.ref('history/' + currentMode + '/' + pid).set({ 
-                id: pid, 
-                num: num, 
-                size: size, 
-                color: color, 
-                time: Date.now() 
+                id: pid, num: num, size: size, color: color, time: Date.now() 
             });
 
-            // Bet Settlement
             db.ref('user_bets/' + userPhone).orderByChild('period').equalTo(pid).once('value', s => {
                 s.forEach(snap => {
                     const bet = snap.val();
@@ -192,22 +181,21 @@
             setTimeout(() => p.style.display = 'none', 3000);
         }
 
+        // --- UPDATED LOAD DATA (Limit to 10) ---
         function loadData() {
-            // Game History Listener
             db.ref('history/' + currentMode).off();
-            db.ref('history/' + currentMode).orderByChild('time').limitToLast(15).on('value', s => {
+            db.ref('history/' + currentMode).orderByChild('time').limitToLast(10).on('value', s => {
                 gameData = [];
                 s.forEach(c => { 
                     let d = c.val();
-                    if(d.id) gameData.push(d); // Prevent undefined IDs
+                    if(d.id) gameData.push(d); 
                 });
                 gameData.reverse();
                 if(historyView === 'game') renderTable();
             });
 
-            // My Bet History Listener
             db.ref('user_bets/' + userPhone).off();
-            db.ref('user_bets/' + userPhone).limitToLast(15).on('value', s => {
+            db.ref('user_bets/' + userPhone).limitToLast(10).on('value', s => {
                 myData = [];
                 s.forEach(c => { 
                     let b = c.val();
@@ -225,6 +213,7 @@
             renderTable();
         }
 
+        // --- UPDATED RENDER TABLE (Fixed to 10 rows) ---
         function renderTable() {
             const head = document.getElementById('tableHead');
             const body = document.getElementById('tableBody');
@@ -232,13 +221,13 @@
             
             if(historyView === 'game') {
                 head.innerHTML = `<tr><th>Period</th><th>Number</th><th>Size</th><th>Color</th></tr>`;
-                gameData.forEach(d => {
+                gameData.slice(0, 10).forEach(d => {
                     let cls = d.color === "Green" ? "bg-green" : (d.color === "Red" ? "bg-red" : "bg-violet");
                     body.innerHTML += `<tr><td>...${String(d.id).slice(-4)}</td><td><span class="res-num ${cls}">${d.num}</span></td><td class="${d.size=='Big'?'txt-big':'txt-small'}">${d.size}</td><td><div class="res-num ${cls}" style="width:10px; height:10px;"></div></td></tr>`;
                 });
             } else {
                 head.innerHTML = `<tr><th>Period</th><th>Choice</th><th>Amount</th><th>Status</th></tr>`;
-                myData.forEach(d => {
+                myData.slice(0, 10).forEach(d => {
                     body.innerHTML += `<tr><td>...${String(d.period).slice(-4)}</td><td class="${d.choice=='Big'?'txt-big':'txt-small'}">${d.choice}</td><td>৳${d.amount}</td><td class="status-${d.status.toLowerCase()}">${d.status}</td></tr>`;
                 });
             }
