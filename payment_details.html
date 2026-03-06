@@ -76,7 +76,7 @@
             <div class="trx-section">
                 <label>সম্পূর্ণ করতে দয়া করে TxnID লিখুন</label>
                 <input type="text" id="trxID" class="trx-input" placeholder="Transaction ID এখানে দিন">
-                <button class="submit-btn" onclick="saveToFirebase()">জমা দিন</button>
+                <button class="submit-btn" id="submitBtn" onclick="saveToFirebase()">জমা দিন</button>
             </div>
         </div>
 
@@ -115,17 +115,14 @@
             alert("কপি হয়েছে!");
         }
 
-        // আপনার কাঙ্ক্ষিত নতুন ফাংশন
+        // ডুপ্লিকেট TrxID চেকসহ নতুন ফাংশন
         function saveToFirebase() {
-            // ১. লগইন করা ইউজারের আইডি (যার অ্যাকাউন্টে টাকা জমা হবে)
             const loggedUser = localStorage.getItem("loggedUser"); 
-            
-            // ২. যে নম্বর থেকে টাকা পাঠানো হয়েছে (যেকোনো নম্বর হতে পারে)
             const senderNo = localStorage.getItem("user_num"); 
-            
-            const trx = document.getElementById("trxID").value;
+            const trx = document.getElementById("trxID").value.trim();
             const amt = localStorage.getItem("dep_amt");
             const method = localStorage.getItem("dep_method");
+            const btn = document.getElementById("submitBtn");
 
             if(!loggedUser) {
                 alert("ত্রুটি: আপনি লগইন করা নেই। দয়া করে লগইন করুন।");
@@ -137,19 +134,36 @@
                 return;
             }
 
-            // ডাটাবেসে রিকোয়েস্ট পাঠানো
-            database.ref('deposits/').push({
-                user: loggedUser,      // এটিই মেইন আইডি, যা অ্যাডমিন প্যানেল ব্যালেন্স যোগ করতে ব্যবহার করবে
-                sender_no: senderNo,   // এটি শুধু আপনার দেখার জন্য, কোন নম্বর থেকে টাকা এসেছে
-                amount: amt,
-                method: method,
-                trxID: trx,
-                status: "Pending",
-                time: new Date().toLocaleString()
-            }).then(() => {
-                alert("আপনার ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
-                window.location.href = "account.html";
-            }).catch((err) => alert("ভুল হয়েছে: " + err.message));
+            // বাটন ডিজেবল করা যাতে কেউ বারবার ক্লিক করতে না পারে
+            btn.disabled = true;
+            btn.innerText = "যাচাই করা হচ্ছে...";
+
+            // ডাটাবেসে এই TrxID আগে থেকে আছে কি না চেক করা
+            database.ref('deposits').orderByChild('trxID').equalTo(trx).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    alert("এই Transaction ID টি ইতিমধ্যে ব্যবহার করা হয়েছে! দয়া করে সঠিক ID দিন।");
+                    btn.disabled = false;
+                    btn.innerText = "জমা দিন";
+                } else {
+                    // যদি নতুন আইডি হয় তবে ডাটাবেসে সেভ হবে
+                    database.ref('deposits/').push({
+                        user: loggedUser,      
+                        sender_no: senderNo,   
+                        amount: amt,
+                        method: method,
+                        trxID: trx,
+                        status: "Pending",
+                        time: new Date().toLocaleString()
+                    }).then(() => {
+                        alert("আপনার ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
+                        window.location.href = "account.html";
+                    }).catch((err) => {
+                        alert("ভুল হয়েছে: " + err.message);
+                        btn.disabled = false;
+                        btn.innerText = "জমা দিন";
+                    });
+                }
+            });
         }
     </script>
 </body>
