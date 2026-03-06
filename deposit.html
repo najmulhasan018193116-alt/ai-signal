@@ -3,40 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Deposit - ai-signal</title>
+    <title>Deposit - ai-signal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #F4F6F9; color: #333; padding-bottom: 30px; }
+        body { background: #F4F6F9; color: #333; padding-bottom: 90px; }
 
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: white; border-bottom: 1px solid #eee; }
-        .header h3 { font-size: 18px; }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; background: white; border-bottom: 1px solid #eee;
+        }
+        .header h3 { font-size: 18px; font-weight: 600; }
         .header a { color: #333; text-decoration: none; }
 
-        .container { padding: 15px; }
-        .section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #444; }
+        /* ব্যালেন্স কার্ড অংশটি ডিলিট করা হয়েছে */
 
-        /* পেমেন্ট মেথড */
+        .container { padding: 0 15px; }
+        .section-title { font-size: 15px; font-weight: 700; margin: 20px 0 12px; color: #444; display: flex; align-items: center; gap: 8px; }
+
         .methods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
-        .method-card { background: white; padding: 12px 5px; border-radius: 12px; text-align: center; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .method-card {
+            background: white; padding: 12px 5px; border-radius: 12px;
+            text-align: center; border: 2px solid transparent; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); transition: 0.3s;
+        }
         .method-card img { width: 35px; height: 35px; margin-bottom: 6px; border-radius: 6px; object-fit: contain; }
         .method-card p { font-size: 11px; font-weight: 700; color: #555; }
-        .method-card.active { border-color: #f37021; background: #FFF9E7; }
+        .method-card.active { border-color: #FDB931; background: #FFF9E7; }
 
-        /* পেমেন্ট ডিটেইলস কার্ড */
-        .payment-info-box { background: #f37021; color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; }
-        .payment-info-box p { font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
-        .number-display { background: white; color: #333; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .copy-btn { color: #f37021; cursor: pointer; font-size: 16px; }
+        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .amount-chip {
+            background: white; padding: 12px; border-radius: 10px; text-align: center;
+            font-weight: 600; color: #666; border: 1.5px solid #eee; cursor: pointer;
+        }
+        .amount-chip.active { background: #FFF4CC; border-color: #FDB931; color: #856404; }
 
-        /* ইনপুট ফর্ম */
         .input-group { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .input-box { margin-bottom: 15px; }
         .input-box label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
-        .input-box input { width: 100%; padding: 14px; border: 1px solid #EAEAEA; border-radius: 10px; outline: none; font-size: 16px; background: #FAFAFA; }
+        .input-box input {
+            width: 100%; padding: 14px; border: 1px solid #EAEAEA; border-radius: 10px;
+            outline: none; font-size: 16px; background: #FAFAFA;
+        }
 
-        .submit-btn { width: 100%; background: #f37021; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .submit-btn:disabled { background: #E0E0E0; cursor: not-allowed; }
+        .deposit-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 15px 20px; border-top: 1px solid #EEE;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .submit-btn {
+            background: #E0E0E0; color: #AAA; border: none; padding: 14px 40px;
+            border-radius: 10px; font-weight: 700; cursor: pointer;
+        }
+        .submit-btn.active { background: #FDB931; color: #222; }
     </style>
 </head>
 <body>
@@ -44,108 +63,97 @@
     <div class="header">
         <a href="account.html"><i class="fas fa-chevron-left"></i></a>
         <h3>Deposit</h3>
-        <a href="history.html" style="font-size: 13px; color: #666;">History</a>
+        <a href="history.html" style="font-size: 13px; color: #666;">Deposit history</a>
     </div>
 
     <div class="container">
-        <p class="section-title">Select Payment Method</p>
+        <p class="section-title"><i class="fas fa-university" style="color: #FDB931;"></i> Select Method</p>
         <div class="methods">
-            <div class="method-card active" onclick="updateInfo('Nagad', '01922007430', 'Cash Out')">
+            <div class="method-card active" onclick="selectMethod(this, 'Nagad')">
                 <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Nagad_Logo.svg/1200px-Nagad_Logo.svg.png" alt="Nagad">
                 <p>Nagad</p>
             </div>
-            <div class="method-card" onclick="updateInfo('bKash', '017XXXXXXXX', 'Send Money')">
+            <div class="method-card" onclick="selectMethod(this, 'bKash')">
                 <img src="https://itshamsul.com/wp-content/uploads/2024/02/bkash-logo-circle.png" alt="bKash">
                 <p>bKash</p>
             </div>
-            <div class="method-card" onclick="updateInfo('Rocket', '018XXXXXXXX', 'Send Money')">
+            <div class="method-card" onclick="selectMethod(this, 'Rocket')">
                 <img src="https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D1CC458D-seeklogo.com.png" alt="Rocket">
                 <p>Rocket</p>
             </div>
-            <div class="method-card" onclick="updateInfo('USDT', 'Your_Wallet_Address', 'Transfer')">
+            <div class="method-card" onclick="selectMethod(this, 'USDT')">
                 <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
                 <p>USDT</p>
             </div>
         </div>
 
-        <div class="payment-info-box">
-            <p id="instructionText">অনুগ্রহ করে নিচের নগদ এজেন্ট অ্যাকাউন্টে অর্থ প্রদান করতে <b>Cash Out</b> ব্যবহার করুন</p>
-            <div class="number-display">
-                <span id="targetNumber">01922007430</span>
-                <i class="far fa-copy copy-btn" onclick="copyNum()"></i>
-            </div>
-            <p>সম্পূর্ণ করতে আপনার TrxID এবং অ্যামাউন্ট লিখুন</p>
+        <p class="section-title"><i class="fas fa-coins" style="color: #FDB931;"></i> Amount</p>
+        <div class="amount-grid">
+            <div class="amount-chip" onclick="setAmount(this, 100)">৳100</div>
+            <div class="amount-chip" onclick="setAmount(this, 500)">৳500</div>
+            <div class="amount-chip" onclick="setAmount(this, 1000)">৳1000</div>
+            <div class="amount-chip" onclick="setAmount(this, 3000)">৳3000</div>
+            <div class="amount-chip" onclick="setAmount(this, 5000)">৳5000</div>
+            <div class="amount-chip" onclick="setAmount(this, 10000)">৳10000</div>
         </div>
 
         <div class="input-group">
             <div class="input-box">
-                <label>অ্যামাউন্ট (পরিমাণ)</label>
-                <input type="number" id="amountInput" placeholder="100" oninput="validate()">
+                <label>অ্যামাউন্ট (৳১০০ - ৳২৫,০০০)</label>
+                <input type="number" id="amountInput" placeholder="পরিমাণ লিখুন" oninput="validateForm()">
             </div>
             <div class="input-box">
-                <label>Transaction ID (TrxID)</label>
-                <input type="text" id="trxID" placeholder="TrxID এখানে দিন" oninput="validate()">
+                <label>আপনার নম্বর দিন</label>
+                <input type="number" id="userNumber" placeholder="যে নম্বর থেকে পাঠাবেন" oninput="validateForm()">
             </div>
-            <button id="depositBtn" class="submit-btn" onclick="sendDeposit()" disabled>জমা দিন</button>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <div class="deposit-footer">
+        <div class="recharge-info">
+            <p>Method:</p>
+            <b id="selectedMethodDisplay">Nagad Fast</b>
+        </div>
+        <button id="depositBtn" class="submit-btn" onclick="goToPayment()" disabled>Deposit</button>
+    </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
-            authDomain: "ai-signal-75e73.firebaseapp.com",
-            projectId: "ai-signal-75e73",
-            databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com",
-            appId: "1:610985325221:web:09032de2788a18a6ae534c"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        let selectedMethod = "Nagad";
 
-        let currentMethod = "Nagad";
-
-        function updateInfo(method, number, type) {
+        function selectMethod(el, m) {
             document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            currentMethod = method;
-            document.getElementById('targetNumber').innerText = number;
-            document.getElementById('instructionText').innerHTML = `অনুগ্রহ করে নিচের ${method} অ্যাকাউন্টে অর্থ প্রদান করতে <b>${type}</b> ব্যবহার করুন`;
+            el.classList.add('active');
+            selectedMethod = m;
+            document.getElementById('selectedMethodDisplay').innerText = m + " Fast";
+            validateForm();
         }
 
-        function copyNum() {
-            const num = document.getElementById('targetNumber').innerText;
-            navigator.clipboard.writeText(num);
-            alert("Number Copied: " + num);
+        function setAmount(el, val) {
+            document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('amountInput').value = val;
+            validateForm();
         }
 
-        function validate() {
+        function validateForm() {
             const amt = document.getElementById('amountInput').value;
-            const trx = document.getElementById('trxID').value;
+            const num = document.getElementById('userNumber').value;
             const btn = document.getElementById('depositBtn');
-            btn.disabled = !(amt >= 100 && trx.length >= 6);
+            if(amt >= 100 && amt <= 25000 && num.length >= 11) {
+                btn.classList.add('active');
+                btn.disabled = false;
+            } else {
+                btn.classList.remove('active');
+                btn.disabled = true;
+            }
         }
 
-        function sendDeposit() {
-            const loggedUser = localStorage.getItem("loggedUser");
-            const amt = document.getElementById('amountInput').value;
-            const trx = document.getElementById('trxID').value;
-
-            if (!loggedUser) { alert("Please Login First!"); return; }
-
-            database.ref('deposits').push({
-                user: loggedUser,
-                amount: amt,
-                method: currentMethod,
-                trxID: trx,
-                status: "Pending", // অ্যাডমিন প্যানেলে এটি Pending দেখাবে
-                time: new Date().toLocaleString()
-            }).then(() => {
-                alert("আপনার ডিপোজিট রিকোয়েস্ট জমা হয়েছে। অপেক্ষা করুন।");
-                window.location.href = "history.html"; // হিস্ট্রি পেজে রিডাইরেক্ট
-            });
+        function goToPayment() {
+            // তথ্যগুলো সেভ করে পেমেন্ট ডিটেইলস পেজে পাঠিয়ে দিচ্ছে
+            localStorage.setItem("dep_amt", document.getElementById('amountInput').value);
+            localStorage.setItem("dep_method", selectedMethod);
+            localStorage.setItem("user_num", document.getElementById('userNumber').value);
+            window.location.href = "payment_details.html"; 
         }
     </script>
 </body>
