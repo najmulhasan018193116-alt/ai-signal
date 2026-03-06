@@ -261,6 +261,7 @@
                     document.getElementById("profileDisplay").innerHTML = `<img src="${savedImg}" style="width:100%;height:100%;">`;
                 }
 
+                // পেজ লোড হওয়ার সময় ব্যালেন্স রিড করবে
                 fetchBalance();
             } else {
                 window.location.replace("index.html");
@@ -278,18 +279,25 @@
             }
         }
 
-        // রিফ্রেশ ফাংশন
+        // রিফ্রেশ ফাংশন - যা ডাটাবেসের নির্দিষ্ট ইউজারের ব্যালেন্স রিড করবে
         function fetchBalance() {
+            const loggedUser = localStorage.getItem("loggedUser");
             const refreshBtn = document.querySelector('.refresh-icon');
-            refreshBtn.classList.add('fa-spin'); // রিফ্রেশ করার সময় আইকন ঘুরবে
             
-            database.ref('users/balance').once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const balance = snapshot.val();
-                    document.getElementById('userBalanceDisplay').innerText = parseFloat(balance).toFixed(2);
-                }
-                setTimeout(() => { refreshBtn.classList.remove('fa-spin'); }, 1000);
-            });
+            if (loggedUser) {
+                if(refreshBtn) refreshBtn.classList.add('fa-spin');
+
+                // ডাটাবেস পাথ ঠিক করা হয়েছে (users/phone/balance)
+                database.ref('users/' + loggedUser + '/balance').once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const balance = snapshot.val();
+                        document.getElementById('userBalanceDisplay').innerText = parseFloat(balance).toFixed(2);
+                    } else {
+                        document.getElementById('userBalanceDisplay').innerText = "0.00";
+                    }
+                    if(refreshBtn) setTimeout(() => { refreshBtn.classList.remove('fa-spin'); }, 1000);
+                });
+            }
         }
 
         function copyUserID() {
