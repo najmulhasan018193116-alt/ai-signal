@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DX Win - Professional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --dx-gold: #ffc107;
+            --dx-bg: #f7f8fc;
+            --big: #ff9800;
+            --small: #2196f3;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
+        body { background: var(--dx-bg); }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--dx-gold), #ffdb70);
+            padding: 30px 20px; text-align: center;
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+        }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; padding: 15px; background: #fff; margin: 10px; border-radius: 15px; }
+        .tab { flex: 1; padding: 10px; background: #f0f1f7; border-radius: 10px; text-align: center; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .tab.active { background: var(--dx-gold); font-weight: bold; box-shadow: 0 2px 8px rgba(255,193,7,0.4); }
+
+        /* Info Card */
+        .info-card {
+            margin: 10px; padding: 15px; background: #fff;
+            border-radius: 15px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #eee;
+        }
+        .timer-box h3 { font-size: 28px; color: #333; }
+
+        /* Controls */
+        .controls { display: flex; gap: 10px; padding: 15px; position: relative; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-big { background: var(--big); box-shadow: 0 4px 10px rgba(255,152,0,0.3); }
+        .btn-small { background: var(--small); box-shadow: 0 4px 10px rgba(33,150,243,0.3); }
+        .btn:active { transform: scale(0.95); }
+
+        /* Floating Button for My History */
+        .history-trigger {
+            position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+            background: var(--dx-gold); padding: 15px 10px;
+            border-radius: 20px 0 0 20px; cursor: pointer; z-index: 100;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1); font-weight: bold;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed; right: -100%; top: 0; width: 85%; height: 100%;
+            background: #fff; z-index: 200; transition: 0.4s; padding: 20px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+        }
+        .side-panel.open { right: 0; }
+        .close-panel { margin-bottom: 20px; font-size: 20px; cursor: pointer; color: #f44336; }
+
+        /* Table Styles */
+        .table-container { background: #fff; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        th { background: #f8f9fa; padding: 12px; border-bottom: 2px solid #eee; }
+        td { padding: 12px; border-bottom: 1px solid #f1f1f1; }
+
+        .res-num-ball { width: 24px; height: 24px; border-radius: 50%; display: inline-block; color: #fff; line-height: 24px; font-weight: bold; }
+        .status-win { color: #4caf50; font-weight: bold; }
+        .status-loss { color: #f44336; font-weight: bold; }
+
+        /* Waiting Overlay */
+        .waiting-overlay {
+            display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.8);
+            z-index: 5; align-items: center; justify-content: center; color: red; font-weight: bold; border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <p>Wallet Balance</p>
+        <h2>৳ <span id="balance">0.00</span></h2>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="setMode(30)">30s</div>
+        <div class="tab" onclick="setMode(60)">1m</div>
+        <div class="tab" onclick="setMode(180)">3m</div>
+        <div class="tab" onclick="setMode(300)">5m</div>
+    </div>
+
+    <div class="info-card">
+        <div><p style="color: #888;">Period ID</p><h4 id="periodId">Syncing...</h4></div>
+        <div class="timer-box"><p style="color: #888; text-align: right;">Time Left</p><h3 id="timer">00:00</h3></div>
+    </div>
+
+    <div class="controls">
+        <div id="waitMsg" class="waiting-overlay">Please Wait...</div>
+        <button class="btn btn-big" onclick="openBet('Big')">BIG</button>
+        <button class="btn btn-small" onclick="openBet('Small')">SMALL</button>
+    </div>
+
+    <div style="padding: 15px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;"><i class="fas fa-chart-line"></i> Recent Results</h3>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Period</th><th>Number</th><th>Size</th></tr></thead>
+                <tbody id="gameHistoryBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="history-trigger" onclick="togglePanel()">
+        <i class="fas fa-history"></i><br>M<br>Y
+    </div>
+
+    <div class="side-panel" id="sidePanel">
+        <div class="close-panel" onclick="togglePanel()"><i class="fas fa-times"></i> Close History</div>
+        <h3>My Betting History</h3>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Period</th><th>Pick</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody id="myHistoryBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = { apiKey: "YOUR_API_KEY", databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const user = localStorage.getItem("userPhone") || "guest_user";
+
+        let currentMode = 30;
+        let lastProcessedPeriod = "";
+
+        // UI Helpers
+        function togglePanel() { document.getElementById('sidePanel').classList.toggle('open'); }
+
+        // Balance Sync
+        db.ref('users/' + user + '/balance').on('value', s => {
+            document.getElementById('balance').innerText = parseFloat(s.val() || 0).toFixed(2);
+        });
+
+        function setMode(m) {
+            currentMode = m;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            updateRealtimeHistory();
+        }
+
+        // Logic to Sync Period ID and Timer
+        function updateClock() {
+            const now = new Date();
+            const totalSeconds = (now.getMinutes() * 60) + now.getSeconds();
+            const remaining = currentMode - (totalSeconds % currentMode);
+            
+            // Fixed Period ID Logic
+            const dateStr = now.getFullYear().toString() + (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
+            const slot = Math.floor(totalSeconds / currentMode);
+            const periodId = dateStr + currentMode + slot.toString().padStart(3, '0');
+            
+            document.getElementById('periodId').innerText = periodId;
+            document.getElementById('timer').innerText = `00:${remaining.toString().padStart(2, '0')}`;
+
+            // Control Lock (last 5 seconds)
+            document.getElementById('waitMsg').style.display = (remaining <= 5) ? 'flex' : 'none';
+
+            // Result processing when timer hits mode duration
+            if (remaining === currentMode && periodId !== lastProcessedPeriod) {
+                lastProcessedPeriod = periodId;
+                // We process the result for the slot that just ended
+                const prevSlot = slot - 1;
+                const prevPeriod = dateStr + currentMode + prevSlot.toString().padStart(3, '0');
+                generateResult(prevPeriod);
+            }
+        }
+
+        function generateResult(pid) {
+            // Predictable random based on Period ID so all users get same result
+            const seed = parseInt(pid.slice(-4));
+            const num = (seed * 7 + 3) % 10;
+            const size = (num >= 5) ? "Big" : "Small";
+
+            db.ref('history/' + currentMode + '/' + pid).set({ num, size });
+            settleBets(pid, size);
+        }
+
+        function settleBets(pid, winSize) {
+            db.ref('user_bets/' + user).orderByChild('period').equalTo(pid).once('value', s => {
+                s.forEach(child => {
+                    const bet = child.val();
+                    if(bet.status === "Pending") {
+                        let status = (bet.choice === winSize) ? "Win" : "Loss";
+                        if(status === "Win") {
+                            db.ref('users/' + user + '/balance').transaction(b => (b || 0) + (bet.amount * 1.9));
+                        }
+                        db.ref('user_bets/' + user + '/' + child.key).update({ status: status });
+                    }
+                });
+            });
+        }
+
+        // Real-time Update for Tables
+        function updateRealtimeHistory() {
+            // Game Results History
+            db.ref('history/' + currentMode).limitToLast(10).on('value', s => {
+                const body = document.getElementById('gameHistoryBody');
+                body.innerHTML = "";
+                let rows = [];
+                s.forEach(c => rows.push({id: c.key, ...c.val()}));
+                rows.reverse().forEach(d => {
+                    body.innerHTML += `<tr>
+                        <td>...${d.id.slice(-4)}</td>
+                        <td><span class="res-num-ball" style="background:${d.num % 2 === 0 ? '#f44336':'#4caf50'}">${d.num}</span></td>
+                        <td style="color:${d.size === 'Big' ? 'orange':'blue'}">${d.size}</td>
+                    </tr>`;
+                });
+            });
+
+            // My Betting History
+            db.ref('user_bets/' + user).limitToLast(15).on('value', s => {
+                const body = document.getElementById('myHistoryBody');
+                body.innerHTML = "";
+                let rows = [];
+                s.forEach(c => rows.push(c.val()));
+                rows.reverse().forEach(d => {
+                    if(d.mode == currentMode) {
+                        let sClass = (d.status === 'Win') ? 'status-win' : (d.status === 'Loss' ? 'status-loss' : '');
+                        body.innerHTML += `<tr>
+                            <td>...${d.period.slice(-4)}</td>
+                            <td>${d.choice}</td>
+                            <td>${d.amount}</td>
+                            <td class="${sClass}">${d.status}</td>
+                        </tr>`;
+                    }
+                });
+            });
+        }
+
+        function openBet(type) {
+            const amt = prompt("Enter Bet Amount (Min 20):", "100");
+            if (!amt || amt < 20) return;
+            const bal = parseFloat(document.getElementById('balance').innerText);
+            if (amt > bal) return alert("Insufficient Balance");
+
+            const pid = document.getElementById('periodId').innerText;
+            db.ref('users/' + user).update({ balance: bal - amt });
+            db.ref('user_bets/' + user).push({
+                period: pid, amount: amt, choice: type, mode: currentMode, status: "Pending"
+            });
+        }
+
+        setInterval(updateClock, 1000);
+        updateRealtimeHistory();
+    </script>
+</body>
+</html>
+
