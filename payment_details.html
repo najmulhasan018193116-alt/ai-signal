@@ -9,7 +9,6 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .method-img { width: 80px; margin-bottom: 10px; }
         .admin-num { font-size: 22px; font-weight: bold; color: #00b09b; margin: 15px 0; display: block; }
         .copy-btn { padding: 5px 15px; background: #eee; border-radius: 10px; cursor: pointer; font-size: 12px; }
         .input-box { text-align: left; margin-top: 20px; }
@@ -20,10 +19,11 @@
 <body>
 
     <div class="card">
-        <h3 id="methName">bKash Payment</h3>
+        <h3 id="methName">Payment</h3>
         <p style="font-size: 14px; color: #666;">নিচের নম্বরে টাকা <b>Send Money</b> করুন</p>
         
-        <span class="admin-num" id="adminNumber">01700000000</span> <span class="copy-btn" onclick="copyNum()">Copy Number</span>
+        <span class="admin-num" id="adminNumber">017XXXXXXXX</span> 
+        <span class="copy-btn" onclick="copyNum()">Copy Number</span>
 
         <hr style="margin: 20px 0; opacity: 0.2;">
 
@@ -39,20 +39,24 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // আপনার ফায়ারবেস কনফিগ এখানে বসান
+        // আপনার দেওয়া কনফিগ এখানে সেট করা হয়েছে
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+          apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+          authDomain: "ai-signal-75e73.firebaseapp.com",
+          projectId: "ai-signal-75e73",
+          storageBucket: "ai-signal-75e73.firebasestorage.app",
+          messagingSenderId: "610985325221",
+          appId: "1:610985325221:web:16e2600afb3b3698ae534c",
+          measurementId: "G-5X29WBQHJK",
+          databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" // এটি আপনার ডাটাবেস ইউআরএল
         };
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        document.getElementById("methName").innerText = localStorage.getItem("dep_method") + " Payment";
+        // মেথড নাম দেখানো
+        document.getElementById("methName").innerText = (localStorage.getItem("dep_method") || "bKash") + " Payment";
 
         function copyNum() {
             const num = document.getElementById("adminNumber").innerText;
@@ -71,7 +75,7 @@
                 return;
             }
 
-            // Firebase এ ডাটা পাঠানো
+            // ডাটাবেসে সেভ করা
             database.ref('deposits/').push({
                 user: userNum,
                 amount: amt,
@@ -80,11 +84,12 @@
                 status: "Pending",
                 time: new Date().toLocaleString()
             }).then(() => {
-                alert("ডিপোজিট সফলভাবে সাবমিট হয়েছে! ১০-৩০ মিনিটের মধ্যে ব্যালেন্স যোগ হবে।");
+                alert("ডিপোজিট সফলভাবে সাবমিট হয়েছে!");
                 window.location.href = "account.html";
+            }).catch((error) => {
+                alert("Error: " + error.message);
             });
         }
     </script>
 </body>
 </html>
-
