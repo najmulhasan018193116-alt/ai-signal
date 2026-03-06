@@ -104,7 +104,7 @@
         <div class="admin-card">
             <h3>Deposit History (Success/Rejected)</h3>
             <table id="depHistoryTable">
-                <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead>
+                <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Note</th></tr></thead>
                 <tbody id="depHistoryBody"></tbody>
             </table>
         </div>
@@ -142,10 +142,9 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Admin Login Logic
     function checkAdminLogin() {
         const pass = document.getElementById('adminPassInput').value;
-        if(pass === "123456") { // আপনার পাসওয়ার্ড এখানে দিন
+        if(pass === "123456") {
             document.getElementById('loginOverlay').style.display = "none";
         } else {
             alert("Wrong Password!");
@@ -159,10 +158,8 @@
         event.currentTarget.classList.add('active');
     }
 
-    // --- Statistics Calculations ---
     function updateStats() {
-        let tDep = 0, tWith = 0, tBonus = 0, tComm = 0;
-        
+        let tDep = 0, tWith = 0;
         database.ref('deposits').once('value', s => {
             s.forEach(c => { if(c.val().status === "Success") tDep += parseFloat(c.val().amount); });
             document.getElementById('totalDep').innerText = tDep;
@@ -171,10 +168,9 @@
             s.forEach(c => { if(c.val().status === "Approved") tWith += parseFloat(c.val().amount); });
             document.getElementById('totalWith').innerText = tWith;
         });
-        // বোনাস ও কমিশন ইউজারের ডাটাবেস থেকে ক্যালকুলেট হবে (যদি আপনার সিস্টেমে ঐ ফিল্ড থাকে)
     }
 
-    // --- Data Loaders ---
+    // --- Deposit Data Loader (With Reject Button) ---
     database.ref('deposits').on('value', snapshot => {
         const depBody = document.getElementById('depositBody');
         const depHist = document.getElementById('depHistoryBody');
@@ -184,9 +180,12 @@
             const d = child.val();
             if(d.status === "Pending") {
                 depBody.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.trxID}</td><td>${d.method}</td>
-                <td><button class="btn btn-success" onclick="approveDep('${child.key}','${d.user}',${d.amount})">Approve</button></td></tr>`;
+                <td>
+                    <button class="btn btn-success" onclick="approveDep('${child.key}','${d.user}',${d.amount})">Approve</button>
+                    <button class="btn btn-danger" onclick="rejectDep('${child.key}')">Reject</button>
+                </td></tr>`;
             } else {
-                depHist.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.status}</td><td>${d.time}</td></tr>`;
+                depHist.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.status}</td><td>${d.note || '-'}</td></tr>`;
             }
         });
         updateStats();
@@ -201,8 +200,10 @@
             const w = child.val();
             if(w.status === "Pending") {
                 withBody.innerHTML += `<tr><td>${w.user}</td><td>${w.amount}</td><td>${w.receiver_no}</td><td>${w.method}</td>
-                <td><button class="btn btn-success" onclick="approveWith('${child.key}')">Approve</button>
-                <button class="btn btn-danger" onclick="rejectWith('${child.key}','${w.user}',${w.amount})">Reject</button></td></tr>`;
+                <td>
+                    <button class="btn btn-success" onclick="approveWith('${child.key}')">Approve</button>
+                    <button class="btn btn-danger" onclick="rejectWith('${child.key}','${w.user}',${w.amount})">Reject</button>
+                </td></tr>`;
             } else {
                 withHist.innerHTML += `<tr><td>${w.user}</td><td>${w.amount}</td><td>${w.status}</td><td>${w.note || '-'}</td></tr>`;
             }
@@ -210,13 +211,26 @@
         updateStats();
     });
 
-    // --- Logic Functions ---
+    // --- Action Functions ---
     function approveDep(id, user, amt) {
         database.ref('users/'+user+'/balance').once('value').then(s => {
             let nBal = (parseFloat(s.val())||0) + parseFloat(amt);
             database.ref('users/'+user).update({ balance: nBal });
-            database.ref('deposits/'+id).update({ status: "Success" });
+            database.ref('deposits/'+id).update({ status: "Success", time: new Date().toLocaleString() });
         });
+    }
+
+    // New Deposit Reject Function
+    function rejectDep(id) {
+        let reason = prompt("রিজেক্ট করার কারণ লিখুন:");
+        if(reason) {
+            database.ref('deposits/'+id).update({ 
+                status: "Rejected", 
+                note: reason,
+                time: new Date().toLocaleString() 
+            });
+            alert("Deposit Rejected!");
+        }
     }
 
     function approveWith(id) {
@@ -224,7 +238,7 @@
     }
 
     function rejectWith(id, user, amt) {
-        let reason = prompt("Reason for rejection:");
+        let reason = prompt("রিজেক্ট করার কারণ লিখুন:");
         if(reason) {
             database.ref('users/'+user+'/balance').once('value').then(s => {
                 let rBal = (parseFloat(s.val())||0) + parseFloat(amt);
@@ -242,7 +256,6 @@
         .then(() => alert("Numbers Updated!"));
     }
 
-    // লোড হওয়া মাত্র নম্বরগুলো ইনপুট বক্সে দেখানো
     database.ref('admin_settings/numbers').once('value', s => {
         const d = s.val();
         if(d) {
