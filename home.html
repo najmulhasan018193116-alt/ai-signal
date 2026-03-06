@@ -3,81 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - User Home</title>
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
-        .header { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .container { padding: 20px; max-width: 400px; margin: auto; }
-        .balance-card { background: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-top: -40px; }
-        .balance-card h3 { color: #888; font-size: 14px; margin: 0; }
-        .balance-card h1 { color: #333; font-size: 32px; margin: 10px 0; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
+        .header { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px; }
+        .container { padding: 20px; max-width: 450px; margin: auto; }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 25px; }
-        .menu-item { background: white; padding: 20px; border-radius: 15px; text-align: center; transition: 0.3s; cursor: pointer; border: 1px solid #eee; }
-        .menu-item:active { transform: scale(0.95); background: #f9f9f9; }
-        .menu-item i { font-size: 28px; color: #4facfe; margin-bottom: 10px; display: block; }
-        .menu-item span { font-size: 14px; font-weight: bold; color: #444; }
+        /* ব্যালেন্স কার্ড */
+        .balance-card { background: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -50px; }
+        .balance-card h3 { margin: 0; color: #888; font-size: 14px; text-transform: uppercase; }
+        .balance-card h1 { margin: 10px 0; color: #333; font-size: 35px; }
 
-        .logout-section { text-align: center; margin-top: 40px; }
-        .logout-btn { background: #ff4b2b; color: white; border: none; padding: 12px 40px; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 75, 43, 0.3); }
+        /* অপশন গ্রিড */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
+        .card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
+        .card:active { transform: scale(0.95); background: #fdfdfd; }
+        .card i { font-size: 30px; color: #4facfe; margin-bottom: 10px; display: block; }
+        .card span { font-weight: 600; color: #555; font-size: 15px; }
+
+        /* লগআউট বাটন */
+        .logout-box { margin-top: 40px; text-align: center; }
+        .btn-logout { background: #ff4b2b; color: white; border: none; padding: 12px 50px; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2 style="margin:0;">Welcome!</h2>
-        <p id="userPhone" style="opacity: 0.9; margin-top: 5px;">Loading...</p>
+<div class="header">
+    <h2 style="margin:0;">স্বাগতম!</h2>
+    <p id="userDisplay" style="margin: 5px 0 0; opacity: 0.9;">লোড হচ্ছে...</p>
+</div>
+
+<div class="container">
+    <div class="balance-card">
+        <h3>আপনার বর্তমান ব্যালেন্স</h3>
+        <h1>৳ <span id="balance">0.00</span></h1>
     </div>
 
-    <div class="container">
-        <div class="balance-card">
-            <h3>Total Balance</h3>
-            <h1>৳ <span id="balance">0.00</span></h1>
+    <div class="grid">
+        <div class="card" onclick="alert('ডিপোজিট সিস্টেম শীঘ্রই আসছে')">
+            <i class="fas fa-wallet"></i>
+            <span>Deposit</span>
         </div>
-
-        <div class="menu-grid">
-            <div class="menu-item" onclick="alert('Deposit system is coming soon!')">
-                <i class="fas fa-plus-circle"></i>
-                <span>Deposit</span>
-            </div>
-            <div class="menu-item" onclick="alert('Withdraw system is coming soon!')">
-                <i class="fas fa-hand-holding-usd"></i>
-                <span>Withdraw</span>
-            </div>
-            <div class="menu-item" onclick="alert('Checking Profile...')">
-                <i class="fas fa-user-edit"></i>
-                <span>Profile</span>
-            </div>
-            <div class="menu-item" onclick="alert('Support is online!')">
-                <i class="fas fa-headset"></i>
-                <span>Support</span>
-            </div>
+        <div class="card" onclick="alert('উইথড্র সিস্টেম শীঘ্রই আসছে')">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Withdraw</span>
         </div>
-
-        <div class="logout-section">
-            <button class="logout-btn" onclick="logout()">Logout Account</button>
+        <div class="card" onclick="alert('আপনার প্রোফাইল')">
+            <i class="fas fa-user-circle"></i>
+            <span>Profile</span>
+        </div>
+        <div class="card" onclick="alert('সাপোর্ট টিম')">
+            <i class="fas fa-headset"></i>
+            <span>Support</span>
         </div>
     </div>
 
-    <script>
-        window.onload = function() {
-            // লোকাল স্টোরেজ থেকে ইউজারের ফোন নম্বর নিয়ে আসা
-            const phone = localStorage.getItem("loggedUser");
-            if (!phone) {
-                window.location.href = "index.html"; // লগইন না থাকলে ফেরত পাঠাবে
-            } else {
-                document.getElementById("userPhone").innerText = "Account: " + phone;
-            }
-        };
+    <div class="logout-box">
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+</div>
 
-        function logout() {
-            if(confirm("Do you want to logout?")) {
-                localStorage.removeItem("loggedUser");
-                window.location.href = "index.html";
-            }
+<script>
+    // পেজ লোড হওয়ার সময় চেক করবে লগইন আছে কি না
+    window.onload = function() {
+        const loginStatus = localStorage.getItem("isLoggedIn");
+        const userPhone = localStorage.getItem("loggedUser");
+
+        if (loginStatus !== "true" || !userPhone) {
+            // যদি ডাটা না থাকে তবে লগইন পেজে পাঠিয়ে দিবে
+            window.location.replace("index.html");
+        } else {
+            // ডাটা থাকলে ফোন নম্বর দেখাবে
+            document.getElementById("userDisplay").innerText = "অ্যাকাউন্ট: " + userPhone;
         }
-    </script>
+    };
+
+    function logout() {
+        if(confirm("আপনি কি নিশ্চিতভাবে লগআউট করতে চান?")) {
+            localStorage.clear(); // সব ডাটা মুছে ফেলা হচ্ছে
+            window.location.replace("index.html");
+        }
+    }
+</script>
+
 </body>
 </html>
-
