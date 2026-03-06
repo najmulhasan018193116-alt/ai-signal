@@ -48,6 +48,9 @@
         .status.Pending { background: #fff3cd; color: #856404; }
         .status.Approved { background: #d4edda; color: #155724; }
         .status.Rejected { background: #f8d7da; color: #721c24; }
+        
+        /* নতুন স্টাইল: উইথড্র বন্ধ থাকার মেসেজ */
+        #timeNotice { color: red; font-size: 12px; text-align: center; margin-top: 5px; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -98,6 +101,7 @@
                 <input type="number" id="amount" class="input-field" placeholder="Enter amount">
             </div>
             <button class="action-btn" id="withdrawBtn" onclick="requestWithdraw()">Confirm Withdrawal</button>
+            <p id="timeNotice">উইথড্র সময়: সকাল ০৮:০০ থেকে রাত ০৮:০০ পর্যন্ত।</p>
         </div>
 
         <div style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-history"></i> Recent Withdrawals</div>
@@ -119,44 +123,55 @@
         const loggedUser = localStorage.getItem("loggedUser");
 
         if (loggedUser) {
-            // ইউজারের ডাটা এবং সেভ করা নম্বর লোড
             database.ref('users/' + loggedUser).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     document.getElementById("userBalance").innerText = (data.balance || 0).toFixed(2);
-                    
                     const select = document.getElementById("selectedNo");
                     select.innerHTML = '<option value="">-- Choose Number --</option>';
-
-                    // নম্বর ১ চেক
                     if (data.withdrawNo1) {
                         document.getElementById("savedNo1").value = data.withdrawNo1;
                         document.getElementById("savedNo1").disabled = true;
                         select.innerHTML += `<option value="${data.withdrawNo1}">${data.withdrawNo1}</option>`;
                     }
-                    // নম্বর ২ চেক
                     if (data.withdrawNo2) {
                         document.getElementById("savedNo2").value = data.withdrawNo2;
                         document.getElementById("savedNo2").disabled = true;
                         select.innerHTML += `<option value="${data.withdrawNo2}">${data.withdrawNo2}</option>`;
                     }
-
-                    // বাটন হাইড করা যদি উভয় নম্বর সেভ থাকে
                     if(data.withdrawNo1 && data.withdrawNo2) {
                         document.getElementById("saveNumBtn").style.display = "none";
                     }
                 }
             });
             loadWithdrawHistory();
+            checkWithdrawTime(); // সময় চেক ফাংশন
         }
 
-        // নম্বর সেভ করার ফাংশন
+        // ফিচ্যার ১: সময় চেক করার ফাংশন (০৮:০০ AM - ০৮:০০ PM)
+        function checkWithdrawTime() {
+            const now = new Date();
+            const hour = now.getHours();
+            const btn = document.getElementById("withdrawBtn");
+            const notice = document.getElementById("timeNotice");
+
+            // যদি সকাল ৮ এর কম অথবা রাত ৮ (২০) এর বেশি বা সমান হয়
+            if (hour < 8 || hour >= 20) {
+                btn.disabled = true;
+                btn.innerText = "Withdraw Closed";
+                notice.style.display = "block";
+                return false;
+            } else {
+                btn.disabled = false;
+                notice.style.display = "none";
+                return true;
+            }
+        }
+
         function saveWithdrawNumbers() {
             const n1 = document.getElementById("savedNo1").value;
             const n2 = document.getElementById("savedNo2").value;
-
             if (n1.length < 11) { alert("কমপক্ষে প্রথম নম্বরটি সঠিক হতে হবে!"); return; }
-
             database.ref('users/' + loggedUser).update({
                 withdrawNo1: n1,
                 withdrawNo2: n2 || ""
@@ -165,8 +180,14 @@
             });
         }
 
-        // উইথড্র রিকোয়েস্ট ফাংশন
+        // উইথড্র রিকোয়েস্ট ফাংশন (ফিচ্যার ২: দৈনিক ১ বার লিমিট যোগ করা হয়েছে)
         function requestWithdraw() {
+            // পুনরায় সময় চেক
+            if(!checkWithdrawTime()) {
+                alert("উইথড্র এখন বন্ধ আছে। সকাল ০৮:০০ থেকে রাত ০৮:০০ এর মধ্যে চেষ্টা করুন।");
+                return;
+            }
+
             const amount = parseFloat(document.getElementById("amount").value);
             const method = document.getElementById("method").value;
             const receiverNo = document.getElementById("selectedNo").value;
@@ -176,26 +197,38 @@
             if (isNaN(amount) || amount < 500) { alert("সর্বনিম্ন উইথড্র ৫00 টাকা"); return; }
             if (amount > currentBalance) { alert("অপর্যাপ্ত ব্যালেন্স!"); return; }
 
-            const btn = document.getElementById("withdrawBtn");
-            btn.disabled = true;
-            btn.innerText = "Processing...";
+            // দৈনিক ১ বার চেক করার লজিক
+            const todayDate = new Date().toLocaleDateString(); // আজকের তারিখ (দিন/মাস/বছর)
+            
+            database.ref('users/' + loggedUser).once('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData.lastWithdrawDate === todayDate) {
+                    alert("আপনি আজকে ইতিমধ্যে একবার উইথড্র করেছেন। আগামীকাল আবার চেষ্টা করুন।");
+                    return;
+                }
 
-            // ব্যালেন্স কাটা এবং রিকোয়েস্ট সেভ
-            database.ref('users/' + loggedUser).update({
-                balance: currentBalance - amount
-            }).then(() => {
-                database.ref('withdraws/').push({
-                    user: loggedUser,
-                    amount: amount,
-                    method: method,
-                    receiver_no: receiverNo,
-                    status: "Pending",
-                    time: new Date().toLocaleString()
+                // পেমেন্ট প্রসেসিং শুরু
+                const btn = document.getElementById("withdrawBtn");
+                btn.disabled = true;
+                btn.innerText = "Processing...";
+
+                database.ref('users/' + loggedUser).update({
+                    balance: currentBalance - amount,
+                    lastWithdrawDate: todayDate // তারিখ সেভ করা
                 }).then(() => {
-                    alert("উইথড্র রিকোয়েস্ট সফল! ব্যালেন্স থেকে টাকা কেটে নেওয়া হয়েছে।");
-                    document.getElementById("amount").value = "";
-                    btn.disabled = false;
-                    btn.innerText = "Confirm Withdrawal";
+                    database.ref('withdraws/').push({
+                        user: loggedUser,
+                        amount: amount,
+                        method: method,
+                        receiver_no: receiverNo,
+                        status: "Pending",
+                        time: new Date().toLocaleString()
+                    }).then(() => {
+                        alert("উইথড্র রিকোয়েস্ট সফল! ব্যালেন্স থেকে টাকা কেটে নেওয়া হয়েছে।");
+                        document.getElementById("amount").value = "";
+                        btn.disabled = false;
+                        btn.innerText = "Confirm Withdrawal";
+                    });
                 });
             });
         }
