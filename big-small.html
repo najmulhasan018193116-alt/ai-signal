@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DX Win - Pro Pro</title>
+    <title>DX Win - Pro Official</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dx-yellow: #ffc107; --dx-bg: #f8f9fa; --big-btn: #ff9800; --small-btn: #2196f3; }
@@ -12,22 +12,20 @@
 
         .header-box { background: var(--dx-yellow); padding: 15px; text-align: center; font-weight: bold; font-size: 20px; color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .wallet-card { background: white; margin: -10px 15px 20px; padding: 20px; text-align: center; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .wallet-card p { color: #888; font-size: 14px; margin-bottom: 5px; }
         .wallet-card h2 { font-size: 30px; color: #333; }
 
         .tabs-container { display: flex; gap: 8px; padding: 0 15px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #fff; color: #333; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #fff; color: #333; font-weight: bold; cursor: pointer; }
         .tab-btn.active { background: var(--dx-yellow); color: #000; }
 
         .info-box { background: #fffef2; margin: 10px 15px; padding: 15px; border-radius: 12px; border: 1px dashed #ffd54f; display: flex; justify-content: space-between; align-items: center; }
-        .info-label { color: #888; font-size: 13px; }
-        .info-value { font-size: 17px; font-weight: bold; color: #333; margin-top: 3px; }
+        .info-value { font-size: 17px; font-weight: bold; color: #333; }
 
         .bet-actions { display: flex; gap: 15px; padding: 15px; position: relative; }
         .main-btn { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; }
         .btn-big { background: var(--big-btn); }
         .btn-small { background: var(--small-btn); }
-        #lockOverlay { display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8); z-index:10; border-radius:12px; align-items:center; justify-content:center; color:red; font-weight:bold; font-size: 18px; }
+        #lockOverlay { display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8); z-index:10; border-radius:12px; align-items:center; justify-content:center; color:red; font-weight:bold; }
 
         .history-section { background: white; margin: 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 350px; }
         .history-tabs { display: flex; border-bottom: 1px solid #eee; }
@@ -35,32 +33,21 @@
         .h-tab.active { color: var(--dx-yellow); border-bottom: 3px solid var(--dx-yellow); }
 
         table { width: 100%; border-collapse: collapse; }
-        th { background: #fff9e6; padding: 12px 5px; font-size: 12px; color: #777; text-align: center; }
-        td { padding: 12px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; font-size: 13px; color: #444; }
+        th { background: #fff9e6; padding: 12px 5px; font-size: 12px; color: #777; }
+        td { padding: 12px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; font-size: 13px; }
         
-        .res-num { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-        
+        .res-num { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
         .bg-red { background: #ff4d4d; }
         .bg-green { background: #4caf50; }
-        .bg-mixed-red { background: linear-gradient(to right, #ff4d4d 50%, #9c27b0 50%); } 
-        .bg-mixed-green { background: linear-gradient(to right, #4caf50 50%, #9c27b0 50%); }
+        .bg-violet { background: #9c27b0; }
         .txt-big { color: #ff9800; font-weight: bold; }
         .txt-small { color: #2196f3; font-weight: bold; }
-        .status-win { color: #4caf50; font-weight: bold; }
-        .status-loss { color: #ff4d4d; font-weight: bold; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; color: white; }
         .modal-box input { width: 100%; background: transparent; border: none; border-bottom: 2px solid var(--dx-yellow); color: white; font-size: 26px; padding: 10px 0; margin: 20px 0; outline: none; text-align: center; }
-        .modal-footer { display: flex; justify-content: space-between; }
-        .modal-footer button { background: none; border: none; color: #5086ff; font-weight: bold; font-size: 16px; cursor: pointer; }
-
-        #resultPopup { display: none; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 20px 30px; border-radius: 15px; color: white; font-size: 22px; font-weight: bold; z-index: 3000; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: zoomIn 0.3s ease; }
-        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; }
-        .pg-btn { background: var(--dx-yellow); border: none; width: 30px; height: 30px; border-radius: 6px; color: white; cursor: pointer; }
+        
+        #resultPopup { display: none; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 20px 30px; border-radius: 15px; color: white; font-size: 22px; font-weight: bold; z-index: 3000; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -68,7 +55,7 @@
     <div class="header-box">DX WIN</div>
 
     <div class="wallet-card">
-        <p>Wallet Balance</p>
+        <p style="color:#888; font-size:14px;">Wallet Balance</p>
         <h2>৳ <span id="balanceDisplay">0.00</span></h2>
     </div>
 
@@ -76,16 +63,15 @@
         <button class="tab-btn active" onclick="changeMode(30, this)">30s</button>
         <button class="tab-btn" onclick="changeMode(60, this)">1m</button>
         <button class="tab-btn" onclick="changeMode(180, this)">3m</button>
-        <button class="tab-btn" onclick="changeMode(300, this)">5m</button>
     </div>
 
     <div class="info-box">
         <div>
-            <div class="info-label">Period ID</div>
+            <div style="color:#888; font-size:13px;">Period ID</div>
             <div class="info-value" id="periodId">Loading...</div>
         </div>
         <div style="text-align: right;">
-            <div class="info-label">Time Left</div>
+            <div style="color:#888; font-size:13px;">Time Left</div>
             <div class="info-value" id="timerDisplay">00:00</div>
         </div>
     </div>
@@ -98,30 +84,22 @@
 
     <div class="history-section">
         <div class="history-tabs">
-            <div class="h-tab active" id="tabGame" onclick="switchHistory('game')">Game History</div>
-            <div class="h-tab" id="tabMy" onclick="switchHistory('my')">My History</div>
+            <div class="h-tab active" id="tabGame" onclick="switchView('game')">Game History</div>
+            <div class="h-tab" id="tabMy" onclick="switchView('my')">My History</div>
         </div>
-        
         <table id="mainTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
-
-        <div class="pagination">
-            <button class="pg-btn" onclick="pager(-1)"><i class="fas fa-chevron-left"></i></button>
-            <span id="pageInfo" style="font-size: 12px; font-weight: bold;">1 / 1</span>
-            <button class="pg-btn" onclick="pager(1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
     </div>
 
     <div class="modal-overlay" id="betModal">
         <div class="modal-box">
-            <h3 id="betTitle">Bet on BIG</h3>
-            <p style="font-size: 13px; color: #aaa; margin-top: 10px;">Balance: ৳ <span id="modalBal">0.00</span></p>
+            <h3 id="betTitle">Bet on</h3>
             <input type="number" id="betInput" placeholder="Enter amount">
-            <div class="modal-footer">
-                <button onclick="closeBet()" style="color: #ff4d4d;">CANCEL</button>
-                <button onclick="confirmBet()">CONFIRM</button>
+            <div style="display:flex; justify-content:space-between;">
+                <button onclick="closeBet()" style="background:none; border:none; color:red; font-weight:bold;">CANCEL</button>
+                <button onclick="confirmBet()" style="background:none; border:none; color:#5086ff; font-weight:bold;">CONFIRM</button>
             </div>
         </div>
     </div>
@@ -132,6 +110,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // --- Firebase Config (আপনারটা বসান) ---
         const firebaseConfig = { apiKey: "YOUR_API_KEY", databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -139,85 +118,54 @@
 
         let currentMode = 30;
         let currentPeriod = "";
-        let historyView = 'game'; 
-        let page = 1;
-        let gameData = [];
-        let myData = [];
+        let selectedChoice = "";
+        let historyView = 'game';
 
-        function getSecureRandom() {
-            const array = new Uint32Array(1);
-            window.crypto.getRandomValues(array);
-            return array[0] % 10;
-        }
-
+        // ব্যালেন্স আপডেট
         db.ref('users/' + userPhone + '/balance').on('value', s => {
-            const bal = parseFloat(s.val() || 0).toFixed(2);
-            document.getElementById('balanceDisplay').innerText = bal;
-            document.getElementById('modalBal').innerText = bal;
+            document.getElementById('balanceDisplay').innerText = parseFloat(s.val() || 0).toFixed(2);
         });
 
-        function openBet(choice) {
-            selectedChoice = choice;
-            document.getElementById('betTitle').innerText = "Bet on " + choice;
-            document.getElementById('betTitle').style.color = (choice === 'Big') ? '#ff9800' : '#2196f3';
-            document.getElementById('betModal').style.display = 'flex';
-        }
-
-        function closeBet() { document.getElementById('betModal').style.display = 'none'; }
-
-        function confirmBet() {
-            const amount = parseFloat(document.getElementById('betInput').value);
-            const balance = parseFloat(document.getElementById('balanceDisplay').innerText);
-            if(!amount || amount < 10 || amount > balance) return alert("Invalid amount");
-
-            const pid = document.getElementById('periodId').innerText;
-            db.ref('users/' + userPhone).update({ balance: (balance - amount).toFixed(2) });
-            db.ref('user_bets/' + userPhone).push({
-                period: pid, amount: amount, choice: selectedChoice, mode: currentMode, status: "Pending", time: Date.now()
-            });
-            closeBet();
-            alert("Bet Placed!");
-        }
-
+        // টাইমার এবং পিরিয়ড আইডি লজিক
         function runTimer() {
             const now = new Date();
-            const totalSec = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             const dateStr = now.getFullYear().toString() + (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
-            
-            // Unique ID per mode
+            const totalSec = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             const periodCounter = Math.floor(totalSec / currentMode);
-            const newPeriodId = dateStr + currentMode + periodCounter.toString().padStart(6, '0');
-            
+            const newPeriodId = dateStr + currentMode + periodCounter.toString().padStart(4, '0');
+
             if (currentPeriod !== "" && currentPeriod !== newPeriodId) {
                 processResult(currentPeriod);
             }
-
             currentPeriod = newPeriodId;
             document.getElementById('periodId').innerText = currentPeriod;
-            
+
             const remain = currentMode - (totalSec % currentMode);
             document.getElementById('timerDisplay').innerText = `00:${remain.toString().padStart(2, '0')}`;
             document.getElementById('lockOverlay').style.display = (remain <= 5) ? 'flex' : 'none';
         }
 
+        // রেজাল্ট জেনারেশন এবং বেট চেক
         function processResult(pid) {
-            const num = getSecureRandom();
+            const num = Math.floor(Math.random() * 10);
             const size = (num >= 5) ? "Big" : "Small";
+            const color = (num === 0 || num === 5) ? "Violet" : ([1,3,7,9].includes(num) ? "Green" : "Red");
 
-            // Save result only for the specific mode branch
-            db.ref('history/' + currentMode + '/' + pid).set({ id: pid, num: num, size: size });
+            // ডাটাবেসে হিস্ট্রি সেভ
+            db.ref('history/' + currentMode + '/' + pid).set({ id: pid, num: num, size: size, color: color, time: Date.now() });
 
+            // বেট চেক
             db.ref('user_bets/' + userPhone).orderByChild('period').equalTo(pid).once('value', s => {
                 s.forEach(snap => {
                     const bet = snap.val();
-                    if(bet.status === "Pending" && bet.mode == currentMode) {
+                    if(bet.mode == currentMode && bet.status === "Pending") {
                         const win = (bet.choice === size);
                         if(win) {
-                            const winAmount = bet.amount * 1.96; 
-                            db.ref('users/' + userPhone + '/balance').transaction(b => (parseFloat(b) || 0) + winAmount);
-                            showResultPop("WIN! +৳" + winAmount.toFixed(2), "#4caf50");
+                            const winAmt = bet.amount * 1.96;
+                            db.ref('users/' + userPhone + '/balance').transaction(b => (parseFloat(b) || 0) + winAmt);
+                            showPopup("WINNER! +৳" + winAmt.toFixed(2), "#4caf50");
                         } else {
-                            showResultPop("LOSS", "#f44336");
+                            showPopup("LOSS", "#f44336");
                         }
                         db.ref('user_bets/' + userPhone + '/' + snap.key).update({ status: win ? "Win" : "Loss" });
                     }
@@ -225,88 +173,58 @@
             });
         }
 
-        function showResultPop(msg, bg) {
+        function showPopup(msg, bg) {
             const p = document.getElementById('resultPopup');
             p.innerText = msg; p.style.backgroundColor = bg; p.style.display = 'block';
             setTimeout(() => p.style.display = 'none', 3000);
         }
 
-        function switchHistory(type) {
-            historyView = type; page = 1;
-            document.getElementById('tabGame').classList.toggle('active', type === 'game');
-            document.getElementById('tabMy').classList.toggle('active', type === 'my');
-            renderTable();
-        }
-
+        // হিস্ট্রি লোড
         function loadData() {
-            // Off previous listeners to save memory/data
             db.ref('history/' + currentMode).off();
-            db.ref('history/' + currentMode).limitToLast(100).on('value', s => {
-                gameData = [];
-                s.forEach(c => { gameData.push(c.val()); });
-                gameData.reverse();
-                if(historyView === 'game') renderTable();
-            });
-
-            db.ref('user_bets/' + userPhone).off();
-            db.ref('user_bets/' + userPhone).on('value', s => {
-                myData = [];
-                s.forEach(c => { 
-                    const b = c.val();
-                    if(b.mode == currentMode) myData.push(b); // Filter by mode
-                });
-                myData.sort((a,b) => b.time - a.time);
-                if(historyView === 'my') renderTable();
+            db.ref('history/' + currentMode).orderByChild('time').limitToLast(10).on('value', s => {
+                let list = [];
+                s.forEach(c => { list.push(c.val()); });
+                list.reverse();
+                if(historyView === 'game') renderTable(list);
             });
         }
 
-        function renderTable() {
+        function renderTable(data) {
             const head = document.getElementById('tableHead');
             const body = document.getElementById('tableBody');
-            const start = (page - 1) * 10;
             body.innerHTML = "";
-
             if(historyView === 'game') {
                 head.innerHTML = `<tr><th>Period</th><th>Number</th><th>Size</th><th>Color</th></tr>`;
-                const items = gameData.slice(start, start + 10);
-                items.forEach(d => {
-                    let colorClass = d.num === 0 ? "bg-mixed-red" : d.num === 5 ? "bg-mixed-green" : [1,3,7,9].includes(d.num) ? "bg-green" : "bg-red";
-                    body.innerHTML += `<tr>
-                        <td style="font-family:monospace;">...${d.id.slice(-6)}</td>
-                        <td><span class="res-num ${colorClass}">${d.num}</span></td>
-                        <td class="${d.size==='Big'?'txt-big':'txt-small'}">${d.size}</td>
-                        <td><span class="dot ${colorClass}"></span></td>
-                    </tr>`;
+                data.forEach(d => {
+                    let cls = d.color === "Green" ? "bg-green" : (d.color === "Red" ? "bg-red" : "bg-violet");
+                    body.innerHTML += `<tr><td>...${d.id.slice(-4)}</td><td><span class="res-num ${cls}">${d.num}</span></td><td class="${d.size=='Big'?'txt-big':'txt-small'}">${d.size}</td><td><div class="res-num ${cls}" style="width:10px; height:10px;"></div></td></tr>`;
                 });
-                document.getElementById('pageInfo').innerText = `${page} / ${Math.ceil(gameData.length / 10) || 1}`;
-            } else {
-                head.innerHTML = `<tr><th>Period</th><th>Select</th><th>Amount</th><th>Status</th></tr>`;
-                const items = myData.slice(start, start + 10);
-                items.forEach(d => {
-                    body.innerHTML += `<tr>
-                        <td style="font-family:monospace;">...${d.period.slice(-6)}</td>
-                        <td class="${d.choice==='Big'?'txt-big':'txt-small'}">${d.choice}</td>
-                        <td>৳${d.amount}</td>
-                        <td class="status-${d.status.toLowerCase()}">${d.status}</td>
-                    </tr>`;
-                });
-                document.getElementById('pageInfo').innerText = `${page} / ${Math.ceil(myData.length / 10) || 1}`;
             }
         }
 
-        function pager(dir) {
-            const total = historyView === 'game' ? gameData.length : myData.length;
-            const max = Math.ceil(total / 10) || 1;
-            if (page + dir >= 1 && page + dir <= max) { page += dir; renderTable(); }
-        }
-
+        // মোড চেঞ্জ
         function changeMode(m, btn) {
-            currentMode = m; page = 1;
+            currentMode = m;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            // Refresh listeners for new mode
             loadData();
-            runTimer(); 
+        }
+
+        // বেট ফাংশন
+        function openBet(c) {
+            selectedChoice = c;
+            document.getElementById('betTitle').innerText = "Bet on " + c;
+            document.getElementById('betModal').style.display = 'flex';
+        }
+        function closeBet() { document.getElementById('betModal').style.display = 'none'; }
+        function confirmBet() {
+            const amt = parseFloat(document.getElementById('betInput').value);
+            if(!amt || amt < 10) return alert("Min bet 10");
+            db.ref('user_bets/' + userPhone).push({ period: currentPeriod, amount: amt, choice: selectedChoice, mode: currentMode, status: "Pending" });
+            db.ref('users/' + userPhone + '/balance').transaction(b => b - amt);
+            closeBet();
+            alert("Bet Placed!");
         }
 
         setInterval(runTimer, 1000);
