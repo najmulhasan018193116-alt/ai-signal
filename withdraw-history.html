@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw History - ai-signal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; padding-bottom: 30px; }
+
+        .header { display: flex; align-items: center; padding: 15px 20px; background: white; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
+        .header h3 { flex: 1; text-align: center; font-size: 18px; margin-right: 30px; }
+        .header a { color: #333; text-decoration: none; font-size: 20px; }
+
+        .container { padding: 15px; max-width: 500px; margin: 0 auto; }
+
+        .history-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid #ff8c00;
+        }
+
+        .details p { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 4px; }
+        .details span { font-size: 12px; color: #888; display: block; }
+        .details .method-tag { font-size: 11px; color: #ff8c00; font-weight: 600; text-transform: uppercase; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* স্ট্যাটাস কালার */
+        .Pending { background: #fff3cd; color: #856404; }
+        .Approved { background: #d4edda; color: #155724; }
+        .Rejected { background: #f8d7da; color: #721c24; }
+
+        .no-data { text-align: center; margin-top: 50px; color: #888; }
+        .no-data i { font-size: 50px; margin-bottom: 15px; display: block; color: #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="withdraw.html"><i class="fas fa-chevron-left"></i></a>
+        <h3>Withdraw History</h3>
+    </div>
+
+    <div class="container" id="historyContainer">
+        <p style="text-align: center; color: #888; margin-top: 20px;">হিস্টোরি চেক করা হচ্ছে...</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+          authDomain: "ai-signal-75e73.firebaseapp.com",
+          projectId: "ai-signal-75e73",
+          databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const loggedUser = localStorage.getItem("loggedUser");
+
+        window.onload = function() {
+            if (!loggedUser) {
+                alert("দয়া করে লগইন করুন");
+                window.location.href = "login.html";
+                return;
+            }
+            fetchHistory();
+        };
+
+        function fetchHistory() {
+            const container = document.getElementById("historyContainer");
+
+            // 'withdraws' ফোল্ডার থেকে বর্তমান ইউজারের ডাটা ফিল্টার করা
+            database.ref('withdraws').orderByChild('user').equalTo(loggedUser).on('value', (snapshot) => {
+                container.innerHTML = ""; // আগের ডাটা পরিষ্কার করা
+
+                if (snapshot.exists()) {
+                    let historyData = [];
+                    
+                    snapshot.forEach((childSnapshot) => {
+                        historyData.push(childSnapshot.val());
+                    });
+
+                    // নতুন রিকোয়েস্ট উপরে দেখানোর জন্য রিভার্স করা
+                    historyData.reverse().forEach((data) => {
+                        const card = `
+                            <div class="history-card">
+                                <div class="details">
+                                    <p>৳ ${data.amount}</p>
+                                    <span class="method-tag">${data.method} - ${data.receiver_no}</span>
+                                    <span>${data.time}</span>
+                                </div>
+                                <div class="status-badge ${data.status}">
+                                    ${data.status}
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += card;
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <i class="fas fa-folder-open"></i>
+                            <p>এখনো কোনো উইথড্র করা হয়নি।</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
