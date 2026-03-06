@@ -8,51 +8,52 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #121212; color: white; padding-bottom: 80px; }
-        .header-card { background: linear-gradient(135deg, #11998e, #38ef7d); padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; margin-bottom: 20px; }
+        .header-card { background: linear-gradient(135deg, #11998e, #38ef7d); padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .container { padding: 0 15px; }
-        .package-card { background: #1e1e1e; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; }
-        .package-img { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
-        .package-img img { width: 100%; height: 100%; object-fit: cover; }
+        .package-card { background: #1e1e1e; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; position: relative; }
+        .package-img { width: 80px; height: 80px; border-radius: 12px; overflow: hidden; background: #333; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #38ef7d; }
         .package-info { flex: 1; }
         .package-info h2 { font-size: 18px; color: #38ef7d; margin-bottom: 5px; }
-        .price-tag { font-size: 16px; font-weight: bold; color: #38ef7d; float: right; }
-        .activate-btn { background: #11998e; color: white; border: none; padding: 12px; border-radius: 20px; width: 100%; margin-top: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .package-info p { font-size: 13px; color: #bbb; }
+        .price-tag { position: absolute; top: 15px; right: 15px; background: #38ef7d; color: #121212; padding: 2px 10px; border-radius: 10px; font-weight: bold; font-size: 14px; }
+        .activate-btn { background: #11998e; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; margin-top: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .activate-btn:active { transform: scale(0.95); }
+        .back-btn { position: absolute; top: 15px; left: 15px; color: white; text-decoration: none; font-size: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header-card">
-        <h3>Current Account Balance</h3>
+        <a href="home.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <h3>My Earnings Balance</h3>
         <h1>৳ <span id="userBalance">0.00</span></h1>
     </div>
 
-    <div class="container" id="packageDisplay"></div>
+    <div class="container" id="packageDisplay">
+        <p style="text-align: center; color: #888;">Loading available plans...</p>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // আপনার Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
             databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
         };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
-        // সমস্যা সমাধানকারী লাইন: ব্রাউজার থেকে নম্বর খুঁজে বের করা
-        const userPhone = localStorage.getItem("userPhone") || localStorage.getItem("loggedUser"); 
-
+        // লগইন চেক
+        const userPhone = localStorage.getItem("userPhone");
         if (!userPhone) {
-            alert("Please login first!");
-            window.location.href = "login.html"; 
+            alert("Session expired. Please login again.");
+            window.location.href = "index.html";
         }
 
-        function loadData() {
-            // ইউজারের রিয়েল টাইম ব্যালেন্স লোড করা
+        // ডাটা লোড করা
+        function initApp() {
+            // ব্যালেন্স আপডেট
             database.ref('users/' + userPhone).on('value', snapshot => {
                 const userData = snapshot.val();
                 if(userData) {
@@ -60,17 +61,21 @@
                 }
             });
 
-            // এডমিন প্যানেল থেকে প্যাকেজ লোড
+            // প্যাকেজ লোড
             database.ref('packages').on('value', snapshot => {
                 const display = document.getElementById('packageDisplay');
                 display.innerHTML = "";
+                if(!snapshot.exists()) {
+                    display.innerHTML = "<p style='text-align:center;'>No plans available now.</p>";
+                    return;
+                }
                 snapshot.forEach(child => {
                     const p = child.val();
                     display.innerHTML += `
                         <div class="package-card">
-                            <div class="package-img"><img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'"></div>
+                            <span class="price-tag">৳ ${p.price}</span>
+                            <div class="package-img"><i class="fas fa-bolt"></i></div>
                             <div class="package-info">
-                                <span class="price-tag">৳ ${p.price}</span>
                                 <h2>${p.name}</h2>
                                 <p>Daily Income: <b>৳ ${p.daily}</b></p>
                                 <p>Validity: <b>${p.validity} Days</b></p>
@@ -79,32 +84,59 @@
                         </div>`;
                 });
             });
+
+            // অটো ইনকাম চেক
+            checkDailyIncome();
         }
 
-        // প্যাকেজ কেনার ফাংশন
+        // প্যাকেজ ক্রয় লজিক
         window.buyPackage = function(pkgId, price, daily, validity) {
             database.ref('users/' + userPhone).once('value', snapshot => {
-                const balance = snapshot.val() ? snapshot.val().balance : 0;
+                const balance = snapshot.val().balance || 0;
                 if(balance >= price) {
-                    if(confirm("Activate this plan for ৳" + price + "?")) {
-                        const newBalance = balance - price;
+                    if(confirm(`Confirm purchase of ${price} Taka plan?`)) {
                         const startTime = Date.now();
-                        
-                        database.ref('users/' + userPhone).update({ balance: newBalance });
+                        // ব্যালেন্স কমানো
+                        database.ref('users/' + userPhone).update({ balance: balance - price });
+                        // সাবস্ক্রিপশন রেকর্ড
                         database.ref('user_subscriptions/' + userPhone + '/' + pkgId).set({
                             daily_income: daily,
                             last_claim: startTime,
-                            expire_time: startTime + (validity * 24 * 60 * 60 * 1000)
+                            expire_time: startTime + (validity * 24 * 60 * 60 * 1000),
+                            status: "active"
                         });
-                        alert("Activated! Your income will start automatically.");
+                        alert("Plan activated! Your income will start automatically.");
                     }
                 } else {
-                    alert("Insufficient Balance! Need ৳" + price);
+                    alert("Insufficient Balance! Please deposit first.");
                 }
             });
         }
 
-        loadData();
+        // অটোমেটিক ইনকাম ক্যালকুলেশন
+        function checkDailyIncome() {
+            database.ref('user_subscriptions/' + userPhone).once('value', snapshot => {
+                snapshot.forEach(pkg => {
+                    const data = pkg.val();
+                    const now = Date.now();
+                    const oneDay = 24 * 60 * 60 * 1000;
+
+                    if (now < data.expire_time && (now - data.last_claim) >= oneDay) {
+                        const daysToPay = Math.floor((now - data.last_claim) / oneDay);
+                        const totalBonus = daysToPay * data.daily_income;
+
+                        // ব্যালেন্স বাড়ানো
+                        database.ref('users/' + userPhone + '/balance').transaction(current => (current || 0) + totalBonus);
+                        // লাস্ট ক্লেইম আপডেট
+                        database.ref('user_subscriptions/' + userPhone + '/' + pkg.key).update({
+                            last_claim: data.last_claim + (daysToPay * oneDay)
+                        });
+                    }
+                });
+            });
+        }
+
+        initApp();
     </script>
 </body>
 </html>
