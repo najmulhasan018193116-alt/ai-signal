@@ -3,87 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>Home - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
-        .header { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px; }
-        .container { padding: 20px; max-width: 450px; margin: auto; }
-        
-        /* ব্যালেন্স কার্ড */
-        .balance-card { background: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -50px; }
-        .balance-card h3 { margin: 0; color: #888; font-size: 14px; text-transform: uppercase; }
-        .balance-card h1 { margin: 10px 0; color: #333; font-size: 35px; }
-
-        /* অপশন গ্রিড */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
-        .card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
-        .card:active { transform: scale(0.95); background: #fdfdfd; }
-        .card i { font-size: 30px; color: #4facfe; margin-bottom: 10px; display: block; }
-        .card span { font-weight: 600; color: #555; font-size: 15px; }
-
-        /* লগআউট বাটন */
-        .logout-box { margin-top: 40px; text-align: center; }
-        .btn-logout { background: #ff4b2b; color: white; border: none; padding: 12px 50px; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3); }
+        body { font-family: 'Arial', sans-serif; background: #f0f4f7; margin: 0; text-align: center; }
+        .header { background: linear-gradient(135deg, #007bff, #00d4ff); color: white; padding: 40px 20px; border-radius: 0 0 25px 25px; }
+        .balance-card { background: white; width: 85%; margin: -30px auto 20px; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .menu-item { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .menu-item i { font-size: 25px; color: #007bff; margin-bottom: 10px; }
+        .btn-logout { background: #ff4757; color: white; border: none; padding: 12px 40px; border-radius: 25px; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h2 style="margin:0;">স্বাগতম!</h2>
-    <p id="userDisplay" style="margin: 5px 0 0; opacity: 0.9;">লোড হচ্ছে...</p>
+    <h2>স্বাগতম!</h2>
+    <p id="userPhoneDisplay">ফোন নম্বর লোড হচ্ছে...</p>
 </div>
 
-<div class="container">
-    <div class="balance-card">
-        <h3>আপনার বর্তমান ব্যালেন্স</h3>
-        <h1>৳ <span id="balance">0.00</span></h1>
-    </div>
-
-    <div class="grid">
-        <div class="card" onclick="alert('ডিপোজিট সিস্টেম শীঘ্রই আসছে')">
-            <i class="fas fa-wallet"></i>
-            <span>Deposit</span>
-        </div>
-        <div class="card" onclick="alert('উইথড্র সিস্টেম শীঘ্রই আসছে')">
-            <i class="fas fa-money-bill-wave"></i>
-            <span>Withdraw</span>
-        </div>
-        <div class="card" onclick="alert('আপনার প্রোফাইল')">
-            <i class="fas fa-user-circle"></i>
-            <span>Profile</span>
-        </div>
-        <div class="card" onclick="alert('সাপোর্ট টিম')">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
-        </div>
-    </div>
-
-    <div class="logout-box">
-        <button class="btn-logout" onclick="logout()">Logout</button>
-    </div>
+<div class="balance-card">
+    <p style="color: #888; margin: 0;">আপনার ব্যালেন্স</p>
+    <h1 style="margin: 10px 0;">৳ <span id="balance">0.00</span></h1>
 </div>
+
+<div class="menu-grid">
+    <div class="menu-item"><i class="fas fa-plus-circle"></i><br>Deposit</div>
+    <div class="menu-item"><i class="fas fa-minus-circle"></i><br>Withdraw</div>
+    <div class="menu-item"><i class="fas fa-user"></i><br>Profile</div>
+    <div class="menu-item"><i class="fas fa-headset"></i><br>Support</div>
+</div>
+
+<button class="btn-logout" onclick="logout()">Logout</button>
 
 <script>
-    // পেজ লোড হওয়ার সময় চেক করবে লগইন আছে কি না
     window.onload = function() {
         const loginStatus = localStorage.getItem("isLoggedIn");
         const userPhone = localStorage.getItem("loggedUser");
 
+        // যদি লগইন ডাটা না থাকে তবে লগইন পেজে পাঠিয়ে দিবে
         if (loginStatus !== "true" || !userPhone) {
-            // যদি ডাটা না থাকে তবে লগইন পেজে পাঠিয়ে দিবে
             window.location.replace("index.html");
         } else {
-            // ডাটা থাকলে ফোন নম্বর দেখাবে
-            document.getElementById("userDisplay").innerText = "অ্যাকাউন্ট: " + userPhone;
+            document.getElementById("userPhoneDisplay").innerText = "অ্যাকাউন্ট: " + userPhone;
         }
     };
 
     function logout() {
-        if(confirm("আপনি কি নিশ্চিতভাবে লগআউট করতে চান?")) {
-            localStorage.clear(); // সব ডাটা মুছে ফেলা হচ্ছে
-            window.location.replace("index.html");
-        }
+        localStorage.clear();
+        window.location.replace("index.html");
     }
 </script>
 
