@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .method-img { width: 80px; margin-bottom: 10px; }
+        .admin-num { font-size: 22px; font-weight: bold; color: #00b09b; margin: 15px 0; display: block; }
+        .copy-btn { padding: 5px 15px; background: #eee; border-radius: 10px; cursor: pointer; font-size: 12px; }
+        .input-box { text-align: left; margin-top: 20px; }
+        .input-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-top: 8px; }
+        .final-btn { width: 100%; background: #00b09b; color: white; border: none; padding: 15px; border-radius: 10px; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h3 id="methName">bKash Payment</h3>
+        <p style="font-size: 14px; color: #666;">নিচের নম্বরে টাকা <b>Send Money</b> করুন</p>
+        
+        <span class="admin-num" id="adminNumber">01700000000</span> <span class="copy-btn" onclick="copyNum()">Copy Number</span>
+
+        <hr style="margin: 20px 0; opacity: 0.2;">
+
+        <div class="input-box">
+            <label>Transaction ID দিন</label>
+            <input type="text" id="trxID" placeholder="যেমন: 8N2K9L0P">
+        </div>
+
+        <button class="final-btn" onclick="saveToFirebase()">Confirm Deposit</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // আপনার ফায়ারবেস কনফিগ এখানে বসান
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.getElementById("methName").innerText = localStorage.getItem("dep_method") + " Payment";
+
+        function copyNum() {
+            const num = document.getElementById("adminNumber").innerText;
+            navigator.clipboard.writeText(num);
+            alert("নম্বর কপি হয়েছে!");
+        }
+
+        function saveToFirebase() {
+            const trx = document.getElementById("trxID").value;
+            const amt = localStorage.getItem("dep_amt");
+            const method = localStorage.getItem("dep_method");
+            const userNum = localStorage.getItem("user_num");
+
+            if(trx.length < 5) {
+                alert("সঠিক Transaction ID দিন");
+                return;
+            }
+
+            // Firebase এ ডাটা পাঠানো
+            database.ref('deposits/').push({
+                user: userNum,
+                amount: amt,
+                method: method,
+                trxID: trx,
+                status: "Pending",
+                time: new Date().toLocaleString()
+            }).then(() => {
+                alert("ডিপোজিট সফলভাবে সাবমিট হয়েছে! ১০-৩০ মিনিটের মধ্যে ব্যালেন্স যোগ হবে।");
+                window.location.href = "account.html";
+            });
+        }
+    </script>
+</body>
+</html>
+
