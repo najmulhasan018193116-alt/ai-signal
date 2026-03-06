@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Alarm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: #00ff6a; /* আপনার থিম সবুজ */
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* হেডার */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            margin-bottom: 25px;
+        }
+        .header a { color: white; text-decoration: none; font-size: 20px; }
+        .header h2 { font-size: 22px; }
+
+        /* নোটিফিকেশন লিস্ট */
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .alarm-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .alarm-icon {
+            width: 50px;
+            height: 50px;
+            background: #f0f4f7;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #00ff6a;
+        }
+
+        .alarm-info { flex: 1; }
+        .alarm-info h4 { font-size: 16px; color: #333; margin-bottom: 4px; }
+        .alarm-info p { font-size: 13px; color: #777; line-height: 1.4; }
+        .alarm-time { font-size: 11px; color: #bbb; margin-top: 5px; }
+
+        /* খালি থাকলে দেখাবে */
+        .empty-state {
+            text-align: center;
+            color: white;
+            margin-top: 100px;
+            display: none; /* নোটিফিকেশন থাকলে এটি হাইড থাকবে */
+        }
+        .empty-state i { font-size: 60px; margin-bottom: 15px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="home.html"><i class="fas fa-arrow-left"></i></a>
+        <h2>Notifications</h2>
+    </div>
+
+    <div class="notification-list">
+        <div class="alarm-card">
+            <div class="alarm-icon"><i class="fas fa-wallet"></i></div>
+            <div class="alarm-info">
+                <h4>উইথড্র সফল হয়েছে!</h4>
+                <p>আপনার ৫০০ টাকা উইথড্র রিকোয়েস্ট সফলভাবে সম্পন্ন হয়েছে।</p>
+                <div class="alarm-time">২ মিনিট আগে</div>
+            </div>
+        </div>
+
+        <div class="alarm-card">
+            <div class="alarm-icon" style="color: #ffb347;"><i class="fas fa-coins"></i></div>
+            <div class="alarm-info">
+                <h4>ডিপোজিট বোনাস!</h4>
+                <p>নতুন ডিপোজিটে আপনি ১০% অতিরিক্ত বোনাস পেয়েছেন। গেম খেলুন এখনই!</p>
+                <div class="alarm-time">১ ঘণ্টা আগে</div>
+            </div>
+        </div>
+
+        <div class="alarm-card">
+            <div class="alarm-icon" style="color: #ff4b2b;"><i class="fas fa-bullhorn"></i></div>
+            <div class="alarm-info">
+                <h4>সিস্টেম আপডেট</h4>
+                <p>আমাদের অ্যাপে নতুন 'Red Green' গেম যুক্ত করা হয়েছে। চেক করুন!</p>
+                <div class="alarm-time">৫ ঘণ্টা আগে</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state">
+        <i class="fas fa-bell-slash"></i>
+        <p>এখনো কোনো নোটিফিকেশন নেই!</p>
+    </div>
+
+</body>
+</html>
+
