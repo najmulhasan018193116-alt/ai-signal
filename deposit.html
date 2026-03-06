@@ -3,105 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deposit Money</title>
+    <title>Deposit - ai-signal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f7f6; padding-bottom: 30px; }
+        body { background: #f8f9fa; color: #333; }
+
+        /* হেডার স্টাইল */
         .header {
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-            padding: 20px; color: white; display: flex; align-items: center; gap: 15px;
-            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; background: white; border-bottom: 1px solid #eee;
         }
-        .header a { color: white; text-decoration: none; }
-        .container { padding: 20px; }
-        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #333; }
-        .methods { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .header a { color: #333; text-decoration: none; font-size: 18px; }
+        .history-link { color: #666; font-size: 14px; text-decoration: none; cursor: pointer; }
+
+        /* ব্যালেন্স কার্ড */
+        .balance-card {
+            background: linear-gradient(135deg, #ffd700, #ffb900);
+            margin: 15px; padding: 25px; border-radius: 15px; color: #333;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        .balance-card p { font-size: 14px; opacity: 0.8; }
+        .balance-card h2 { font-size: 32px; margin-top: 5px; }
+
+        .container { padding: 0 15px; }
+        .section-title { font-size: 16px; font-weight: bold; margin: 15px 0; color: #555; display: flex; align-items: center; gap: 8px; }
+
+        /* মেথড সিলেকশন */
+        .methods { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .method-card {
-            background: white; padding: 15px 10px; border-radius: 15px; text-align: center;
-            border: 2px solid transparent; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            min-width: 100px; background: white; padding: 15px; border-radius: 12px;
+            text-align: center; border: 2px solid transparent; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s;
         }
-        .method-card img { width: 50px; height: 50px; margin-bottom: 8px; object-fit: contain; }
-        .method-card.active { border-color: #00b09b; background: #e0fff9; }
-        .input-group { background: white; padding: 20px; border-radius: 20px; }
-        .input-box { margin-bottom: 20px; }
+        .method-card img { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 8px; }
+        .method-card p { font-size: 12px; font-weight: 600; }
+        .method-card.active { border-color: #ffb900; background: #fffdf0; }
+
+        /* চ্যানেল লিস্ট */
+        .channel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .channel-card {
+            background: #f1f3f5; padding: 15px; border-radius: 10px;
+            font-size: 13px; color: #666; border: 1.5px solid transparent; cursor: pointer;
+        }
+        .channel-card b { display: block; color: #333; margin-bottom: 4px; font-size: 14px; }
+        .channel-card.active { background: #fff4cc; border-color: #ffb900; color: #856404; }
+
+        /* ইনপুট বক্স */
+        .input-group { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .input-box { margin-bottom: 15px; }
         .input-box label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
         .input-box input {
-            width: 100%; padding: 12px 15px; border: 1px solid #eee; border-radius: 10px; outline: none;
+            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px;
+            outline: none; font-size: 16px; background: #fdfdfd;
         }
-        .amount-chips { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .chip { padding: 8px 15px; background: #eee; border-radius: 20px; font-size: 13px; cursor: pointer; }
+
+        .deposit-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 15px; border-top: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .recharge-info { font-size: 13px; color: #777; }
+        .recharge-info b { color: #333; display: block; }
+
         .submit-btn {
-            width: 100%; background: linear-gradient(135deg, #00b09b, #96c93d); color: white;
-            border: none; padding: 15px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer;
+            background: #ced4da; color: #fff; border: none; padding: 12px 35px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
+        .submit-btn.active { background: #ffb900; color: #333; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="account.html"><i class="fas fa-arrow-left"></i></a>
-        <h2>Deposit Money</h2>
+        <a href="account.html"><i class="fas fa-chevron-left"></i></a>
+        <h3>Deposit</h3>
+        <a href="history.html" class="history-link">Deposit history</a>
+    </div>
+
+    <div class="balance-card">
+        <p><i class="fas fa-wallet"></i> Balance</p>
+        <h2>৳ <span id="currentBalance">24.57</span> <i class="fas fa-sync-alt" style="font-size: 16px; opacity: 0.5;"></i></h2>
     </div>
 
     <div class="container">
-        <p class="section-title">পেমেন্ট মেথড সিলেক্ট করুন</p>
         <div class="methods">
-            <div class="method-card active" onclick="selectMethod(this, 'bKash')">
-                <img src="https://itshamsul.com/wp-content/uploads/2024/02/bkash-logo-circle.png" alt="bKash">
-                <p>bKash</p>
-            </div>
-            <div class="method-card" onclick="selectMethod(this, 'Nagad')">
+            <div class="method-card active" onclick="selectMethod(this, 'Nagad')">
                 <img src="https://freelogopng.com/images/all_img/1679248787nagad-logo-png.png" alt="Nagad">
                 <p>Nagad</p>
             </div>
-            <div class="method-card" onclick="selectMethod(this, 'Rocket')">
-                <img src="https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D1CC458D-seeklogo.com.png" alt="Rocket">
-                <p>Rocket</p>
+            <div class="method-card" onclick="selectMethod(this, 'bKash')">
+                <img src="https://itshamsul.com/wp-content/uploads/2024/02/bkash-logo-circle.png" alt="bKash">
+                <p>bKash</p>
+            </div>
+            <div class="method-card">
+                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
+                <p>USDT</p>
+            </div>
+        </div>
+
+        <p class="section-title"><i class="fas fa-money-bill-wave" style="color: #ffb900;"></i> Select channel</p>
+        <div class="channel-grid">
+            <div class="channel-card active" onclick="selectChannel(this, 'GoPay')">
+                <b>GoPay-Nagad</b>
+                Balance: 500 - 25K
+            </div>
+            <div class="channel-card" onclick="selectChannel(this, 'RolezPay')">
+                <b>RolezPay-nagad</b>
+                Balance: 500 - 30K
             </div>
         </div>
 
         <div class="input-group">
             <div class="input-box">
-                <label>ডিপোজিট পরিমাণ (৳)</label>
-                <input type="number" id="amountInput" placeholder="সর্বনিম্ন ৫০০ টাকা">
-                <div class="amount-chips">
-                    <span class="chip" onclick="setAmount(500)">৳৫০০</span>
-                    <span class="chip" onclick="setAmount(1000)">৳১০০০</span>
-                    <span class="chip" onclick="setAmount(5000)">৳৫০০০</span>
-                </div>
+                <label>আপনার নম্বর দিন</label>
+                <input type="number" id="userNumber" placeholder="যে নম্বর থেকে টাকা পাঠাবেন" oninput="validateForm()">
             </div>
-
             <div class="input-box">
-                <label>আপনার মেথড নম্বর (বিকাশ/নগদ নম্বর)</label>
-                <input type="number" id="userNumber" placeholder="যে নম্বর থেকে টাকা পাঠাবেন">
+                <label>ডিপোজিট পরিমাণ (৳)</label>
+                <input type="number" id="amountInput" placeholder="পরিমাণ লিখুন" oninput="validateForm()">
             </div>
-
-            <button class="submit-btn" onclick="goToPayment()">Submit</button>
         </div>
     </div>
 
-    <script>
-        let selectedMethod = "bKash";
+    <div class="deposit-footer">
+        <div class="recharge-info">
+            Recharge Method: <b id="selectedMethodDisplay">GoPay-Nagad</b>
+        </div>
+        <button id="depositBtn" class="submit-btn" onclick="goToPayment()" disabled>Deposit</button>
+    </div>
 
-        function selectMethod(element, method) {
-            document.querySelectorAll('.method-card').forEach(card => card.classList.remove('active'));
-            element.classList.add('active');
-            selectedMethod = method;
+    <script>
+        let selectedMethod = "Nagad";
+        let selectedChannel = "GoPay";
+
+        function selectMethod(el, m) {
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedMethod = m;
+            updateFooter();
         }
 
-        function setAmount(val) { document.getElementById('amountInput').value = val; }
+        function selectChannel(el, ch) {
+            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedChannel = ch;
+            updateFooter();
+        }
+
+        function updateFooter() {
+            document.getElementById('selectedMethodDisplay').innerText = selectedChannel + "-" + selectedMethod;
+        }
+
+        function validateForm() {
+            const amt = document.getElementById('amountInput').value;
+            const num = document.getElementById('userNumber').value;
+            const btn = document.getElementById('depositBtn');
+            
+            if(amt >= 500 && num.length >= 11) {
+                btn.classList.add('active');
+                btn.disabled = false;
+            } else {
+                btn.classList.remove('active');
+                btn.disabled = true;
+            }
+        }
 
         function goToPayment() {
             const amt = document.getElementById('amountInput').value;
             const num = document.getElementById('userNumber').value;
 
-            if(amt < 500 || num.length < 11) {
-                alert("সঠিক তথ্য দিন। সর্বনিম্ন ৫০০ টাকা।");
-                return;
-            }
-
-            // তথ্যগুলো সেভ করে পরের পেজে পাঠানো
             localStorage.setItem("dep_amt", amt);
             localStorage.setItem("dep_method", selectedMethod);
             localStorage.setItem("user_num", num);
