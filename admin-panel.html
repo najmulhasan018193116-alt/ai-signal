@@ -9,10 +9,14 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; display: flex; }
         
+        /* Login Overlay */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #11998e; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 350px; text-align: center; }
+
         /* Sidebar */
         .sidebar { width: 250px; background: #11998e; height: 100vh; color: white; padding: 20px; position: fixed; }
         .sidebar h2 { margin-bottom: 30px; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
-        .sidebar nav p { padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 5px; }
+        .sidebar nav p { padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .sidebar nav p:hover { background: rgba(255,255,255,0.1); }
         .sidebar nav p.active { background: white; color: #11998e; font-weight: bold; }
 
@@ -21,49 +25,66 @@
         .section { display: none; }
         .section.active { display: block; }
 
-        .admin-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { color: #333; margin-bottom: 20px; }
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #11998e; }
+        .stat-card h4 { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .stat-card h2 { color: #11998e; font-size: 24px; }
 
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+        .admin-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
         th { background: #f8f9fa; color: #666; }
 
-        /* Buttons & Badges */
-        .btn { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #dc3545; color: white; }
-        .status { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .status-Success { background: #d4edda; color: #155724; }
-        .status-Rejected { background: #f8d7da; color: #721c24; }
-        .status-Pending { background: #fff3cd; color: #856404; }
-
-        /* Settings Form */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
     </style>
 </head>
 <body>
 
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2 style="margin-bottom: 20px; color: #11998e;">Admin Login</h2>
+        <div class="input-group">
+            <label>Admin Password</label>
+            <input type="password" id="adminPassInput" placeholder="Enter Password">
+        </div>
+        <button class="btn btn-success" style="width: 100%; padding: 12px;" onclick="checkAdminLogin()">Login</button>
+    </div>
+</div>
+
 <div class="sidebar">
     <h2>Admin Panel</h2>
     <nav>
-        <p class="active" onclick="showSection('deposits')"><i class="fas fa-wallet"></i> Deposits</p>
-        <p onclick="showSection('withdraws')"><i class="fas fa-hand-holding-usd"></i> Withdraws</p>
-        <p onclick="showSection('history')"><i class="fas fa-history"></i> Full History</p>
-        <p onclick="showSection('settings')"><i class="fas fa-cog"></i> Payment Settings</p>
+        <p class="active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</p>
+        <p onclick="showSection('deposits')"><i class="fas fa-wallet"></i> Deposits</p>
+        <p onclick="showSection('withdraws')"><i class="fas fa-hand-holding-usd"></i> Withdrawals</p>
+        <p onclick="showSection('history')"><i class="fas fa-history"></i> Transactions</p>
+        <p onclick="showSection('settings')"><i class="fas fa-cog"></i> Settings</p>
     </nav>
 </div>
 
 <div class="main-content">
     
-    <div id="deposits" class="section active">
+    <div id="dashboard" class="section active">
+        <div class="stats-grid">
+            <div class="stat-card"><h4>Total Deposit</h4><h2>৳ <span id="totalDep">0</span></h2></div>
+            <div class="stat-card"><h4>Total Withdraw</h4><h2>৳ <span id="totalWith">0</span></h2></div>
+            <div class="stat-card"><h4>Total Bonus</h4><h2>৳ <span id="totalBonus">0</span></h2></div>
+            <div class="stat-card"><h4>Total Commission</h4><h2>৳ <span id="totalComm">0</span></h2></div>
+        </div>
+    </div>
+
+    <div id="deposits" class="section">
         <div class="admin-card">
             <h2>Pending Deposits</h2>
-            <table id="depositTable">
-                <thead>
-                    <tr><th>User</th><th>Amount</th><th>TrxID</th><th>Method</th><th>Action</th></tr>
-                </thead>
+            <table>
+                <thead><tr><th>User</th><th>Amount</th><th>TrxID</th><th>Method</th><th>Action</th></tr></thead>
                 <tbody id="depositBody"></tbody>
             </table>
         </div>
@@ -72,10 +93,8 @@
     <div id="withdraws" class="section">
         <div class="admin-card">
             <h2>Pending Withdrawals</h2>
-            <table id="withdrawTable">
-                <thead>
-                    <tr><th>User</th><th>Amount</th><th>Number</th><th>Method</th><th>Action</th></tr>
-                </thead>
+            <table>
+                <thead><tr><th>User</th><th>Amount</th><th>Number</th><th>Method</th><th>Action</th></tr></thead>
                 <tbody id="withdrawBody"></tbody>
             </table>
         </div>
@@ -83,24 +102,28 @@
 
     <div id="history" class="section">
         <div class="admin-card">
-            <h2>All Transactions (Success/Rejected)</h2>
-            <table id="historyTable">
-                <thead>
-                    <tr><th>Type</th><th>User</th><th>Amount</th><th>Status</th><th>Note</th></tr>
-                </thead>
-                <tbody id="historyBody"></tbody>
+            <h3>Deposit History (Success/Rejected)</h3>
+            <table id="depHistoryTable">
+                <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead>
+                <tbody id="depHistoryBody"></tbody>
+            </table>
+        </div>
+        <div class="admin-card">
+            <h3>Withdraw History (Approved/Rejected)</h3>
+            <table id="withHistoryTable">
+                <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Note</th></tr></thead>
+                <tbody id="withHistoryBody"></tbody>
             </table>
         </div>
     </div>
 
     <div id="settings" class="section">
         <div class="admin-card">
-            <h2>Update Admin Payment Numbers</h2>
-            <div class="form-group">
-                <label>Admin bKash Number</label>
-                <input type="text" id="admin_bkash" placeholder="017xxxxxxxx">
-            </div>
-            <button class="btn btn-success" onclick="updateNumbers()">Save Numbers</button>
+            <h2>Payment Numbers (User will see these)</h2>
+            <div class="input-group"><label>bKash Number</label><input type="text" id="setBkash"></div>
+            <div class="input-group"><label>Nagad Number</label><input type="text" id="setNagad"></div>
+            <div class="input-group"><label>Rocket Number</label><input type="text" id="setRocket"></div>
+            <button class="btn btn-success" onclick="updateNumbers()">Update Numbers</button>
         </div>
     </div>
 
@@ -119,105 +142,115 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Section Switcher
+    // Admin Login Logic
+    function checkAdminLogin() {
+        const pass = document.getElementById('adminPassInput').value;
+        if(pass === "123456") { // আপনার পাসওয়ার্ড এখানে দিন
+            document.getElementById('loginOverlay').style.display = "none";
+        } else {
+            alert("Wrong Password!");
+        }
+    }
+
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.sidebar nav p').forEach(p => p.classList.remove('active'));
-        event.target.classList.add('active');
+        event.currentTarget.classList.add('active');
     }
 
-    // --- Deposit Management ---
+    // --- Statistics Calculations ---
+    function updateStats() {
+        let tDep = 0, tWith = 0, tBonus = 0, tComm = 0;
+        
+        database.ref('deposits').once('value', s => {
+            s.forEach(c => { if(c.val().status === "Success") tDep += parseFloat(c.val().amount); });
+            document.getElementById('totalDep').innerText = tDep;
+        });
+        database.ref('withdraws').once('value', s => {
+            s.forEach(c => { if(c.val().status === "Approved") tWith += parseFloat(c.val().amount); });
+            document.getElementById('totalWith').innerText = tWith;
+        });
+        // বোনাস ও কমিশন ইউজারের ডাটাবেস থেকে ক্যালকুলেট হবে (যদি আপনার সিস্টেমে ঐ ফিল্ড থাকে)
+    }
+
+    // --- Data Loaders ---
     database.ref('deposits').on('value', snapshot => {
-        const tbody = document.getElementById('depositBody');
-        const historyBody = document.getElementById('historyBody');
-        tbody.innerHTML = ""; 
+        const depBody = document.getElementById('depositBody');
+        const depHist = document.getElementById('depHistoryBody');
+        depBody.innerHTML = ""; depHist.innerHTML = "";
+        
         snapshot.forEach(child => {
             const d = child.val();
             if(d.status === "Pending") {
-                tbody.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.trxID}</td><td>${d.method}</td>
-                <td><button class="btn btn-success" onclick="approveDep('${child.key}','${d.user}',${d.amount})">Approve</button>
-                <button class="btn btn-danger" onclick="rejectData('deposits','${child.key}')">Reject</button></td></tr>`;
+                depBody.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.trxID}</td><td>${d.method}</td>
+                <td><button class="btn btn-success" onclick="approveDep('${child.key}','${d.user}',${d.amount})">Approve</button></td></tr>`;
+            } else {
+                depHist.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.status}</td><td>${d.time}</td></tr>`;
             }
         });
+        updateStats();
     });
 
-    function approveDep(id, user, amt) {
-        database.ref('users/'+user+'/balance').once('value').then(s => {
-            let newBal = (parseFloat(s.val()) || 0) + parseFloat(amt);
-            database.ref('users/'+user).update({ balance: newBal });
-            database.ref('deposits/'+id).update({ status: "Success" });
-            alert("Deposit Approved!");
-        });
-    }
-
-    // --- Withdraw Management ---
     database.ref('withdraws').on('value', snapshot => {
-        const tbody = document.getElementById('withdrawBody');
-        tbody.innerHTML = "";
+        const withBody = document.getElementById('withdrawBody');
+        const withHist = document.getElementById('withHistoryBody');
+        withBody.innerHTML = ""; withHist.innerHTML = "";
+
         snapshot.forEach(child => {
             const w = child.val();
             if(w.status === "Pending") {
-                tbody.innerHTML += `<tr><td>${w.user}</td><td>${w.amount}</td><td>${w.receiver_no}</td><td>${w.method}</td>
-                <td><button class="btn btn-success" onclick="approveWith('${child.key}')">Success</button>
-                <button class="btn btn-danger" onclick="rejectWithdraw('${child.key}', '${w.user}', ${w.amount})">Reject</button></td></tr>`;
+                withBody.innerHTML += `<tr><td>${w.user}</td><td>${w.amount}</td><td>${w.receiver_no}</td><td>${w.method}</td>
+                <td><button class="btn btn-success" onclick="approveWith('${child.key}')">Approve</button>
+                <button class="btn btn-danger" onclick="rejectWith('${child.key}','${w.user}',${w.amount})">Reject</button></td></tr>`;
+            } else {
+                withHist.innerHTML += `<tr><td>${w.user}</td><td>${w.amount}</td><td>${w.status}</td><td>${w.note || '-'}</td></tr>`;
             }
         });
+        updateStats();
     });
+
+    // --- Logic Functions ---
+    function approveDep(id, user, amt) {
+        database.ref('users/'+user+'/balance').once('value').then(s => {
+            let nBal = (parseFloat(s.val())||0) + parseFloat(amt);
+            database.ref('users/'+user).update({ balance: nBal });
+            database.ref('deposits/'+id).update({ status: "Success" });
+        });
+    }
 
     function approveWith(id) {
         database.ref('withdraws/'+id).update({ status: "Approved" });
-        alert("Withdraw marked as Success!");
     }
 
-    function rejectWithdraw(id, user, amt) {
-        let reason = prompt("রিজেক্ট করার কারণ লিখুন:");
+    function rejectWith(id, user, amt) {
+        let reason = prompt("Reason for rejection:");
         if(reason) {
             database.ref('users/'+user+'/balance').once('value').then(s => {
-                let refundBal = (parseFloat(s.val()) || 0) + parseFloat(amt);
-                database.ref('users/'+user).update({ balance: refundBal }); // টাকা ফেরত দেওয়া
+                let rBal = (parseFloat(s.val())||0) + parseFloat(amt);
+                database.ref('users/'+user).update({ balance: rBal });
                 database.ref('withdraws/'+id).update({ status: "Rejected", note: reason });
-                alert("Withdraw Rejected & Refunded.");
             });
         }
     }
 
-    // --- History Loader ---
-    function loadHistory() {
-        const hBody = document.getElementById('historyBody');
-        hBody.innerHTML = "";
-        
-        // Deposits History
-        database.ref('deposits').once('value', snap => {
-            snap.forEach(c => {
-                const d = c.val();
-                if(d.status !== "Pending") {
-                    hBody.innerHTML += `<tr><td>Deposit</td><td>${d.user}</td><td>${d.amount}</td><td><span class="status status-${d.status}">${d.status}</span></td><td>-</td></tr>`;
-                }
-            });
-        });
-
-        // Withdraw History
-        database.ref('withdraws').once('value', snap => {
-            snap.forEach(c => {
-                const d = c.val();
-                if(d.status !== "Pending") {
-                    hBody.innerHTML += `<tr><td>Withdraw</td><td>${d.user}</td><td>${d.amount}</td><td><span class="status status-${d.status}">${d.status}</span></td><td>${d.note || '-'}</td></tr>`;
-                }
-            });
-        });
-    }
-    setInterval(loadHistory, 5000); // প্রতি ৫ সেকেন্ডে হিস্টোরি আপডেট
-
-    // --- Settings (Number Update) ---
     function updateNumbers() {
-        const num = document.getElementById('admin_bkash').value;
-        database.ref('admin_settings').update({ bkash_number: num }).then(() => alert("Number Updated!"));
+        const b = document.getElementById('setBkash').value;
+        const n = document.getElementById('setNagad').value;
+        const r = document.getElementById('setRocket').value;
+        database.ref('admin_settings/numbers').update({ bkash: b, nagad: n, rocket: r })
+        .then(() => alert("Numbers Updated!"));
     }
 
-    function rejectData(ref, id) {
-        database.ref(ref+'/'+id).update({ status: "Rejected" });
-    }
+    // লোড হওয়া মাত্র নম্বরগুলো ইনপুট বক্সে দেখানো
+    database.ref('admin_settings/numbers').once('value', s => {
+        const d = s.val();
+        if(d) {
+            document.getElementById('setBkash').value = d.bkash || "";
+            document.getElementById('setNagad').value = d.nagad || "";
+            document.getElementById('setRocket').value = d.rocket || "";
+        }
+    });
 </script>
 
 </body>
