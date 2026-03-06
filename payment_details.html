@@ -9,16 +9,14 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; padding-bottom: 50px; }
 
-        /* হেডার স্টাইল */
         .top-header { text-align: center; padding: 30px 0; background: #fff; margin-bottom: 20px; }
         .top-header h1 { font-size: 28px; color: #333; margin-bottom: 5px; }
         .top-header p { font-size: 14px; color: #888; }
 
         .container { width: 92%; max-width: 500px; margin: 0 auto; }
 
-        /* মেইন পেমেন্ট কার্ড */
         .payment-card {
-            background: #ff8c00; /* স্ক্রিনশটের মতো অরেঞ্জ থিম */
+            background: #ff8c00; 
             border-radius: 15px;
             padding: 25px;
             color: white;
@@ -27,22 +25,8 @@
 
         .payment-card h4 { font-size: 15px; line-height: 1.6; margin-bottom: 20px; text-align: center; font-weight: 500; }
 
-        /* ইনফো বক্স */
-        .info-box {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            color: #333;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
+        .info-box { background: white; border-radius: 12px; padding: 20px; color: #333; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
         .info-row:last-child { border-bottom: none; }
 
         .label { color: #666; font-size: 14px; display: flex; align-items: center; gap: 8px; }
@@ -50,48 +34,23 @@
         
         .method-tag { background: #fff0e0; color: #ff8c00; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
         .copy-icon { color: #aaa; cursor: pointer; transition: 0.3s; }
-        .copy-icon:active { color: #ff8c00; transform: scale(1.2); }
 
-        /* ইনপুট এবং বাটন */
         .trx-section { margin-top: 25px; }
         .trx-section label { display: block; color: white; margin-bottom: 10px; font-size: 14px; }
         
-        .trx-input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
+        .trx-input { width: 100%; padding: 15px; border-radius: 8px; border: none; outline: none; font-size: 16px; margin-bottom: 20px; }
 
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            background: #e67e00;
-            color: white;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        .submit-btn { width: 100%; padding: 15px; border: none; background: #e67e00; color: white; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-        .submit-btn:active { transform: scale(0.98); background: #cc7000; }
-
-        /* ইন্সট্রাকশন */
         .instruction { margin-top: 30px; }
         .instruction h3 { font-size: 16px; color: #0056b3; margin-bottom: 15px; border-bottom: 2px solid #0056b3; display: inline-block; }
-        .instruction ol { padding-left: 20px; }
         .instruction li { font-size: 13px; color: #555; margin-bottom: 12px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
     <div class="top-header">
-        <h1>Payment</h1>
+        <h1>Payment Details</h1>
         <p id="currentTime">Loading time...</p>
     </div>
 
@@ -102,22 +61,15 @@
             <div class="info-box">
                 <div class="info-row">
                     <span class="label">ওয়ালেট</span>
-                    <span class="value">
-                        <span id="displayMethod" class="method-tag">Loading...</span>
-                    </span>
+                    <span class="value"><span id="displayMethod" class="method-tag">Loading...</span></span>
                 </div>
                 <div class="info-row">
                     <span class="label">সংখ্যা</span>
-                    <span class="value">
-                        <span id="adminNumber">01819311694</span> <i class="far fa-copy copy-icon" onclick="copyText('adminNumber')"></i>
-                    </span>
+                    <span class="value"><span id="adminNumber">01819311694</span> <i class="far fa-copy copy-icon" onclick="copyText('adminNumber')"></i></span>
                 </div>
                 <div class="info-row">
                     <span class="label">পরিমাণ</span>
-                    <span class="value" style="color: #28a745;">
-                        <span id="displayAmount">00</span>
-                        <i class="far fa-copy copy-icon" onclick="copyText('displayAmount')"></i>
-                    </span>
+                    <span class="value" style="color: #28a745;"><span id="displayAmount">00</span> <i class="far fa-copy copy-icon" onclick="copyText('displayAmount')"></i></span>
                 </div>
             </div>
 
@@ -131,8 +83,8 @@
         <div class="instruction">
             <h3>ব্যাখ্যা:</h3>
             <ol>
-                <li><b>ওয়ালেট জমা ব্যবহারকারীদের জন্য নির্দেশিকা:</b> নির্দেশিকা ম্যাচিং প্রক্রিয়া সম্পন্ন হওয়ার পর এবং নির্ধারিত নিয়ন্ত্রিত ওয়ালেট অ্যাকাউন্ট প্রাপ্তির পর বিনিয়োগকারীদের অবশ্যই তাদের ব্যক্তিগত ওয়ালেট অ্যাকাউন্ট ব্যবহার করে অর্থ প্রেরণ করতে হবে।</li>
-                <li><b>অর্থ প্রেরণ ও জমা নিশ্চিতকরণ প্রক্রিয়া:</b> অর্থ প্রেরণের পর প্রাপ্ত TrxID টি সঠিকভাবে ইনপুট বক্সে দিয়ে "জমা দিন" বাটনে ক্লিক করুন।</li>
+                <li>অর্থ প্রেরণের পর প্রাপ্ত TrxID টি সঠিকভাবে ইনপুট বক্সে দিন।</li>
+                <li>"জমা দিন" বাটনে ক্লিক করার পর অ্যাডমিন আপনার পেমেন্ট যাচাই করে ব্যালেন্স যোগ করে দিবে।</li>
             </ol>
         </div>
     </div>
@@ -141,22 +93,16 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // আপনার Firebase Config
         const firebaseConfig = {
           apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
           authDomain: "ai-signal-75e73.firebaseapp.com",
           projectId: "ai-signal-75e73",
-          storageBucket: "ai-signal-75e73.firebasestorage.app",
-          messagingSenderId: "610985325221",
-          appId: "1:610985325221:web:16e2600afb3b3698ae534c",
-          measurementId: "G-5X29WBQHJK",
           databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
         };
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // পেজ লোড হলে ডাটা বসানো
         window.onload = function() {
             document.getElementById("displayMethod").innerText = localStorage.getItem("dep_method") || "bKash";
             document.getElementById("displayAmount").innerText = localStorage.getItem("dep_amt") || "0";
@@ -169,28 +115,41 @@
             alert("কপি হয়েছে!");
         }
 
+        // আপনার কাঙ্ক্ষিত নতুন ফাংশন
         function saveToFirebase() {
+            // ১. লগইন করা ইউজারের আইডি (যার অ্যাকাউন্টে টাকা জমা হবে)
+            const loggedUser = localStorage.getItem("loggedUser"); 
+            
+            // ২. যে নম্বর থেকে টাকা পাঠানো হয়েছে (যেকোনো নম্বর হতে পারে)
+            const senderNo = localStorage.getItem("user_num"); 
+            
             const trx = document.getElementById("trxID").value;
             const amt = localStorage.getItem("dep_amt");
             const method = localStorage.getItem("dep_method");
-            const userNum = localStorage.getItem("user_num");
+
+            if(!loggedUser) {
+                alert("ত্রুটি: আপনি লগইন করা নেই। দয়া করে লগইন করুন।");
+                return;
+            }
 
             if(trx.length < 5) {
                 alert("সঠিক Transaction ID দিন");
                 return;
             }
 
+            // ডাটাবেসে রিকোয়েস্ট পাঠানো
             database.ref('deposits/').push({
-                user: userNum,
+                user: loggedUser,      // এটিই মেইন আইডি, যা অ্যাডমিন প্যানেল ব্যালেন্স যোগ করতে ব্যবহার করবে
+                sender_no: senderNo,   // এটি শুধু আপনার দেখার জন্য, কোন নম্বর থেকে টাকা এসেছে
                 amount: amt,
                 method: method,
                 trxID: trx,
                 status: "Pending",
                 time: new Date().toLocaleString()
             }).then(() => {
-                alert("সফলভাবে জমা হয়েছে!");
+                alert("আপনার ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
                 window.location.href = "account.html";
-            }).catch((err) => alert(err.message));
+            }).catch((err) => alert("ভুল হয়েছে: " + err.message));
         }
     </script>
 </body>
