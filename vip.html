@@ -18,11 +18,11 @@
         .btn-add:hover { background: #218838; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
         th { background: #007bff; color: white; }
         
         .delete-btn { color: #dc3545; cursor: pointer; font-size: 18px; border: none; background: none; }
-        .status-active { color: #28a745; font-weight: bold; }
+        .pkg-img-preview { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #eee; }
     </style>
 </head>
 <body>
@@ -34,6 +34,8 @@
         <input type="number" id="pPrice" placeholder="প্যাকেজের দাম (৳)">
         <input type="number" id="pDaily" placeholder="প্রতিদিনের ইনকাম (৳)">
         <input type="number" id="pValidity" placeholder="মেয়াদ (দিন)">
+        <input type="text" id="pImage" placeholder="ইমেজ লিঙ্ক (Image URL)">
+        
         <button class="btn btn-add" onclick="addPackage()">প্যাকেজ সেভ করুন</button>
     </div>
 
@@ -42,6 +44,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>ছবি</th>
                     <th>নাম</th>
                     <th>দাম</th>
                     <th>ইনকাম</th>
@@ -59,7 +62,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-    // আপনার Firebase কনফিগারেশন
     const firebaseConfig = {
         apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
         databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
@@ -67,12 +69,13 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const database = firebase.database();
 
-    // প্যাকেজ যোগ করার ফাংশন
+    // প্যাকেজ যোগ করার ফাংশন (ইমেজসহ)
     function addPackage() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
         const daily = document.getElementById('pDaily').value;
         const validity = document.getElementById('pValidity').value;
+        const image = document.getElementById('pImage').value; // ইমেজ ইনপুট নেওয়া
 
         if (!name || !price || !daily || !validity) {
             alert("সবগুলো ঘর পূরণ করুন!");
@@ -84,13 +87,15 @@
             name: name,
             price: parseInt(price),
             daily: parseInt(daily),
-            validity: parseInt(validity)
+            validity: parseInt(validity),
+            image: image || "" // ডাটাবেসে ইমেজ সেভ করা
         }).then(() => {
             alert("প্যাকেজটি সফলভাবে যোগ হয়েছে!");
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
             document.getElementById('pDaily').value = '';
             document.getElementById('pValidity').value = '';
+            document.getElementById('pImage').value = '';
         });
     }
 
@@ -104,8 +109,14 @@
                 const pkg = childSnapshot.val();
                 const key = childSnapshot.key;
                 
+                // ইমেজ প্রিভিউ লজিক
+                const imgDisplay = pkg.image 
+                    ? `<img src="${pkg.image}" class="pkg-img-preview" onerror="this.src='https://via.placeholder.com/50'">` 
+                    : `<i class="fas fa-image" style="font-size:30px; color:#ccc;"></i>`;
+
                 tableBody.innerHTML += `
                     <tr>
+                        <td>${imgDisplay}</td>
                         <td>${pkg.name}</td>
                         <td>৳${pkg.price}</td>
                         <td>৳${pkg.daily}</td>
@@ -119,11 +130,10 @@
                 `;
             });
         } else {
-            tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>কোনো প্যাকেজ পাওয়া যায়নি।</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>কোনো প্যাকেজ পাওয়া যায়নি।</td></tr>";
         }
     });
 
-    // প্যাকেজ ডিলিট করার ফাংশন
     function deletePackage(key) {
         if (confirm("আপনি কি নিশ্চিতভাবে এই প্যাকেজটি মুছে ফেলতে চান?")) {
             database.ref('packages/' + key).remove();
