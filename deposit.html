@@ -7,70 +7,61 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f8f9fa; color: #333; }
+        body { background: #F4F6F9; color: #333; padding-bottom: 90px; }
 
-        /* হেডার স্টাইল */
         .header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; background: white; border-bottom: 1px solid #eee;
         }
-        .header a { color: #333; text-decoration: none; font-size: 18px; }
-        .history-link { color: #666; font-size: 14px; text-decoration: none; cursor: pointer; }
+        .header h3 { font-size: 18px; font-weight: 600; }
+        .header a { color: #333; text-decoration: none; }
 
-        /* ব্যালেন্স কার্ড */
         .balance-card {
-            background: linear-gradient(135deg, #ffd700, #ffb900);
-            margin: 15px; padding: 25px; border-radius: 15px; color: #333;
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, #FFD700, #FDB931);
+            margin: 15px; padding: 25px; border-radius: 16px; color: #222;
+            box-shadow: 0 8px 20px rgba(253, 185, 49, 0.3);
         }
-        .balance-card p { font-size: 14px; opacity: 0.8; }
-        .balance-card h2 { font-size: 32px; margin-top: 5px; }
+        .balance-card h2 { font-size: 32px; margin-top: 5px; font-weight: 700; }
 
         .container { padding: 0 15px; }
-        .section-title { font-size: 16px; font-weight: bold; margin: 15px 0; color: #555; display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 15px; font-weight: 700; margin: 20px 0 12px; color: #444; display: flex; align-items: center; gap: 8px; }
 
-        /* মেথড সিলেকশন */
-        .methods { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        /* পেমেন্ট মেথড বাটনগুলো - ৪টি অপশন */
+        .methods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .method-card {
-            min-width: 100px; background: white; padding: 15px; border-radius: 12px;
+            background: white; padding: 12px 5px; border-radius: 12px;
             text-align: center; border: 2px solid transparent; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); transition: 0.3s;
         }
-        .method-card img { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 8px; }
-        .method-card p { font-size: 12px; font-weight: 600; }
-        .method-card.active { border-color: #ffb900; background: #fffdf0; }
+        .method-card img { width: 35px; height: 35px; margin-bottom: 6px; border-radius: 6px; object-fit: contain; }
+        .method-card p { font-size: 11px; font-weight: 700; color: #555; }
+        .method-card.active { border-color: #FDB931; background: #FFF9E7; }
 
-        /* চ্যানেল লিস্ট */
-        .channel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .channel-card {
-            background: #f1f3f5; padding: 15px; border-radius: 10px;
-            font-size: 13px; color: #666; border: 1.5px solid transparent; cursor: pointer;
+        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .amount-chip {
+            background: white; padding: 12px; border-radius: 10px; text-align: center;
+            font-weight: 600; color: #666; border: 1.5px solid #eee; cursor: pointer;
         }
-        .channel-card b { display: block; color: #333; margin-bottom: 4px; font-size: 14px; }
-        .channel-card.active { background: #fff4cc; border-color: #ffb900; color: #856404; }
+        .amount-chip.active { background: #FFF4CC; border-color: #FDB931; color: #856404; }
 
-        /* ইনপুট বক্স */
-        .input-group { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .input-group { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .input-box { margin-bottom: 15px; }
         .input-box label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
         .input-box input {
-            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px;
-            outline: none; font-size: 16px; background: #fdfdfd;
+            width: 100%; padding: 14px; border: 1px solid #EAEAEA; border-radius: 10px;
+            outline: none; font-size: 16px; background: #FAFAFA;
         }
 
         .deposit-footer {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: white; padding: 15px; border-top: 1px solid #eee;
+            background: white; padding: 15px 20px; border-top: 1px solid #EEE;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .recharge-info { font-size: 13px; color: #777; }
-        .recharge-info b { color: #333; display: block; }
-
         .submit-btn {
-            background: #ced4da; color: #fff; border: none; padding: 12px 35px;
-            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            background: #E0E0E0; color: #AAA; border: none; padding: 14px 40px;
+            border-radius: 10px; font-weight: 700; cursor: pointer;
         }
-        .submit-btn.active { background: #ffb900; color: #333; }
+        .submit-btn.active { background: #FDB931; color: #222; }
     </style>
 </head>
 <body>
@@ -78,89 +69,88 @@
     <div class="header">
         <a href="account.html"><i class="fas fa-chevron-left"></i></a>
         <h3>Deposit</h3>
-        <a href="history.html" class="history-link">Deposit history</a>
+        <a href="history.html" style="font-size: 13px; color: #666;">Deposit history</a>
     </div>
 
     <div class="balance-card">
-        <p><i class="fas fa-wallet"></i> Balance</p>
-        <h2>৳ <span id="currentBalance">24.57</span> <i class="fas fa-sync-alt" style="font-size: 16px; opacity: 0.5;"></i></h2>
+        <p><i class="fas fa-wallet"></i> Total Balance</p>
+        <h2>৳ <span id="currentBalance">24.57</span></h2>
     </div>
 
     <div class="container">
+        <p class="section-title"><i class="fas fa-university" style="color: #FDB931;"></i> Select Method</p>
         <div class="methods">
             <div class="method-card active" onclick="selectMethod(this, 'Nagad')">
-                <img src="https://freelogopng.com/images/all_img/1679248787nagad-logo-png.png" alt="Nagad">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Nagad_Logo.svg/1200px-Nagad_Logo.svg.png" alt="Nagad">
                 <p>Nagad</p>
             </div>
             <div class="method-card" onclick="selectMethod(this, 'bKash')">
                 <img src="https://itshamsul.com/wp-content/uploads/2024/02/bkash-logo-circle.png" alt="bKash">
                 <p>bKash</p>
             </div>
-            <div class="method-card">
+            <div class="method-card" onclick="selectMethod(this, 'Rocket')">
+                <img src="https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D1CC458D-seeklogo.com.png" alt="Rocket">
+                <p>Rocket</p>
+            </div>
+            <div class="method-card" onclick="selectMethod(this, 'USDT')">
                 <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
                 <p>USDT</p>
             </div>
         </div>
 
-        <p class="section-title"><i class="fas fa-money-bill-wave" style="color: #ffb900;"></i> Select channel</p>
-        <div class="channel-grid">
-            <div class="channel-card active" onclick="selectChannel(this, 'GoPay')">
-                <b>GoPay-Nagad</b>
-                Balance: 500 - 25K
-            </div>
-            <div class="channel-card" onclick="selectChannel(this, 'RolezPay')">
-                <b>RolezPay-nagad</b>
-                Balance: 500 - 30K
-            </div>
+        <p class="section-title"><i class="fas fa-coins" style="color: #FDB931;"></i> Amount</p>
+        <div class="amount-grid">
+            <div class="amount-chip" onclick="setAmount(this, 100)">৳100</div>
+            <div class="amount-chip" onclick="setAmount(this, 500)">৳500</div>
+            <div class="amount-chip" onclick="setAmount(this, 1000)">৳1000</div>
+            <div class="amount-chip" onclick="setAmount(this, 3000)">৳3000</div>
+            <div class="amount-chip" onclick="setAmount(this, 5000)">৳5000</div>
+            <div class="amount-chip" onclick="setAmount(this, 10000)">৳10000</div>
         </div>
 
         <div class="input-group">
             <div class="input-box">
-                <label>আপনার নম্বর দিন</label>
-                <input type="number" id="userNumber" placeholder="যে নম্বর থেকে টাকা পাঠাবেন" oninput="validateForm()">
+                <label>অ্যামাউন্ট (৳১০০ - ৳২৫,০০০)</label>
+                <input type="number" id="amountInput" placeholder="পরিমাণ লিখুন" oninput="validateForm()">
             </div>
             <div class="input-box">
-                <label>ডিপোজিট পরিমাণ (৳)</label>
-                <input type="number" id="amountInput" placeholder="পরিমাণ লিখুন" oninput="validateForm()">
+                <label>আপনার নম্বর দিন</label>
+                <input type="number" id="userNumber" placeholder="যে নম্বর থেকে পাঠাবেন" oninput="validateForm()">
             </div>
         </div>
     </div>
 
     <div class="deposit-footer">
         <div class="recharge-info">
-            Recharge Method: <b id="selectedMethodDisplay">GoPay-Nagad</b>
+            <p>Method:</p>
+            <b id="selectedMethodDisplay">Nagad Fast</b>
         </div>
         <button id="depositBtn" class="submit-btn" onclick="goToPayment()" disabled>Deposit</button>
     </div>
 
     <script>
         let selectedMethod = "Nagad";
-        let selectedChannel = "GoPay";
 
         function selectMethod(el, m) {
             document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             selectedMethod = m;
-            updateFooter();
+            document.getElementById('selectedMethodDisplay').innerText = m + " Fast";
+            validateForm();
         }
 
-        function selectChannel(el, ch) {
-            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+        function setAmount(el, val) {
+            document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
-            selectedChannel = ch;
-            updateFooter();
-        }
-
-        function updateFooter() {
-            document.getElementById('selectedMethodDisplay').innerText = selectedChannel + "-" + selectedMethod;
+            document.getElementById('amountInput').value = val;
+            validateForm();
         }
 
         function validateForm() {
             const amt = document.getElementById('amountInput').value;
             const num = document.getElementById('userNumber').value;
             const btn = document.getElementById('depositBtn');
-            
-            if(amt >= 500 && num.length >= 11) {
+            if(amt >= 100 && amt <= 25000 && num.length >= 11) {
                 btn.classList.add('active');
                 btn.disabled = false;
             } else {
@@ -170,13 +160,9 @@
         }
 
         function goToPayment() {
-            const amt = document.getElementById('amountInput').value;
-            const num = document.getElementById('userNumber').value;
-
-            localStorage.setItem("dep_amt", amt);
+            localStorage.setItem("dep_amt", document.getElementById('amountInput').value);
             localStorage.setItem("dep_method", selectedMethod);
-            localStorage.setItem("user_num", num);
-            
+            localStorage.setItem("user_num", document.getElementById('userNumber').value);
             window.location.href = "payment_details.html";
         }
     </script>
