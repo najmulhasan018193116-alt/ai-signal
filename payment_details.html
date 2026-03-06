@@ -3,43 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Details</title>
+    <title>Payment - ai-signal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f0f2f5; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .admin-num { font-size: 22px; font-weight: bold; color: #00b09b; margin: 15px 0; display: block; }
-        .copy-btn { padding: 5px 15px; background: #eee; border-radius: 10px; cursor: pointer; font-size: 12px; }
-        .input-box { text-align: left; margin-top: 20px; }
-        .input-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-top: 8px; }
-        .final-btn { width: 100%; background: #00b09b; color: white; border: none; padding: 15px; border-radius: 10px; margin-top: 20px; font-weight: bold; }
+        body { background: #f0f2f5; padding-bottom: 50px; }
+
+        /* হেডার স্টাইল */
+        .top-header { text-align: center; padding: 30px 0; background: #fff; margin-bottom: 20px; }
+        .top-header h1 { font-size: 28px; color: #333; margin-bottom: 5px; }
+        .top-header p { font-size: 14px; color: #888; }
+
+        .container { width: 92%; max-width: 500px; margin: 0 auto; }
+
+        /* মেইন পেমেন্ট কার্ড */
+        .payment-card {
+            background: #ff8c00; /* স্ক্রিনশটের মতো অরেঞ্জ থিম */
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .payment-card h4 { font-size: 15px; line-height: 1.6; margin-bottom: 20px; text-align: center; font-weight: 500; }
+
+        /* ইনফো বক্স */
+        .info-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            color: #333;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .label { color: #666; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .value { font-weight: 700; font-size: 16px; color: #333; display: flex; align-items: center; gap: 10px; }
+        
+        .method-tag { background: #fff0e0; color: #ff8c00; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+        .copy-icon { color: #aaa; cursor: pointer; transition: 0.3s; }
+        .copy-icon:active { color: #ff8c00; transform: scale(1.2); }
+
+        /* ইনপুট এবং বাটন */
+        .trx-section { margin-top: 25px; }
+        .trx-section label { display: block; color: white; margin-bottom: 10px; font-size: 14px; }
+        
+        .trx-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            background: #e67e00;
+            color: white;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:active { transform: scale(0.98); background: #cc7000; }
+
+        /* ইন্সট্রাকশন */
+        .instruction { margin-top: 30px; }
+        .instruction h3 { font-size: 16px; color: #0056b3; margin-bottom: 15px; border-bottom: 2px solid #0056b3; display: inline-block; }
+        .instruction ol { padding-left: 20px; }
+        .instruction li { font-size: 13px; color: #555; margin-bottom: 12px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h3 id="methName">Payment</h3>
-        <p style="font-size: 14px; color: #666;">নিচের নম্বরে টাকা <b>Send Money</b> করুন</p>
-        
-        <span class="admin-num" id="adminNumber">017XXXXXXXX</span> 
-        <span class="copy-btn" onclick="copyNum()">Copy Number</span>
+    <div class="top-header">
+        <h1>Payment</h1>
+        <p id="currentTime">Loading time...</p>
+    </div>
 
-        <hr style="margin: 20px 0; opacity: 0.2;">
+    <div class="container">
+        <div class="payment-card">
+            <h4>অনুগ্রহ করে একই পরিমাণ স্থানান্তর করুন এবং ব্যর্থ এড়াতে সঠিক TxnID পূরণ করুন</h4>
+            
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="label">ওয়ালেট</span>
+                    <span class="value">
+                        <span id="displayMethod" class="method-tag">Loading...</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="label">সংখ্যা</span>
+                    <span class="value">
+                        <span id="adminNumber">01819311694</span> <i class="far fa-copy copy-icon" onclick="copyText('adminNumber')"></i>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="label">পরিমাণ</span>
+                    <span class="value" style="color: #28a745;">
+                        <span id="displayAmount">00</span>
+                        <i class="far fa-copy copy-icon" onclick="copyText('displayAmount')"></i>
+                    </span>
+                </div>
+            </div>
 
-        <div class="input-box">
-            <label>Transaction ID দিন</label>
-            <input type="text" id="trxID" placeholder="যেমন: 8N2K9L0P">
+            <div class="trx-section">
+                <label>সম্পূর্ণ করতে দয়া করে TxnID লিখুন</label>
+                <input type="text" id="trxID" class="trx-input" placeholder="Transaction ID এখানে দিন">
+                <button class="submit-btn" onclick="saveToFirebase()">জমা দিন</button>
+            </div>
         </div>
 
-        <button class="final-btn" onclick="saveToFirebase()">Confirm Deposit</button>
+        <div class="instruction">
+            <h3>ব্যাখ্যা:</h3>
+            <ol>
+                <li><b>ওয়ালেট জমা ব্যবহারকারীদের জন্য নির্দেশিকা:</b> নির্দেশিকা ম্যাচিং প্রক্রিয়া সম্পন্ন হওয়ার পর এবং নির্ধারিত নিয়ন্ত্রিত ওয়ালেট অ্যাকাউন্ট প্রাপ্তির পর বিনিয়োগকারীদের অবশ্যই তাদের ব্যক্তিগত ওয়ালেট অ্যাকাউন্ট ব্যবহার করে অর্থ প্রেরণ করতে হবে।</li>
+                <li><b>অর্থ প্রেরণ ও জমা নিশ্চিতকরণ প্রক্রিয়া:</b> অর্থ প্রেরণের পর প্রাপ্ত TrxID টি সঠিকভাবে ইনপুট বক্সে দিয়ে "জমা দিন" বাটনে ক্লিক করুন।</li>
+            </ol>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // আপনার দেওয়া কনফিগ এখানে সেট করা হয়েছে
+        // আপনার Firebase Config
         const firebaseConfig = {
           apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
           authDomain: "ai-signal-75e73.firebaseapp.com",
@@ -48,20 +150,23 @@
           messagingSenderId: "610985325221",
           appId: "1:610985325221:web:16e2600afb3b3698ae534c",
           measurementId: "G-5X29WBQHJK",
-          databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" // এটি আপনার ডাটাবেস ইউআরএল
+          databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // মেথড নাম দেখানো
-        document.getElementById("methName").innerText = (localStorage.getItem("dep_method") || "bKash") + " Payment";
+        // পেজ লোড হলে ডাটা বসানো
+        window.onload = function() {
+            document.getElementById("displayMethod").innerText = localStorage.getItem("dep_method") || "bKash";
+            document.getElementById("displayAmount").innerText = localStorage.getItem("dep_amt") || "0";
+            document.getElementById("currentTime").innerText = new Date().toLocaleString();
+        };
 
-        function copyNum() {
-            const num = document.getElementById("adminNumber").innerText;
-            navigator.clipboard.writeText(num);
-            alert("নম্বর কপি হয়েছে!");
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            alert("কপি হয়েছে!");
         }
 
         function saveToFirebase() {
@@ -75,7 +180,6 @@
                 return;
             }
 
-            // ডাটাবেসে সেভ করা
             database.ref('deposits/').push({
                 user: userNum,
                 amount: amt,
@@ -84,11 +188,9 @@
                 status: "Pending",
                 time: new Date().toLocaleString()
             }).then(() => {
-                alert("ডিপোজিট সফলভাবে সাবমিট হয়েছে!");
+                alert("সফলভাবে জমা হয়েছে!");
                 window.location.href = "account.html";
-            }).catch((error) => {
-                alert("Error: " + error.message);
-            });
+            }).catch((err) => alert(err.message));
         }
     </script>
 </body>
