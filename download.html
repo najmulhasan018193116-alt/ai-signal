@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download App</title>
+    <link rel="manifest" href="manifest.json"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #00ff6a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        
+        .download-card { background: white; padding: 40px 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 350px; }
+        .app-icon { width: 80px; height: 80px; background: #00ff6a; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; }
+        
+        h2 { color: #333; margin-bottom: 10px; }
+        p { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+        .btn-install {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white; border: none; padding: 15px 30px; border-radius: 30px;
+            font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .back-home { margin-top: 20px; display: block; color: #888; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="download-card">
+        <div class="app-icon"><i class="fas fa-gamepad"></i></div>
+        <h2>ইন্সটল করুন</h2>
+        <p>সরাসরি আপনার মোবাইলে অ্যাপ হিসেবে ব্যবহার করতে নিচের বাটনে ক্লিক করুন।</p>
+        
+        <button id="installBtn" class="btn-install">
+            <i class="fab fa-chrome"></i> Install App
+        </button>
+
+        <a href="home.html" class="back-home">ফিরে যান</a>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // ব্রাউজারের ডিফল্ট পপ-আপ আটকানো
+            e.preventDefault();
+            deferredPrompt = e;
+            // বাটনটি দেখান
+            installBtn.style.display = 'flex';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                }
+                deferredPrompt = null;
+            } else {
+                alert("আপনার ব্রাউজারে এটি সরাসরি সাপোর্ট করছে না। ক্রোম ব্রাউজারের মেনু (তিনটি ডট) থেকে 'Install App' বা 'Add to Home Screen' এ ক্লিক করুন।");
+            }
+        });
+    </script>
+</body>
+</html>
 
