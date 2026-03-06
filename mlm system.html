@@ -1,1 +1,160 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earning Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #121212; color: white; padding-bottom: 80px; overflow-x: hidden; }
+
+        /* Balance Section */
+        .header-card {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        .header-card h3 { font-size: 16px; opacity: 0.9; font-weight: 400; }
+        .header-card h1 { font-size: 36px; margin-top: 5px; }
+
+        /* Package Container */
+        .container { padding: 0 15px; }
+        
+        /* Package Card */
+        .package-card {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #333;
+        }
+        .package-img {
+            width: 100px;
+            height: 100px;
+            background: #2c2c2c;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .package-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .package-info { flex: 1; }
+        .package-info h2 { font-size: 18px; color: #38ef7d; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .package-info p { font-size: 13px; color: #bbb; line-height: 1.6; }
+        .package-info b { color: white; }
+
+        .price-tag {
+            font-size: 16px;
+            font-weight: bold;
+            color: #38ef7d;
+        }
+
+        .activate-btn {
+            background: #11998e;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .activate-btn:active { transform: scale(0.95); }
+
+        /* Bottom Nav - Clean Version */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #333;
+            z-index: 1000;
+        }
+        .nav-item { text-align: center; color: #888; font-size: 12px; text-decoration: none; flex: 1; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: #38ef7d; }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <h3>Total Account Balance</h3>
+        <h1>৳ <span id="userBalance">1500.00</span></h1>
+    </div>
+
+    <div class="container" id="packageList">
+        <div class="package-card">
+            <div class="package-img">
+                <img src="https://img.freepik.com/free-vector/telecommunication-tower-with-antennas_1284-46931.jpg" alt="Tower"> 
+            </div>
+            <div class="package-info">
+                <h2>Plan P-1 <span class="price-tag">৳ 600.00</span></h2>
+                <p>Daily Income: <b>৳ 55.00</b></p>
+                <p>Total Return: <b>৳ 1100.00</b></p>
+                <p>Validity: <b>20 Days</b></p>
+                <button class="activate-btn" onclick="buyPackage(600, 55)">Activate Now</button>
+            </div>
+        </div>
+
+        <div class="package-card">
+            <div class="package-img">
+                <img src="https://img.freepik.com/free-vector/telecommunication-tower-with-antennas_1284-46931.jpg" alt="Tower">
+            </div>
+            <div class="package-info">
+                <h2>Plan P-2 <span class="price-tag">৳ 1200.00</span></h2>
+                <p>Daily Income: <b>৳ 115.00</b></p>
+                <p>Total Return: <b>৳ 2300.00</b></p>
+                <p>Validity: <b>20 Days</b></p>
+                <button class="activate-btn" onclick="buyPackage(1200, 115)">Activate Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="javascript:history.back()" class="nav-item">
+            <i class="fas fa-arrow-left"></i>Back
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-chart-line"></i>Earning
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-users"></i>Team
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-user"></i>Me
+        </a>
+    </div>
+
+    <script>
+        let currentBalance = 1500.00;
+        document.getElementById('userBalance').innerText = currentBalance.toFixed(2);
+
+        function buyPackage(price, daily) {
+            if(currentBalance >= price) {
+                if(confirm("Are you sure you want to activate this plan?")) {
+                    currentBalance -= price;
+                    document.getElementById('userBalance').innerText = currentBalance.toFixed(2);
+                    alert("Package Activated Successfully!");
+                }
+            } else {
+                alert("Insufficient Balance! Please Deposit first.");
+            }
+        }
+    </script>
+</body>
+</html>
