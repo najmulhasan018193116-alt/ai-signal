@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Deposit Manager</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
+        .admin-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h2 { color: #11998e; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #11998e; color: white; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-success { background: #28a745; color: white; margin-right: 5px; }
+        .btn-reject { background: #dc3545; color: white; }
+        .status-pending { color: orange; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>Pending Deposits</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Amount</th>
+                <th>TrxID</th>
+                <th>Method</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="depositTableBody">
+            </tbody>
+    </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+        authDomain: "ai-signal-75e73.firebaseapp.com",
+        projectId: "ai-signal-75e73",
+        databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // পেন্ডিং ডিপোজিটগুলো লোড করা
+    database.ref('deposits').on('value', (snapshot) => {
+        const tableBody = document.getElementById('depositTableBody');
+        tableBody.innerHTML = "";
+        
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const requestId = childSnapshot.key;
+
+            if(data.status === "Pending") {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${data.user}</td>
+                        <td>৳ ${data.amount}</td>
+                        <td>${data.trxID}</td>
+                        <td>${data.method}</td>
+                        <td>
+                            <button class="btn btn-success" onclick="approveDeposit('${requestId}', '${data.user}', ${data.amount})">Approve</button>
+                            <button class="btn btn-reject" onclick="rejectDeposit('${requestId}')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+    });
+
+    // অ্যাপ্রুভ ফাংশন: এটি ইউজারের ব্যালেন্সে টাকা যোগ করবে
+    function approveDeposit(reqId, userPhone, amount) {
+        if(confirm("অ্যাপ্রুভ করতে চান? ইউজার ব্যালেন্সে টাকা যোগ হয়ে যাবে।")) {
+            const userBalanceRef = database.ref('users/' + userPhone + '/balance');
+            
+            userBalanceRef.once('value').then((snapshot) => {
+                let currentBalance = parseFloat(snapshot.val()) || 0;
+                let newBalance = currentBalance + parseFloat(amount);
+
+                // ১. ইউজারের ব্যালেন্স আপডেট
+                userBalanceRef.set(newBalance).then(() => {
+                    // ২. রিকোয়েস্ট স্ট্যাটাস আপডেট
+                    database.ref('deposits/' + reqId).update({ status: "Success" });
+                    alert("Success! Balance Added.");
+                });
+            });
+        }
+    }
+
+    // রিজেক্ট ফাংশন
+    function rejectDeposit(reqId) {
+        if(confirm("রিজেক্ট করতে চান?")) {
+            database.ref('deposits/' + reqId).update({ status: "Rejected" });
+        }
+    }
+</script>
+
+</body>
+</html>
+
