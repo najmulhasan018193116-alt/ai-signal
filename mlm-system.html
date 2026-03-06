@@ -17,26 +17,22 @@
         .package-info h2 { font-size: 18px; color: #38ef7d; margin-bottom: 5px; }
         .price-tag { font-size: 16px; font-weight: bold; color: #38ef7d; float: right; }
         .activate-btn { background: #11998e; color: white; border: none; padding: 12px; border-radius: 20px; width: 100%; margin-top: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .activate-btn:active { transform: scale(0.95); }
-        .back-btn { position: absolute; top: 15px; left: 15px; color: white; text-decoration: none; font-size: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header-card">
-        <a href="home.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
         <h3>Current Account Balance</h3>
         <h1>৳ <span id="userBalance">0.00</span></h1>
     </div>
 
-    <div class="container" id="packageDisplay">
-        </div>
+    <div class="container" id="packageDisplay"></div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Firebase Config
+        // আপনার Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
             databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
@@ -47,115 +43,68 @@
         }
         const database = firebase.database();
 
-        // localStorage থেকে ইউজার ফোন নম্বর সংগ্রহ
-        const userPhone = localStorage.getItem("userPhone"); 
+        // সমস্যা সমাধানকারী লাইন: ব্রাউজার থেকে নম্বর খুঁজে বের করা
+        const userPhone = localStorage.getItem("userPhone") || localStorage.getItem("loggedUser"); 
 
-        // লগইন চেক করা
         if (!userPhone) {
             alert("Please login first!");
-            window.location.href = "login.html"; // লগইন পেজের সঠিক নাম নিশ্চিত করুন
+            window.location.href = "login.html"; 
         }
 
-        // ডাটাবেস থেকে তথ্য লোড করা
         function loadData() {
-            if (!userPhone) return;
-
-            // ইউজারের ব্যালেন্স রিয়েলটাইম আপডেট
+            // ইউজারের রিয়েল টাইম ব্যালেন্স লোড করা
             database.ref('users/' + userPhone).on('value', snapshot => {
                 const userData = snapshot.val();
-                if (userData) {
-                    const balance = userData.balance || 0;
-                    document.getElementById('userBalance').innerText = parseFloat(balance).toFixed(2);
+                if(userData) {
+                    document.getElementById('userBalance').innerText = parseFloat(userData.balance || 0).toFixed(2);
                 }
             });
 
-            // এডমিন প্যানেল থেকে প্যাকেজগুলো লোড করা
+            // এডমিন প্যানেল থেকে প্যাকেজ লোড
             database.ref('packages').on('value', snapshot => {
                 const display = document.getElementById('packageDisplay');
                 display.innerHTML = "";
-                
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const p = child.val();
-                        display.innerHTML += `
-                            <div class="package-card">
-                                <div class="package-img">
-                                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
-                                </div>
-                                <div class="package-info">
-                                    <span class="price-tag">৳ ${p.price}</span>
-                                    <h2>${p.name}</h2>
-                                    <p>Daily Income: <b>৳ ${p.daily}</b></p>
-                                    <p>Validity: <b>${p.validity} Days</b></p>
-                                    <button class="activate-btn" onclick="buyPackage('${child.key}', ${p.price}, ${p.daily}, ${p.validity})">Activate Now</button>
-                                </div>
-                            </div>`;
-                    });
-                } else {
-                    display.innerHTML = "<p style='text-align:center;'>No packages available.</p>";
-                }
+                snapshot.forEach(child => {
+                    const p = child.val();
+                    display.innerHTML += `
+                        <div class="package-card">
+                            <div class="package-img"><img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'"></div>
+                            <div class="package-info">
+                                <span class="price-tag">৳ ${p.price}</span>
+                                <h2>${p.name}</h2>
+                                <p>Daily Income: <b>৳ ${p.daily}</b></p>
+                                <p>Validity: <b>${p.validity} Days</b></p>
+                                <button class="activate-btn" onclick="buyPackage('${child.key}', ${p.price}, ${p.daily}, ${p.validity})">Activate Now</button>
+                            </div>
+                        </div>`;
+                });
             });
         }
 
         // প্যাকেজ কেনার ফাংশন
-        function buyPackage(pkgId, price, daily, validity) {
+        window.buyPackage = function(pkgId, price, daily, validity) {
             database.ref('users/' + userPhone).once('value', snapshot => {
-                const userData = snapshot.val();
-                const currentBalance = (userData && userData.balance) ? userData.balance : 0;
-
-                if (currentBalance >= price) {
-                    if (confirm("Do you want to buy this plan for ৳" + price + "?")) {
-                        const newBalance = currentBalance - price;
+                const balance = snapshot.val() ? snapshot.val().balance : 0;
+                if(balance >= price) {
+                    if(confirm("Activate this plan for ৳" + price + "?")) {
+                        const newBalance = balance - price;
                         const startTime = Date.now();
                         
-                        // ব্যালেন্স কমানো
                         database.ref('users/' + userPhone).update({ balance: newBalance });
-
-                        // সাবস্ক্রিপশন লিস্টে যোগ করা
                         database.ref('user_subscriptions/' + userPhone + '/' + pkgId).set({
                             daily_income: daily,
                             last_claim: startTime,
                             expire_time: startTime + (validity * 24 * 60 * 60 * 1000)
                         });
-                        
-                        alert("Plan Activated Successfully!");
+                        alert("Activated! Your income will start automatically.");
                     }
                 } else {
-                    alert("Insufficient Balance! Your current balance is ৳" + currentBalance);
+                    alert("Insufficient Balance! Need ৳" + price);
                 }
             });
         }
 
-        // অটোমেটিক ইনকাম ক্যালকুলেশন লজিক
-        function checkAutoIncome() {
-            if (!userPhone) return;
-
-            database.ref('user_subscriptions/' + userPhone).once('value', snapshot => {
-                snapshot.forEach(pkg => {
-                    const data = pkg.val();
-                    const now = Date.now();
-                    const diff = now - data.last_claim;
-                    const oneDay = 24 * 60 * 60 * 1000;
-                    
-                    if (now < data.expire_time && diff >= oneDay) {
-                        const daysPassed = Math.floor(diff / oneDay);
-                        const totalBonus = daysPassed * data.daily_income;
-                        
-                        // ইউজারের মূল ব্যালেন্সে টাকা যোগ করা
-                        database.ref('users/' + userPhone + '/balance').transaction(current => (current || 0) + totalBonus);
-                        
-                        // লাস্ট ক্লেইম টাইম আপডেট করা যাতে ডাবল পেমেন্ট না হয়
-                        database.ref('user_subscriptions/' + userPhone + '/' + pkg.key).update({
-                            last_claim: data.last_claim + (daysPassed * oneDay)
-                        });
-                    }
-                });
-            });
-        }
-
-        // পেজ লোড হলে ফাংশনগুলো কল করা
         loadData();
-        checkAutoIncome();
     </script>
 </body>
 </html>
