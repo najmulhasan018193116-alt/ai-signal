@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit History - ai-signal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f8f9fa; color: #333; }
+
+        .header {
+            display: flex; align-items: center; gap: 15px;
+            padding: 15px 20px; background: white; border-bottom: 1px solid #eee;
+        }
+        .header a { color: #333; text-decoration: none; font-size: 18px; }
+
+        .container { padding: 15px; }
+
+        /* হিষ্টোরি কার্ড স্টাইল */
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .left-info b { display: block; font-size: 16px; color: #222; margin-bottom: 4px; }
+        .left-info span { font-size: 12px; color: #888; }
+
+        .right-info { text-align: right; }
+        .amount { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; display: block; }
+        
+        /* স্ট্যাটাস ব্যাজ */
+        .status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .pending { background: #fff4cc; color: #856404; }
+        .success { background: #d4edda; color: #155724; }
+        .failed { background: #f8d7da; color: #721c24; }
+
+        #noData { text-align: center; margin-top: 50px; color: #999; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="deposit.html"><i class="fas fa-arrow-left"></i></a>
+        <h3>Deposit History</h3>
+    </div>
+
+    <div class="container" id="historyContainer">
+        </div>
+
+    <div id="noData">
+        <i class="fas fa-folder-open" style="font-size: 40px; margin-bottom: 10px;"></i>
+        <p>এখনো কোনো ডিপোজিট করা হয়নি</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // আপনার Firebase Config
+        const firebaseConfig = {
+          apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+          authDomain: "ai-signal-75e73.firebaseapp.com",
+          projectId: "ai-signal-75e73",
+          storageBucket: "ai-signal-75e73.firebasestorage.app",
+          messagingSenderId: "610985325221",
+          appId: "1:610985325221:web:16e2600afb3b3698ae534c",
+          measurementId: "G-5X29WBQHJK",
+          databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ডাটা লোড করা
+        function loadHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            const noData = document.getElementById('noData');
+            
+            // Firebase থেকে তথ্য আনা
+            database.ref('deposits/').on('value', (snapshot) => {
+                historyContainer.innerHTML = "";
+                if (snapshot.exists()) {
+                    noData.style.display = "none";
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        
+                        const itemHtml = `
+                            <div class="history-item">
+                                <div class="left-info">
+                                    <b>${data.method} Deposit</b>
+                                    <span>Trx: ${data.trxID}</span><br>
+                                    <span>${data.time}</span>
+                                </div>
+                                <div class="right-info">
+                                    <span class="amount">৳${data.amount}</span>
+                                    <span class="status ${data.status.toLowerCase()}">${data.status}</span>
+                                </div>
+                            </div>
+                        `;
+                        historyContainer.insertAdjacentHTML('afterbegin', itemHtml);
+                    });
+                } else {
+                    noData.style.display = "block";
+                }
+            });
+        }
+
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>
+
