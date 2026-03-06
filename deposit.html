@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Money</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7f6; padding-bottom: 30px; }
+
+        /* হেডার */
+        .header {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+        .header a { color: white; text-decoration: none; font-size: 20px; }
+
+        .container { padding: 20px; }
+
+        /* মেথড সিলেকশন */
+        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #333; }
+        
+        .methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .method-card {
+            background: white;
+            padding: 15px 10px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .method-card img { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 8px; }
+        .method-card p { font-size: 12px; font-weight: bold; color: #555; }
+
+        /* সিলেকশন হলে বর্ডার কালার হবে */
+        .method-card.active {
+            border-color: #00b09b;
+            background: #e0fff9;
+        }
+
+        /* ইনপুট বক্স */
+        .input-group { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .input-box { margin-bottom: 20px; }
+        .input-box label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
+        .input-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        /* টাকা দ্রুত সিলেক্ট করার বাটন */
+        .amount-chips { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .chip {
+            padding: 8px 15px;
+            background: #eee;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .deposit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 176, 155, 0.3);
+        }
+
+        .notice {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+            color: #856404;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="account.html"><i class="fas fa-arrow-left"></i></a>
+        <h2>Deposit Money</h2>
+    </div>
+
+    <div class="container">
+        <p class="section-title">পেমেন্ট মেথড সিলেক্ট করুন</p>
+        <div class="methods">
+            <div class="method-card active" onclick="selectMethod(this, 'bKash')">
+                <img src="https://itshamsul.com/wp-content/uploads/2024/02/bkash-logo-circle.png" alt="bKash">
+                <p>bKash</p>
+            </div>
+            <div class="method-card" onclick="selectMethod(this, 'Nagad')">
+                <img src="https://freelogopng.com/images/all_img/1679248787nagad-logo-png.png" alt="Nagad">
+                <p>Nagad</p>
+            </div>
+            <div class="method-card" onclick="selectMethod(this, 'Rocket')">
+                <img src="https://Logos-download.com/wp-content/uploads/2022/01/Rocket_Dutch_Bangla_Bank_Logo.png" alt="Rocket">
+                <p>Rocket</p>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="input-box">
+                <label>ডিপোজিট পরিমাণ (৳)</label>
+                <input type="number" id="amountInput" placeholder="সর্বনিম্ন ৫০০ টাকা">
+                <div class="amount-chips">
+                    <span class="chip" onclick="setAmount(500)">৳৫০০</span>
+                    <span class="chip" onclick="setAmount(1000)">৳১০০০</span>
+                    <span class="chip" onclick="setAmount(2000)">৳২০০০</span>
+                    <span class="chip" onclick="setAmount(5000)">৳৫০০০</span>
+                </div>
+            </div>
+
+            <div class="input-box">
+                <label>আপনার মেথড নম্বর</label>
+                <input type="text" placeholder="যে নম্বর থেকে টাকা পাঠাবেন">
+            </div>
+
+            <button class="deposit-btn" onclick="processDeposit()">পরবর্তী ধাপ</button>
+        </div>
+
+        <div class="notice">
+            <i class="fas fa-info-circle"></i> 
+            <b>সতর্কতা:</b> টাকা পাঠানোর পর ট্রানজিশন আইডি (Transaction ID) অবশ্যই সংগ্রহ করে রাখবেন। ভুল তথ্য দিলে ডিপোজিট সফল হবে না।
+        </div>
+    </div>
+
+    
+
+    <script>
+        let selectedMethod = "bKash";
+
+        function selectMethod(element, method) {
+            // আগের একটিভ ক্লাস সরানো
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            // নতুনটি একটিভ করা
+            element.classList.add('active');
+            selectedMethod = method;
+        }
+
+        function setAmount(val) {
+            document.getElementById('amountInput').value = val;
+        }
+
+        function processDeposit() {
+            const amt = document.getElementById('amountInput').value;
+            if(amt < 500) {
+                alert("দুঃখিত, সর্বনিম্ন ৫০০ টাকা ডিপোজিট করতে হবে।");
+            } else {
+                alert(selectedMethod + " এর মাধ্যমে " + amt + " টাকা ডিপোজিটের পরবর্তী ধাপে আপনাকে নিয়ে যাওয়া হচ্ছে।");
+                // এখানে আপনি পরের পেজ (যেখানে নম্বর কপি করবে) সেটা লিঙ্ক করতে পারেন।
+            }
+        }
+    </script>
+
+</body>
+</html>
