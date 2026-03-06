@@ -17,7 +17,7 @@
         /* প্রোফাইল হেডার */
         .header-gradient {
             background: linear-gradient(135deg, #00b09b, #96c93d);
-            height: 220px;
+            height: 240px;
             padding: 30px 20px;
             color: white;
             text-align: center;
@@ -36,7 +36,37 @@
             font-size: 40px;
         }
 
-        .user-acc-no { font-size: 14px; opacity: 0.9; margin-top: 5px; background: rgba(0,0,0,0.1); padding: 5px 15px; border-radius: 20px; display: inline-block; }
+        /* আইডি এবং কপি বাটন স্টাইল */
+        .id-container {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 6px 15px;
+            border-radius: 20px;
+            margin-top: 8px;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-acc-no { font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+
+        .copy-btn {
+            background: #fff;
+            color: #00b09b;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .copy-btn:active { transform: scale(0.9); background: #eee; }
 
         /* ব্যালেন্স কার্ড */
         .balance-card {
@@ -53,12 +83,7 @@
         .balance-amount { font-size: 36px; font-weight: 800; color: #333; margin: 5px 0; }
 
         /* বাটন লিস্ট ডিজাইন */
-        .button-list {
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .button-list { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
 
         .action-btn {
             background: white;
@@ -74,8 +99,6 @@
             border: 1px solid #eee;
         }
 
-        .action-btn:active { transform: scale(0.97); background: #f9f9f9; }
-
         .btn-icon {
             width: 45px; height: 45px;
             border-radius: 12px;
@@ -87,7 +110,6 @@
             margin-right: 15px;
         }
 
-        /* বাটন কালার */
         .bg-deposit { background: linear-gradient(135deg, #00c6ff, #0072ff); }
         .bg-withdraw { background: linear-gradient(135deg, #f09819, #edde5d); }
         .bg-profile { background: linear-gradient(135deg, #6a11cb, #2575fc); }
@@ -96,7 +118,7 @@
 
         .chevron { margin-left: auto; color: #ccc; font-size: 14px; }
 
-        /* নিচের মেনুবার */
+        /* বটম নেভিগেশন */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%;
             display: flex; justify-content: space-around;
@@ -107,8 +129,6 @@
         }
 
         .nav-link { text-align: center; color: #aaa; text-decoration: none; flex: 1; }
-        .nav-link i { font-size: 22px; display: block; margin-bottom: 3px; }
-        .nav-link span { font-size: 12px; font-weight: 600; }
         .nav-link.active { color: #00b09b; }
     </style>
 </head>
@@ -117,7 +137,13 @@
     <div class="header-gradient">
         <div class="user-icon-circle"><i class="fas fa-user-circle"></i></div>
         <h2 id="userName">স্বাগতম!</h2>
-        <div class="user-acc-no">অ্যাকাউন্ট: <span id="userPhoneDisplay">Loading...</span></div>
+        
+        <div class="id-container">
+            <span class="user-acc-no">ID: <span id="userPhoneDisplay">*****</span></span>
+            <button class="copy-btn" onclick="copyUserID()" title="Copy ID">
+                <i class="fas fa-copy"></i>
+            </button>
+        </div>
     </div>
 
     <div class="balance-card">
@@ -126,56 +152,65 @@
     </div>
 
     <div class="button-list">
-        
         <a href="deposit.html" class="action-btn">
             <div class="btn-icon bg-deposit"><i class="fas fa-wallet"></i></div>
             <span>Deposit</span>
             <i class="fas fa-chevron-right chevron"></i>
         </a>
-
         <a href="withdraw.html" class="action-btn">
             <div class="btn-icon bg-withdraw"><i class="fas fa-money-bill-transfer"></i></div>
             <span>Withdraw</span>
             <i class="fas fa-chevron-right chevron"></i>
         </a>
-
         <a href="profile.html" class="action-btn">
             <div class="btn-icon bg-profile"><i class="fas fa-user-edit"></i></div>
             <span>Profile Settings</span>
             <i class="fas fa-chevron-right chevron"></i>
         </a>
-
         <a href="support.html" class="action-btn">
             <div class="btn-icon bg-support"><i class="fas fa-headset"></i></div>
             <span>Customer Support</span>
             <i class="fas fa-chevron-right chevron"></i>
         </a>
-
         <a href="javascript:void(0)" class="action-btn" onclick="handleLogout()" style="margin-top: 10px; border-color: #ffccd2;">
             <div class="btn-icon bg-signout"><i class="fas fa-sign-out-alt"></i></div>
             <span style="color: #DD2476;">Sign Out</span>
             <i class="fas fa-chevron-right chevron"></i>
         </a>
-        
     </div>
 
     <div class="bottom-nav">
-        <a href="home.html" class="nav-link"><i class="fas fa-th-large"></i><span>Home</span></a>
-        <a href="activity.html" class="nav-link"><i class="fas fa-history"></i><span>Activity</span></a>
-        <a href="promotion.html" class="nav-link"><i class="fas fa-gift"></i><span>Promotion</span></a>
-        <a href="account.html" class="nav-link active"><i class="fas fa-user-circle"></i><span>Account</span></a>
+        <a href="home.html" class="nav-link"><i class="fas fa-th-large"></i></a>
+        <a href="activity.html" class="nav-link"><i class="fas fa-history"></i></a>
+        <a href="promotion.html" class="nav-link"><i class="fas fa-gift"></i></a>
+        <a href="account.html" class="nav-link active"><i class="fas fa-user-circle"></i></a>
     </div>
 
     <script>
+        // আসল নম্বর সেভ রাখার জন্য গ্লোবাল ভেরিয়েবল
+        let fullUserID = "";
+
         window.onload = function() {
             const loggedUser = localStorage.getItem("loggedUser");
             if (loggedUser) {
-                document.getElementById("userPhoneDisplay").innerText = loggedUser;
+                fullUserID = loggedUser;
+                // শেষ ৫টি নম্বর দেখানো (যেমন: ******12345)
+                const lastFive = loggedUser.slice(-5);
+                document.getElementById("userPhoneDisplay").innerText = "******" + lastFive;
                 document.getElementById("userBalance").innerText = "0.00";
             } else {
                 window.location.replace("index.html");
             }
         };
+
+        // কপি করার ফাংশন
+        function copyUserID() {
+            if (fullUserID) {
+                navigator.clipboard.writeText(fullUserID).then(() => {
+                    alert("Account ID Copied: " + fullUserID);
+                });
+            }
+        }
 
         function handleLogout() {
             if(confirm("আপনি কি নিশ্চিতভাবে লগআউট করতে চান?")) {
@@ -184,7 +219,5 @@
             }
         }
     </script>
-
 </body>
 </html>
-
