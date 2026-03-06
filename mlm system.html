@@ -16,7 +16,8 @@
         .package-info { flex: 1; }
         .package-info h2 { font-size: 18px; color: #38ef7d; margin-bottom: 5px; }
         .price-tag { font-size: 16px; font-weight: bold; color: #38ef7d; float: right; }
-        .activate-btn { background: #11998e; color: white; border: none; padding: 10px; border-radius: 20px; width: 100%; margin-top: 10px; font-weight: bold; cursor: pointer; }
+        .activate-btn { background: #11998e; color: white; border: none; padding: 12px; border-radius: 20px; width: 100%; margin-top: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .activate-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -31,23 +32,35 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script>
-        // আপনার সঠিক Firebase Config
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
             databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const userPhone = "01XXXXXXXXX"; // এখানে ইউজারের ফোন নম্বরটি ডাইনামিকলি বসবে
 
-        // ব্যালেন্স ও প্যাকেজ লোড
+        // ডাইনামিক ইউজার ফোন নম্বর (localStorage থেকে)
+        const userPhone = localStorage.getItem("userPhone"); 
+
+        if (!userPhone) {
+            alert("Please login first!");
+            window.location.href = "login.html"; 
+        }
+
+        // ডাটা লোড করা
         function loadData() {
+            // ব্যালেন্স আপডেট
             database.ref('users/' + userPhone).on('value', snapshot => {
                 const userData = snapshot.val();
-                if(userData) document.getElementById('userBalance').innerText = parseFloat(userData.balance).toFixed(2);
+                if(userData) {
+                    document.getElementById('userBalance').innerText = parseFloat(userData.balance).toFixed(2);
+                }
             });
 
+            // এডমিন প্যানেলের প্যাকেজ লোড
             database.ref('packages').on('value', snapshot => {
                 const display = document.getElementById('packageDisplay');
                 display.innerHTML = "";
@@ -59,39 +72,40 @@
                             <div class="package-info">
                                 <span class="price-tag">৳ ${p.price}</span>
                                 <h2>${p.name}</h2>
-                                <p>Daily: ৳ ${p.daily} | Validity: ${p.validity} Days</p>
-                                <button class="activate-btn" onclick="buyPackage('${child.key}', ${p.price}, ${p.daily})">Activate Now</button>
+                                <p>Daily Income: <b>৳ ${p.daily}</b></p>
+                                <p>Validity: <b>${p.validity} Days</b></p>
+                                <button class="activate-btn" onclick="buyPackage('${child.key}', ${p.price}, ${p.daily}, ${p.validity})">Activate Now</button>
                             </div>
                         </div>`;
                 });
             });
         }
 
-        // প্যাকেজ কেনার ফাংশন
-        function buyPackage(pkgId, price, daily) {
+        // প্যাকেজ ক্রয় এবং ব্যালেন্স বিয়োগ
+        function buyPackage(pkgId, price, daily, validity) {
             database.ref('users/' + userPhone).once('value', snapshot => {
-                const balance = snapshot.val().balance;
+                const balance = snapshot.val().balance || 0;
                 if(balance >= price) {
-                    if(confirm("Confirm Purchase?")) {
+                    if(confirm("Do you want to buy this plan for ৳" + price + "?")) {
                         const newBalance = balance - price;
                         const startTime = Date.now();
                         
-                        // ব্যালেন্স আপডেট ও কেনা প্যাকেজ সেভ
+                        // ডাটাবেস আপডেট
                         database.ref('users/' + userPhone).update({ balance: newBalance });
                         database.ref('user_subscriptions/' + userPhone + '/' + pkgId).set({
                             daily_income: daily,
                             last_claim: startTime,
-                            expire_time: startTime + (20 * 24 * 60 * 60 * 1000) // উদাহরণস্বরূপ ২০ দিন
+                            expire_time: startTime + (validity * 24 * 60 * 60 * 1000)
                         });
-                        alert("Success! Income will be added every 24 hours.");
+                        alert("Plan Activated! Income will start after 24 hours.");
                     }
                 } else {
-                    alert("Insufficient Account Balance!");
+                    alert("Insufficient Balance! Please deposit first.");
                 }
             });
         }
 
-        // অটোমেটিক ইনকাম চেক (প্রতিবার পেজ লোডে চেক করবে)
+        // অটোমেটিক ২৪ ঘণ্টা ইনকাম লজিক
         function checkAutoIncome() {
             database.ref('user_subscriptions/' + userPhone).once('value', snapshot => {
                 snapshot.forEach(pkg => {
@@ -99,13 +113,16 @@
                     const now = Date.now();
                     const diff = now - data.last_claim;
                     
-                    if (diff >= 24 * 60 * 60 * 1000) { // ২৪ ঘণ্টা পূর্ণ হলে
+                    if (now < data.expire_time && diff >= 24 * 60 * 60 * 1000) {
                         const daysPassed = Math.floor(diff / (24 * 60 * 60 * 1000));
                         const totalBonus = daysPassed * data.daily_income;
                         
+                        // ব্যালেন্স যোগ করা
                         database.ref('users/' + userPhone + '/balance').transaction(current => (current || 0) + totalBonus);
+                        
+                        // লাস্ট ক্লেইম টাইম আপডেট
                         database.ref('user_subscriptions/' + userPhone + '/' + pkg.key).update({
-                            last_claim: now
+                            last_claim: data.last_claim + (daysPassed * 24 * 60 * 60 * 1000)
                         });
                     }
                 });
@@ -117,4 +134,3 @@
     </script>
 </body>
 </html>
-
