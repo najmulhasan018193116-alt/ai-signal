@@ -86,12 +86,11 @@
 </div>
 
 <script type="module">
-    // ১. প্রয়োজনীয় Firebase লাইব্রেরি ইমপোর্ট (CDN ব্যবহার করা হয়েছে)
+    // প্রয়োজনীয় Firebase লাইব্রেরি এবং Firestore ইমপোর্ট করা হয়েছে
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ২. আপনার নতুন Firebase কনফিগারেশন আপডেট করা হয়েছে
     const firebaseConfig = {
       apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
       authDomain: "ai-signal-75e73.firebaseapp.com",
@@ -102,14 +101,12 @@
       measurementId: "G-8S74TM917W"
     };
 
-    // ৩. Firebase ইনিশিয়ালাইজেশন (ডুপ্লিকেট রিমুভ করা হয়েছে)
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const analytics = getAnalytics(app);
+    const db = getFirestore(app); // Firestore Initialize
 
     let confirmationResult;
 
-    // ৪. reCAPTCHA সেটআপ
     window.onload = function() {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'normal',
@@ -117,7 +114,6 @@
         });
     };
 
-    // ৫. UI ফাংশনগুলো (Login/Register ট্যাব সুইচ)
     window.showRegister = function() {
         document.getElementById("loginPage").classList.add("hidden");
         document.getElementById("registerPage").classList.remove("hidden");
@@ -139,47 +135,67 @@
         document.getElementById("pageTitle").innerText = "Reset Password";
     }
 
-    // ৬. রেজিস্ট্রেশন লজিক
-    window.registerUser = function() {
+    // --- Firestore এ রেজিস্ট্রেশন করার লজিক ---
+    window.registerUser = async function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
         let confirm = document.getElementById("regConfirm").value;
+        let ref = document.getElementById("refCode").value;
         let agree = document.getElementById("agree").checked;
 
         if(phone.length < 11) { alert("Invalid Phone Number"); return; }
         if(pass !== confirm) { alert("Passwords do not match"); return; }
         if(!agree) { alert("Please agree to privacy policy"); return; }
 
-        let accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
-        if(accounts.find(u => u.phone === phone)) {
-            alert("Phone already registered!");
-            return;
-        }
+        try {
+            const userRef = doc(db, "users", phone);
+            const userSnap = await getDoc(userRef);
 
-        accounts.push({ phone, pass });
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-        alert("Registration Successful!");
-        showLogin();
+            if (userSnap.exists()) {
+                alert("This phone number is already registered!");
+                return;
+            }
+
+            // Firebase Firestore-এ ডাটা সেভ করা হচ্ছে
+            await setDoc(userRef, {
+                phone: phone,
+                pass: pass,
+                referralCode: ref,
+                createdAt: new Date()
+            });
+
+            alert("Registration Successful in Firebase!");
+            showLogin();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
     }
 
-    // ৭. লগইন লজিক এবং Home Page রিডাইরেক্ট
-    window.loginUser = function() {
+    // --- Firestore থেকে লগইন চেক করার লজিক ---
+    window.loginUser = async function() {
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
         
-        let accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
-        let user = accounts.find(u => u.phone === phone && u.pass === pass);
+        try {
+            const userRef = doc(db, "users", phone);
+            const userSnap = await getDoc(userRef);
 
-        if(user) {
-            alert("Login Successful!");
-            // সফল লগইনের পর home.html-এ নিয়ে যাবে
-            window.location.href = "home.html"; 
-        } else {
-            alert("Incorrect Phone or Password");
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                if(userData.pass === pass) {
+                    alert("Login Successful!");
+                    window.location.href = "home.html";
+                } else {
+                    alert("Wrong Password!");
+                }
+            } else {
+                alert("User not found in Database!");
+            }
+        } catch (e) {
+            alert("Database Error: " + e.message);
         }
     }
 
-    // ৮. OTP পাঠানোর লজিক
     window.sendOTP = function() {
         let phoneField = document.getElementById("resetPhone").value.trim();
         if(!phoneField) { alert("Enter phone number first"); return; }
@@ -196,7 +212,7 @@
             });
     }
 
-    // ৯. পাসওয়ার্ড রিসেট লজিক
+    // --- পাসওয়ার্ড রিসেট করে Firestore-এ আপডেট করা ---
     window.resetPassword = function() {
         const code = document.getElementById("otpInput").value.trim();
         const newPass = document.getElementById("newPass").value;
@@ -205,17 +221,14 @@
         if(!confirmationResult) { alert("Please send OTP first"); return; }
         if(newPass.length < 4) { alert("Password too short"); return; }
 
-        confirmationResult.confirm(code).then(() => {
-            let accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
-            let userIndex = accounts.findIndex(u => u.phone === phone);
-            
-            if(userIndex !== -1) {
-                accounts[userIndex].pass = newPass;
-                localStorage.setItem("accounts", JSON.stringify(accounts));
-                alert("Password Updated Successfully!");
+        confirmationResult.confirm(code).then(async () => {
+            try {
+                const userRef = doc(db, "users", phone);
+                await updateDoc(userRef, { pass: newPass });
+                alert("Password Updated in Firebase Database!");
                 showLogin();
-            } else {
-                alert("Phone number not found in local records!");
+            } catch (e) {
+                alert("Error updating password: " + e.message);
             }
         }).catch(() => {
             alert("Invalid OTP Code");
