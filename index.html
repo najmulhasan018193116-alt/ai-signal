@@ -84,19 +84,39 @@
         <p onclick="showLogin()">Back to Login</p>
     </div>
 </div>
-
 <script type="module">
+    // ১. Firebase লাইব্রেরিগুলো ইমপোর্ট করুন
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
+    // ২. আপনার নতুন Firebase কনফিগারেশন এখানে বসান
     const firebaseConfig = {
-        apiKey: "AIzaSyCALYxA2M4BwIXq5KC3VMGsZpAFh8nL3fo",
-        authDomain: "bengal-east-company-limited.firebaseapp.com",
-        projectId: "bengal-east-company-limited",
-        storageBucket: "bengal-east-company-limited.firebasestorage.app",
-        messagingSenderId: "653223286483",
-        appId: "1:653223286483:web:f6c822aa1f22a13cf02626"
+      apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+      authDomain: "ai-signal-75e73.firebaseapp.com",
+      projectId: "ai-signal-75e73",
+      storageBucket: "ai-signal-75e73.firebasestorage.app",
+      messagingSenderId: "610985325221",
+      appId: "1:610985325221:web:09032de2788a18a6ae534c",
+      measurementId: "G-8S74TM917W"
     };
+
+    // ৩. Firebase ইনিশিয়ালাইজ করুন
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const analytics = getAnalytics(app);
+
+    // --- এরপর আপনার বাকি সব ফাংশন (loginUser, registerUser ইত্যাদি) থাকবে ---
+    
+    window.onload = function() {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'normal',
+            'callback': (response) => { console.log("Captcha solved"); }
+        });
+    };
+
+    // ... বাকি কোড অপরিবর্তিত থাকবে ...
+        
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
