@@ -42,6 +42,9 @@
         .bg-violet { background: #9c27b0; }
         .txt-big { color: #ff9800; font-weight: bold; }
         .txt-small { color: #2196f3; font-weight: bold; }
+        .status-win { color: #4caf50; font-weight: bold; }
+        .status-loss { color: #ff4d4d; font-weight: bold; }
+        .status-pending { color: #ff9800; font-weight: bold; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
         .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; color: white; }
@@ -110,7 +113,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // --- Firebase Config (আপনারটা বসান) ---
         const firebaseConfig = { apiKey: "YOUR_API_KEY", databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -120,13 +122,13 @@
         let currentPeriod = "";
         let selectedChoice = "";
         let historyView = 'game';
+        let gameData = [];
+        let myData = [];
 
-        // ব্যালেন্স আপডেট
         db.ref('users/' + userPhone + '/balance').on('value', s => {
             document.getElementById('balanceDisplay').innerText = parseFloat(s.val() || 0).toFixed(2);
         });
 
-        // টাইমার এবং পিরিয়ড আইডি লজিক
         function runTimer() {
             const now = new Date();
             const dateStr = now.getFullYear().toString() + (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
@@ -145,16 +147,13 @@
             document.getElementById('lockOverlay').style.display = (remain <= 5) ? 'flex' : 'none';
         }
 
-        // রেজাল্ট জেনারেশন এবং বেট চেক
         function processResult(pid) {
             const num = Math.floor(Math.random() * 10);
             const size = (num >= 5) ? "Big" : "Small";
             const color = (num === 0 || num === 5) ? "Violet" : ([1,3,7,9].includes(num) ? "Green" : "Red");
 
-            // ডাটাবেসে হিস্ট্রি সেভ
             db.ref('history/' + currentMode + '/' + pid).set({ id: pid, num: num, size: size, color: color, time: Date.now() });
 
-            // বেট চেক
             db.ref('user_bets/' + userPhone).orderByChild('period').equalTo(pid).once('value', s => {
                 s.forEach(snap => {
                     const bet = snap.val();
@@ -179,31 +178,53 @@
             setTimeout(() => p.style.display = 'none', 3000);
         }
 
-        // হিস্ট্রি লোড
         function loadData() {
             db.ref('history/' + currentMode).off();
-            db.ref('history/' + currentMode).orderByChild('time').limitToLast(10).on('value', s => {
-                let list = [];
-                s.forEach(c => { list.push(c.val()); });
-                list.reverse();
-                if(historyView === 'game') renderTable(list);
+            db.ref('history/' + currentMode).orderByChild('time').limitToLast(15).on('value', s => {
+                gameData = [];
+                s.forEach(c => { gameData.push(c.val()); });
+                gameData.reverse();
+                if(historyView === 'game') renderTable();
+            });
+
+            db.ref('user_bets/' + userPhone).off();
+            db.ref('user_bets/' + userPhone).limitToLast(15).on('value', s => {
+                myData = [];
+                s.forEach(c => { 
+                    let b = c.val();
+                    if(b.mode == currentMode) myData.push(b);
+                });
+                myData.reverse();
+                if(historyView === 'my') renderTable();
             });
         }
 
-        function renderTable(data) {
+        function switchView(view) {
+            historyView = view;
+            document.getElementById('tabGame').classList.toggle('active', view === 'game');
+            document.getElementById('tabMy').classList.toggle('active', view === 'my');
+            renderTable();
+        }
+
+        function renderTable() {
             const head = document.getElementById('tableHead');
             const body = document.getElementById('tableBody');
             body.innerHTML = "";
+            
             if(historyView === 'game') {
                 head.innerHTML = `<tr><th>Period</th><th>Number</th><th>Size</th><th>Color</th></tr>`;
-                data.forEach(d => {
+                gameData.forEach(d => {
                     let cls = d.color === "Green" ? "bg-green" : (d.color === "Red" ? "bg-red" : "bg-violet");
                     body.innerHTML += `<tr><td>...${d.id.slice(-4)}</td><td><span class="res-num ${cls}">${d.num}</span></td><td class="${d.size=='Big'?'txt-big':'txt-small'}">${d.size}</td><td><div class="res-num ${cls}" style="width:10px; height:10px;"></div></td></tr>`;
+                });
+            } else {
+                head.innerHTML = `<tr><th>Period</th><th>Choice</th><th>Amount</th><th>Status</th></tr>`;
+                myData.forEach(d => {
+                    body.innerHTML += `<tr><td>...${d.period.slice(-4)}</td><td class="${d.choice=='Big'?'txt-big':'txt-small'}">${d.choice}</td><td>৳${d.amount}</td><td class="status-${d.status.toLowerCase()}">${d.status}</td></tr>`;
                 });
             }
         }
 
-        // মোড চেঞ্জ
         function changeMode(m, btn) {
             currentMode = m;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -211,20 +232,30 @@
             loadData();
         }
 
-        // বেট ফাংশন
         function openBet(c) {
             selectedChoice = c;
             document.getElementById('betTitle').innerText = "Bet on " + c;
             document.getElementById('betModal').style.display = 'flex';
         }
         function closeBet() { document.getElementById('betModal').style.display = 'none'; }
+        
         function confirmBet() {
             const amt = parseFloat(document.getElementById('betInput').value);
-            if(!amt || amt < 10) return alert("Min bet 10");
-            db.ref('user_bets/' + userPhone).push({ period: currentPeriod, amount: amt, choice: selectedChoice, mode: currentMode, status: "Pending" });
+            const balance = parseFloat(document.getElementById('balanceDisplay').innerText);
+            if(!amt || amt < 10) return showPopup("Min bet ৳10", "#f44336");
+            if(amt > balance) return showPopup("Insufficient Balance", "#f44336");
+            
+            db.ref('user_bets/' + userPhone).push({ 
+                period: currentPeriod, 
+                amount: amt, 
+                choice: selectedChoice, 
+                mode: currentMode, 
+                status: "Pending",
+                time: Date.now()
+            });
             db.ref('users/' + userPhone + '/balance').transaction(b => b - amt);
             closeBet();
-            alert("Bet Placed!");
+            showPopup("Bet Placed Successfully!", "#2196f3");
         }
 
         setInterval(runTimer, 1000);
