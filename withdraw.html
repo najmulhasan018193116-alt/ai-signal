@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - ai-signal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7f6; color: #333; padding-bottom: 50px; }
+
+        .header { display: flex; align-items: center; padding: 15px 20px; background: white; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
+        .header h3 { flex: 1; text-align: center; font-size: 18px; margin-right: 30px; }
+        .header a { color: #333; text-decoration: none; font-size: 20px; }
+
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+
+        .balance-section { 
+            background: linear-gradient(135deg, #ff8c00, #e67e00); 
+            padding: 30px 20px; border-radius: 20px; color: white; 
+            text-align: center; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(230, 126, 0, 0.2);
+        }
+        .balance-section p { font-size: 14px; opacity: 0.9; }
+        .balance-section h2 { font-size: 32px; margin-top: 5px; }
+
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #ff8c00; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; font-weight: 600; }
+        
+        .input-field { 
+            width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; 
+            font-size: 15px; outline: none; transition: 0.3s; background: #fafafa;
+        }
+        .input-field:focus { border-color: #ff8c00; background: #fff; }
+        .input-field:disabled { background: #e9ecef; cursor: not-allowed; }
+
+        .action-btn { 
+            width: 100%; padding: 14px; border: none; background: #ff8c00; 
+            color: white; border-radius: 10px; font-size: 16px; font-weight: bold; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .action-btn:disabled { background: #ccc; }
+
+        .history-item { background: white; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border-left: 5px solid #ff8c00; margin-bottom: 10px; }
+        .status { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+        .status.Pending { background: #fff3cd; color: #856404; }
+        .status.Approved { background: #d4edda; color: #155724; }
+        .status.Rejected { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="account.html"><i class="fas fa-chevron-left"></i></a>
+        <h3>Withdraw System</h3>
+    </div>
+
+    <div class="container">
+        <div class="balance-section">
+            <p>Your Current Balance</p>
+            <h2>৳ <span id="userBalance">0.00</span></h2>
+        </div>
+
+        <div class="card" id="numberSetupCard">
+            <div class="card-title"><i class="fas fa-id-card"></i> Setup Withdraw Numbers</div>
+            <div class="input-group">
+                <label>Withdraw Number 1</label>
+                <input type="number" id="savedNo1" class="input-field" placeholder="01XXXXXXXXX">
+            </div>
+            <div class="input-group">
+                <label>Withdraw Number 2</label>
+                <input type="number" id="savedNo2" class="input-field" placeholder="01XXXXXXXXX (Optional)">
+            </div>
+            <button class="action-btn" id="saveNumBtn" onclick="saveWithdrawNumbers()">Save & Lock Numbers</button>
+            <p style="font-size: 11px; color: #d9534f; margin-top: 8px;">* একবার সেভ করলে শুধুমাত্র অ্যাডমিন পরিবর্তন করতে পারবে।</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-money-bill-wave"></i> Create Withdrawal</div>
+            <div class="input-group">
+                <label>Select Receiver Number</label>
+                <select id="selectedNo" class="input-field">
+                    <option value="">-- Choose Number --</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Method</label>
+                <select id="method" class="input-field">
+                    <option value="bKash">bKash</option>
+                    <option value="Nagad">Nagad</option>
+                    <option value="Rocket">Rocket</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Amount (Min. ৳500)</label>
+                <input type="number" id="amount" class="input-field" placeholder="Enter amount">
+            </div>
+            <button class="action-btn" id="withdrawBtn" onclick="requestWithdraw()">Confirm Withdrawal</button>
+        </div>
+
+        <div style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-history"></i> Recent Withdrawals</div>
+        <div id="withdrawHistory"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+          authDomain: "ai-signal-75e73.firebaseapp.com",
+          projectId: "ai-signal-75e73",
+          databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const loggedUser = localStorage.getItem("loggedUser");
+
+        if (loggedUser) {
+            // ইউজারের ডাটা এবং সেভ করা নম্বর লোড
+            database.ref('users/' + loggedUser).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById("userBalance").innerText = (data.balance || 0).toFixed(2);
+                    
+                    const select = document.getElementById("selectedNo");
+                    select.innerHTML = '<option value="">-- Choose Number --</option>';
+
+                    // নম্বর ১ চেক
+                    if (data.withdrawNo1) {
+                        document.getElementById("savedNo1").value = data.withdrawNo1;
+                        document.getElementById("savedNo1").disabled = true;
+                        select.innerHTML += `<option value="${data.withdrawNo1}">${data.withdrawNo1}</option>`;
+                    }
+                    // নম্বর ২ চেক
+                    if (data.withdrawNo2) {
+                        document.getElementById("savedNo2").value = data.withdrawNo2;
+                        document.getElementById("savedNo2").disabled = true;
+                        select.innerHTML += `<option value="${data.withdrawNo2}">${data.withdrawNo2}</option>`;
+                    }
+
+                    // বাটন হাইড করা যদি উভয় নম্বর সেভ থাকে
+                    if(data.withdrawNo1 && data.withdrawNo2) {
+                        document.getElementById("saveNumBtn").style.display = "none";
+                    }
+                }
+            });
+            loadWithdrawHistory();
+        }
+
+        // নম্বর সেভ করার ফাংশন
+        function saveWithdrawNumbers() {
+            const n1 = document.getElementById("savedNo1").value;
+            const n2 = document.getElementById("savedNo2").value;
+
+            if (n1.length < 11) { alert("কমপক্ষে প্রথম নম্বরটি সঠিক হতে হবে!"); return; }
+
+            database.ref('users/' + loggedUser).update({
+                withdrawNo1: n1,
+                withdrawNo2: n2 || ""
+            }).then(() => {
+                alert("নম্বর সফলভাবে লক করা হয়েছে।");
+            });
+        }
+
+        // উইথড্র রিকোয়েস্ট ফাংশন
+        function requestWithdraw() {
+            const amount = parseFloat(document.getElementById("amount").value);
+            const method = document.getElementById("method").value;
+            const receiverNo = document.getElementById("selectedNo").value;
+            const currentBalance = parseFloat(document.getElementById("userBalance").innerText);
+
+            if (!receiverNo) { alert("উইথড্র করার জন্য একটি নম্বর সিলেক্ট করুন!"); return; }
+            if (isNaN(amount) || amount < 500) { alert("সর্বনিম্ন উইথড্র ৫00 টাকা"); return; }
+            if (amount > currentBalance) { alert("অপর্যাপ্ত ব্যালেন্স!"); return; }
+
+            const btn = document.getElementById("withdrawBtn");
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            // ব্যালেন্স কাটা এবং রিকোয়েস্ট সেভ
+            database.ref('users/' + loggedUser).update({
+                balance: currentBalance - amount
+            }).then(() => {
+                database.ref('withdraws/').push({
+                    user: loggedUser,
+                    amount: amount,
+                    method: method,
+                    receiver_no: receiverNo,
+                    status: "Pending",
+                    time: new Date().toLocaleString()
+                }).then(() => {
+                    alert("উইথড্র রিকোয়েস্ট সফল! ব্যালেন্স থেকে টাকা কেটে নেওয়া হয়েছে।");
+                    document.getElementById("amount").value = "";
+                    btn.disabled = false;
+                    btn.innerText = "Confirm Withdrawal";
+                });
+            });
+        }
+
+        function loadWithdrawHistory() {
+            database.ref('withdraws').orderByChild('user').equalTo(loggedUser).on('value', (snapshot) => {
+                const historyDiv = document.getElementById("withdrawHistory");
+                historyDiv.innerHTML = "";
+                if (snapshot.exists()) {
+                    let items = [];
+                    snapshot.forEach(snap => { items.push(snap.val()); });
+                    items.reverse().forEach(data => {
+                        historyDiv.innerHTML += `
+                            <div class="history-item">
+                                <div>
+                                    <p style="font-size:14px; font-weight:bold;">৳ ${data.amount} (${data.receiver_no})</p>
+                                    <span style="font-size:10px; color:#888;">${data.time} via ${data.method}</span>
+                                </div>
+                                <div class="status ${data.status}">${data.status}</div>
+                            </div>`;
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
