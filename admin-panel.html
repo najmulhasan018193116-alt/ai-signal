@@ -228,26 +228,29 @@
         if(event) event.currentTarget.classList.add('active');
     }
 
+    // --- এই ফাংশনটি সংশোধন করা হয়েছে আজকের হিসাব দেখানোর জন্য ---
     function updateStats() {
         let tDep = 0, tWith = 0;
         let todayDepAmt = 0, todayDepCount = 0;
         let todayWithAmt = 0, todayWithCount = 0;
         
-        // আজকের তারিখ বের করার জন্য সঠিক পদ্ধতি
         const now = new Date();
-        const todayStr = now.toLocaleDateString('en-US'); // "M/D/YYYY" format
+        // আজকের দিনের শুরু (রাত ১২টা)
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        // আজকের দিনের শেষ
+        const endOfToday = startOfToday + (24 * 60 * 60 * 1000);
 
         database.ref('deposits').once('value', s => {
             s.forEach(c => { 
                 const d = c.val();
                 if(d.status === "Success") {
-                    tDep += parseFloat(d.amount || 0);
+                    const amount = parseFloat(d.amount || 0);
+                    tDep += amount;
                     
-                    // তারিখ চেক করার উন্নত লজিক
                     if(d.time) {
-                        const dDate = new Date(d.time).toLocaleDateString('en-US');
-                        if(dDate === todayStr) {
-                            todayDepAmt += parseFloat(d.amount || 0);
+                        const dDate = new Date(d.time).getTime();
+                        if(dDate >= startOfToday && dDate < endOfToday) {
+                            todayDepAmt += amount;
                             todayDepCount++;
                         }
                     }
@@ -262,12 +265,13 @@
             s.forEach(c => { 
                 const w = c.val();
                 if(w.status === "Approved") {
-                    tWith += parseFloat(w.amount || 0);
+                    const amount = parseFloat(w.amount || 0);
+                    tWith += amount;
                     
                     if(w.time) {
-                        const wDate = new Date(w.time).toLocaleDateString('en-US');
-                        if(wDate === todayStr) {
-                            todayWithAmt += parseFloat(w.amount || 0);
+                        const wDate = new Date(w.time).getTime();
+                        if(wDate >= startOfToday && wDate < endOfToday) {
+                            todayWithAmt += amount;
                             todayWithCount++;
                         }
                     }
@@ -354,19 +358,19 @@
         database.ref('users/'+user+'/balance').once('value').then(s => {
             let nBal = (parseFloat(s.val())||0) + parseFloat(amt);
             database.ref('users/'+user).update({ balance: nBal });
-            database.ref('deposits/'+id).update({ status: "Success", time: new Date().toLocaleString() });
+            database.ref('deposits/'+id).update({ status: "Success", time: new Date().toISOString() }); // ISO format safe for calculation
         });
     }
 
     function rejectDep(id) {
         let reason = prompt("রিজেক্ট করার কারণ লিখুন:");
         if(reason) {
-            database.ref('deposits/'+id).update({ status: "Rejected", note: reason, time: new Date().toLocaleString() });
+            database.ref('deposits/'+id).update({ status: "Rejected", note: reason, time: new Date().toISOString() });
         }
     }
 
     function approveWith(id) {
-        database.ref('withdraws/'+id).update({ status: "Approved", time: new Date().toLocaleString() });
+        database.ref('withdraws/'+id).update({ status: "Approved", time: new Date().toISOString() });
     }
 
     function rejectWith(id, user, amt) {
@@ -375,7 +379,7 @@
             database.ref('users/'+user+'/balance').once('value').then(s => {
                 let rBal = (parseFloat(s.val())||0) + parseFloat(amt);
                 database.ref('users/'+user).update({ balance: rBal });
-                database.ref('withdraws/'+id).update({ status: "Rejected", note: reason, time: new Date().toLocaleString() });
+                database.ref('withdraws/'+id).update({ status: "Rejected", note: reason, time: new Date().toISOString() });
             });
         }
     }
@@ -400,4 +404,3 @@
 
 </body>
 </html>
-
