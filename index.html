@@ -20,9 +20,21 @@
         .hidden { display: none; }
         p { cursor: pointer; color: #ff8a00; margin-top: 15px; font-size: 14px; }
         #recaptcha-container { margin: 10px 0; }
+
+        /* কাস্টম টোস্ট মেসেজ স্টাইল */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 8px; padding: 16px; position: fixed;
+            z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px;
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
+
+<div id="toast"></div>
 
 <div class="container">
     <div class="logo">🔐</div>
@@ -50,7 +62,11 @@
             <span class="toggle-pass" onclick="togglePass('regPass')">👁️</span>
         </div>
         <input type="password" id="regConfirm" placeholder="Confirm Password">
-        <input type="text" id="refCode" placeholder="Referral Code">
+        
+        <div class="input-group">
+            <input type="number" id="referrerInput" placeholder="Refer Code (Optional)">
+        </div>
+
         <label style="font-size: 12px;">
             <input type="checkbox" id="agree"> I agree to privacy policy
         </label>
@@ -91,6 +107,14 @@
 
     let confirmationResult;
 
+    // কাস্টম টোস্ট ফাংশন (ব্রাউজার অ্যালার্টের বদলে)
+    window.showToast = function(msg) {
+        const x = document.getElementById("toast");
+        x.innerText = msg;
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    }
+
     // UI Toggle functions
     window.togglePass = function(id) {
         const input = document.getElementById(id);
@@ -129,26 +153,25 @@
         let phone = document.getElementById("loginPhone").value.trim();
         let pass = document.getElementById("loginPass").value;
         
-        if(!phone || !pass) { alert("Please enter phone and password"); return; }
+        if(!phone || !pass) { showToast("Please enter phone and password"); return; }
 
         try {
             const userRef = ref(db, "users/" + phone);
             const snapshot = await get(userRef);
 
             if (snapshot.exists() && snapshot.val().pass === pass) {
-                // সেশন ডাটা সেভ করা
                 localStorage.setItem("isLoggedIn", "true");
                 localStorage.setItem("loggedUser", phone); 
                 localStorage.setItem("userPhone", phone); 
 
-                alert("Login Successful!");
-                window.location.href = "home.html"; 
+                showToast("Login Successful!");
+                setTimeout(() => { window.location.href = "home.html"; }, 1500);
             } else { 
-                alert("Incorrect Phone or Password"); 
+                showToast("Incorrect Phone or Password"); 
             }
         } catch (e) { 
             console.error(e);
-            alert("Database Error: " + e.message); 
+            showToast("Database Error: " + e.message); 
         }
     }
 
@@ -157,58 +180,75 @@
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
         let confirm = document.getElementById("regConfirm").value;
+        let refID = document.getElementById("referrerInput").value; // রেফারেল কোড নেওয়া
         let agree = document.getElementById("agree").checked;
 
-        if(phone.length < 11) { alert("Invalid Phone Number"); return; }
-        if(pass !== confirm) { alert("Passwords do not match"); return; }
-        if(!agree) { alert("Please agree to privacy policy"); return; }
+        if(phone.length < 11) { showToast("Invalid Phone Number"); return; }
+        if(pass !== confirm) { showToast("Passwords do not match"); return; }
+        if(!agree) { showToast("Please agree to privacy policy"); return; }
 
         try {
             const userRef = ref(db, "users/" + phone);
             const checkUser = await get(userRef);
-            if(checkUser.exists()) { alert("User already registered!"); return; }
+            if(checkUser.exists()) { showToast("User already registered!"); return; }
 
             await set(userRef, { 
                 phone: phone, 
                 pass: pass, 
                 balance: 0, 
+                referrerID: refID || "none", // রেফারেল আইডি সেভ করা
                 createdAt: new Date().toISOString() 
             });
 
-            alert("Registration Successful! Now Login.");
-            showLogin();
-        } catch (e) { alert("Error: " + e.message); }
+            showToast("Registration Successful! Now Login.");
+            setTimeout(() => { showLogin(); }, 1500);
+        } catch (e) { showToast("Error: " + e.message); }
     }
 
     // OTP and Password Reset
     window.sendOTP = function() {
         let phoneField = document.getElementById("resetPhone").value.trim();
-        if(!phoneField) { alert("Enter phone number first"); return; }
+        if(!phoneField) { showToast("Enter phone number first"); return; }
         const phoneNumber = "+88" + phoneField;
         signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
-            .then((result) => { confirmationResult = result; alert("OTP Sent!"); })
-            .catch((error) => { alert("Error: " + error.message); });
+            .then((result) => { confirmationResult = result; showToast("OTP Sent!"); })
+            .catch((error) => { showToast("Error: " + error.message); });
     }
 
     window.resetPassword = function() {
         const code = document.getElementById("otpInput").value.trim();
         const newPass = document.getElementById("newPass").value;
         const phone = document.getElementById("resetPhone").value.trim();
-        if(!confirmationResult) { alert("Send OTP first"); return; }
+        if(!confirmationResult) { showToast("Send OTP first"); return; }
         
         confirmationResult.confirm(code).then(async () => {
             const userRef = ref(db, "users/" + phone);
             await update(userRef, { pass: newPass });
-            alert("Password Updated!");
-            showLogin();
-        }).catch(() => alert("Invalid OTP"));
+            showToast("Password Updated!");
+            setTimeout(() => { showLogin(); }, 1500);
+        }).catch(() => showToast("Invalid OTP"));
     }
 
-    // Initializing Recaptcha on Load
+    // Initializing Recaptcha and Refer Logic on Load
     window.onload = function() {
+        // ১. রিক্যাপচা সেটআপ
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'normal'
         });
+
+        // ২. রেফারেল লিঙ্ক লজিক
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+
+        if (refCode) {
+            showRegister(); // সরাসরি রেজিস্ট্রেশন পেজ দেখাবে
+            const refField = document.getElementById('referrerInput');
+            if (refField) {
+                refField.value = refCode;
+                refField.readOnly = true; // পরিবর্তন করা যাবে না
+                refField.style.backgroundColor = "#f0f0f0";
+            }
+        }
     };
 </script>
 
