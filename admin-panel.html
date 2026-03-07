@@ -14,11 +14,13 @@
         .login-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 350px; text-align: center; }
 
         /* Sidebar */
-        .sidebar { width: 250px; background: #11998e; height: 100vh; color: white; padding: 20px; position: fixed; }
+        .sidebar { width: 250px; background: #11998e; height: 100vh; color: white; padding: 20px; position: fixed; overflow-y: auto; }
         .sidebar h2 { margin-bottom: 30px; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
         .sidebar nav p { padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .sidebar nav p:hover { background: rgba(255,255,255,0.1); }
         .sidebar nav p.active { background: white; color: #11998e; font-weight: bold; }
+        .vip-group { margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        .vip-title { font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 10px; padding-left: 10px; }
 
         /* Main Content */
         .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 30px; }
@@ -30,6 +32,7 @@
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #11998e; }
         .stat-card h4 { color: #666; font-size: 14px; margin-bottom: 10px; }
         .stat-card h2 { color: #11998e; font-size: 24px; }
+        .stat-card.daily { border-top-color: #ff9800; }
 
         .admin-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -44,7 +47,6 @@
         .input-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
         .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
         
-        /* Status Styles */
         .text-success { color: #28a745; font-weight: bold; }
         .text-danger { color: #dc3545; font-weight: bold; }
         .online-dot { height: 10px; width: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; margin-right: 5px; }
@@ -71,7 +73,16 @@
         <p onclick="showSection('users')"><i class="fas fa-users"></i> Users List</p>
         <p onclick="showSection('deposits')"><i class="fas fa-wallet"></i> Deposits</p>
         <p onclick="showSection('withdraws')"><i class="fas fa-hand-holding-usd"></i> Withdrawals</p>
-        <p onclick="window.location.href='vip.html'"><i class="fas fa-gem"></i> VIP</p>
+        
+        <div class="vip-group">
+            <div class="vip-title">VIP Control</div>
+            <p onclick="window.location.href='vip1.html'"><i class="fas fa-gem"></i> VIP 1</p>
+            <p onclick="window.location.href='vip2.html'"><i class="fas fa-gem"></i> VIP 2</p>
+            <p onclick="window.location.href='vip3.html'"><i class="fas fa-gem"></i> VIP 3</p>
+            <p onclick="window.location.href='vip4.html'"><i class="fas fa-gem"></i> VIP 4</p>
+            <p onclick="window.location.href='vip5.html'"><i class="fas fa-gem"></i> VIP 5</p>
+        </div>
+
         <p onclick="showSection('history')"><i class="fas fa-history"></i> Transactions</p>
         <p onclick="showSection('settings')"><i class="fas fa-cog"></i> Settings</p>
         <p onclick="adminLogout()" style="margin-top: 20px; color: #ffcccc;"><i class="fas fa-sign-out-alt"></i> Logout</p>
@@ -86,6 +97,9 @@
             <div class="stat-card"><h4>Online Now</h4><h2><span id="statOnlineUsers" style="color: #28a745;">0</span></h2></div>
             <div class="stat-card"><h4>Total Deposit</h4><h2>৳ <span id="totalDep">0</span></h2></div>
             <div class="stat-card"><h4>Total Withdraw</h4><h2>৳ <span id="totalWith">0</span></h2></div>
+            
+            <div class="stat-card daily"><h4>Today's Deposits</h4><h2>৳ <span id="todayDepAmt">0</span> (<span id="todayDepCount">0</span>)</h2></div>
+            <div class="stat-card daily"><h4>Today's Withdraws</h4><h2>৳ <span id="todayWithAmt">0</span> (<span id="todayWithCount">0</span>)</h2></div>
         </div>
     </div>
 
@@ -211,22 +225,51 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.sidebar nav p').forEach(p => p.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
     }
 
     function updateStats() {
         let tDep = 0, tWith = 0;
+        let todayDepAmt = 0, todayDepCount = 0;
+        let todayWithAmt = 0, todayWithCount = 0;
+        
+        const todayDate = new Date().toLocaleDateString();
+
         database.ref('deposits').once('value', s => {
-            s.forEach(c => { if(c.val().status === "Success") tDep += parseFloat(c.val().amount); });
+            s.forEach(c => { 
+                const d = c.val();
+                if(d.status === "Success") {
+                    tDep += parseFloat(d.amount);
+                    // আজকের দিনের হিসাব
+                    if(d.time && new Date(d.time).toLocaleDateString() === todayDate) {
+                        todayDepAmt += parseFloat(d.amount);
+                        todayDepCount++;
+                    }
+                }
+            });
             document.getElementById('totalDep').innerText = tDep;
+            document.getElementById('todayDepAmt').innerText = todayDepAmt;
+            document.getElementById('todayDepCount').innerText = todayDepCount;
         });
+
         database.ref('withdraws').once('value', s => {
-            s.forEach(c => { if(c.val().status === "Approved") tWith += parseFloat(c.val().amount); });
+            s.forEach(c => { 
+                const w = c.val();
+                if(w.status === "Approved") {
+                    tWith += parseFloat(w.amount);
+                    // আজকের দিনের হিসাব
+                    if(w.time && new Date(w.time).toLocaleDateString() === todayDate) {
+                        todayWithAmt += parseFloat(w.amount);
+                        todayWithCount++;
+                    }
+                }
+            });
             document.getElementById('totalWith').innerText = tWith;
+            document.getElementById('todayWithAmt').innerText = todayWithAmt;
+            document.getElementById('todayWithCount').innerText = todayWithCount;
         });
     }
 
-    // --- User Details and Online/Offline Logic ---
     database.ref('users').on('value', snapshot => {
         const userListBody = document.getElementById('userListBody');
         userListBody.innerHTML = "";
@@ -237,8 +280,6 @@
         snapshot.forEach(child => {
             const u = child.val();
             totalUsers++;
-            
-            // অনলাইন চেক: যদি lastSeen ১ মিনিটের কম হয়
             const isOnline = u.lastSeen && (now - u.lastSeen < 60000);
             if(isOnline) onlineUsers++;
 
@@ -350,3 +391,4 @@
 
 </body>
 </html>
+
