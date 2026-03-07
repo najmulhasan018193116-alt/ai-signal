@@ -1,1 +1,96 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotion - Referral Program</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; margin-top: 10px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; background: #f9f9f9; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #11998e; color: white; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box { background: #11998e; color: white; padding: 15px; border-radius: 10px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h3>আপনার রেফারেল লিঙ্ক</h3>
+        <div class="input-group">
+            <input type="text" id="referLink" readonly>
+            <button class="btn" onclick="copyLink()"><i class="fas fa-copy"></i> কপি</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box"><h4>মোট রেফার</h4><h2 id="totalRef">0</h2></div>
+        <div class="stat-box"><h4>মোট কমিশন</h4><h2>৳ <span id="totalComm">0</span></h2></div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+        <h3>আপনার টিম লিস্ট (ডাউনলাইন)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>আইডি নম্বর</th>
+                    <th>নাম</th>
+                    <th>ডিপোজিট</th>
+                </tr>
+            </thead>
+            <tbody id="teamBody"></tbody>
+        </table>
+    </div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    // Firebase Config (আপনারটা বসাবেন)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+        databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // ইউজারের তথ্য (লগইন সেশন থেকে আসবে)
+    const userPhone = localStorage.getItem("userPhone") || "01700000000"; 
+
+    // লিঙ্ক জেনারেট
+    const fullLink = window.location.origin + "/register.html?ref=" + userPhone;
+    document.getElementById('referLink').value = fullLink;
+
+    function copyLink() {
+        const copyText = document.getElementById("referLink");
+        copyText.select();
+        document.execCommand("copy");
+        alert("লিঙ্ক কপি হয়েছে!");
+    }
+
+    // টিম ডাটা লোড
+    database.ref('users').orderByChild('referrer').equalTo(userPhone).on('value', s => {
+        let html = "";
+        let count = 0;
+        let totalC = 0;
+        s.forEach(child => {
+            const u = child.val();
+            count++;
+            html += `<tr><td>${child.key}</td><td>${u.name || 'N/A'}</td><td>৳ ${u.totalDeposit || 0}</td></tr>`;
+        });
+        document.getElementById('teamBody').innerHTML = html;
+        document.getElementById('totalRef').innerText = count;
+    });
+
+    // কমিশন লোড (ইউজারের নিজস্ব প্রোফাইল থেকে)
+    database.ref('users/' + userPhone + '/refCommission').on('value', s => {
+        document.getElementById('totalComm').innerText = s.val() || 0;
+    });
+</script>
+</body>
+</html>
 
