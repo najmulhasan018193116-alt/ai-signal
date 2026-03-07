@@ -1,0 +1,34 @@
+<div class="card">
+    <h2><i class="fas fa-tools"></i> VIP 2 - Payment Settings</h2>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <select id="setMethod">
+            <option value="bkash">bKash</option>
+            <option value="nagad">Nagad</option>
+            <option value="rocket">Rocket</option>
+        </select>
+        <select id="setType">
+            <option value="ক্যাশ আউট">Cash Out</option>
+            <option value="সেন্ড মানি">Send Money</option>
+        </select>
+    </div>
+    <input type="text" id="setNumber" placeholder="নতুন নম্বর দিন">
+    <button class="btn btn-add" onclick="updatePaymentInfo()">নম্বর আপডেট করুন</button>
+</div>
+
+<script>
+function updatePaymentInfo() {
+    const method = document.getElementById('setMethod').value;
+    const type = document.getElementById('setType').value;
+    const number = document.getElementById('setNumber').value;
+
+    if(!number) { alert("নম্বর দিন!"); return; }
+
+    database.ref('admin_settings/vip2/' + method).set({
+        number: number,
+        type: type
+    }).then(() => {
+        alert(method + " তথ্য আপডেট হয়েছে!");
+    });
+}
+</script>
+  
