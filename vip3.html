@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin - ai-signal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; display: flex; }
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #11998e; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 350px; text-align: center; }
+        .sidebar { width: 250px; background: #11998e; height: 100vh; color: white; padding: 20px; position: fixed; overflow-y: auto; }
+        .sidebar h2 { margin-bottom: 30px; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .sidebar nav p { padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .sidebar nav p:hover { background: rgba(255,255,255,0.1); }
+        .sidebar nav p.active { background: white; color: #11998e; font-weight: bold; }
+        .vip-group { margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        .vip-title { font-size: 12px; text-transform: uppercase; opacity: 0.7; margin-bottom: 10px; padding-left: 10px; }
+        .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 30px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #11998e; }
+        .stat-card h4 { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .stat-card h2 { color: #11998e; font-size: 24px; }
+        .stat-card.bonus { border-top-color: #e91e63; }
+        .admin-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
+        th { background: #f8f9fa; color: #666; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-success { background: #28a745; color: white; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+    </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2 style="margin-bottom: 20px; color: #11998e;">Admin Login</h2>
+        <div class="input-group"><label>Password</label><input type="password" id="adminPassInput"></div>
+        <button class="btn btn-success" style="width: 100%;" onclick="checkAdminLogin()">Login</button>
+    </div>
+</div>
+
+<div class="sidebar">
+    <h2>Admin Panel</h2>
+    <nav>
+        <p class="active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</p>
+        <p onclick="showSection('users')"><i class="fas fa-users"></i> Users List</p>
+        <p onclick="showSection('deposits')"><i class="fas fa-wallet"></i> Deposits</p>
+        <p onclick="showSection('withdraws')"><i class="fas fa-hand-holding-usd"></i> Withdrawals</p>
+        
+        <div class="vip-group">
+            <div class="vip-title">VIP Control</div>
+            <p onclick="window.location.href='vip1.html'"><i class="fas fa-gem"></i> VIP 1</p>
+            <p onclick="window.location.href='vip2.html'"><i class="fas fa-gem"></i> VIP 2</p>
+            <p onclick="showSection('referControl')"><i class="fas fa-gem"></i> VIP 3 (Refer Control)</p>
+            <p onclick="window.location.href='vip4.html'"><i class="fas fa-gem"></i> VIP 4</p>
+            <p onclick="window.location.href='vip5.html'"><i class="fas fa-gem"></i> VIP 5</p>
+        </div>
+
+        <p onclick="showSection('history')"><i class="fas fa-history"></i> Transactions</p>
+        <p onclick="adminLogout()" style="margin-top: 20px; color: #ffcccc;"><i class="fas fa-sign-out-alt"></i> Logout</p>
+    </nav>
+</div>
+
+<div class="main-content">
+    
+    <div id="dashboard" class="section active">
+        <div class="stats-grid">
+            <div class="stat-card"><h4>Total Users</h4><h2><span id="statTotalUsers">0</span></h2></div>
+            <div class="stat-card"><h4>Total Deposit</h4><h2>৳ <span id="totalDep">0</span></h2></div>
+            <div class="stat-card bonus"><h4>Total Referral Bonus</h4><h2>৳ <span id="totalRefBonus">0</span></h2></div>
+        </div>
+    </div>
+
+    <div id="referControl" class="section">
+        <div class="admin-card" style="border-left: 5px solid #e91e63;">
+            <h2><i class="fas fa-percentage"></i> রেফার কমিশন সেটআপ</h2>
+            <div style="margin-top: 15px; display: flex; gap: 10px; align-items: flex-end;">
+                <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                    <label>নতুন কমিশন হার (%)</label>
+                    <input type="number" id="newRefRate" placeholder="যেমন: 10">
+                </div>
+                <button class="btn btn-success" style="padding: 12px 20px;" onclick="saveRefRate()">সেভ করুন</button>
+            </div>
+            <p style="margin-top: 10px; font-size: 13px; color: #666;">বর্তমান রেট: <span id="currentRateDisp" style="font-weight:bold; color:#11998e;">0</span>%</p>
+        </div>
+
+        <div class="admin-card">
+            <h3>বিস্তারিত রেফার রিপোর্ট</h3>
+            <div class="stats-grid" style="margin-top: 15px;">
+                <div class="stat-card bonus">
+                    <h4>বিতরণকৃত মোট বোনাস</h4>
+                    <h2>৳ <span id="reportTotalBonus">0</span></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="users" class="section">
+        <div class="admin-card">
+            <h2>Registered Users</h2>
+            <table>
+                <thead><tr><th>Phone</th><th>Name</th><th>Balance</th><th>Refer By</th></tr></thead>
+                <tbody id="userListBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="deposits" class="section">
+        <div class="admin-card">
+            <h2>Pending Deposits</h2>
+            <table>
+                <thead><tr><th>User</th><th>Amount</th><th>TrxID</th><th>Action</th></tr></thead>
+                <tbody id="depositBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
+        databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // UI Logic
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.sidebar nav p').forEach(p => p.classList.remove('active'));
+        if(event) event.currentTarget.classList.add('active');
+        
+        if(id === 'referControl') updateReferReport();
+    }
+
+    // ১. রেফার কমিশন সেভ ফাংশন (VIP 3)
+    function saveRefRate() {
+        const rate = document.getElementById('newRefRate').value;
+        if(rate !== "") {
+            database.ref('admin_settings/referral').update({ percent: parseFloat(rate) })
+            .then(() => {
+                alert("কমিশন রেট আপডেট হয়েছে!");
+                document.getElementById('newRefRate').value = "";
+            });
+        }
+    }
+
+    // ২. বর্তমান রেট এবং বোনাস রিপোর্ট আপডেট
+    database.ref('admin_settings/referral/percent').on('value', s => {
+        document.getElementById('currentRateDisp').innerText = s.val() || 0;
+    });
+
+    function updateReferReport() {
+        let totalC = 0;
+        database.ref('users').once('value', snapshot => {
+            snapshot.forEach(child => {
+                totalC += parseFloat(child.val().refCommission || 0);
+            });
+            document.getElementById('reportTotalBonus').innerText = totalC.toFixed(2);
+            document.getElementById('totalRefBonus').innerText = totalC.toFixed(2);
+        });
+    }
+
+    // ৩. ডিপোজিট এপ্রুভ ও অটো কমিশন লজিক
+    function approveDep(id, user, amt) {
+        database.ref('users/'+user).once('value').then(snap => {
+            const userData = snap.val();
+            
+            // মেইন ব্যালেন্স আপডেট
+            database.ref('users/'+user).update({ 
+                balance: (parseFloat(userData.balance) || 0) + parseFloat(amt),
+                totalDeposit: (parseFloat(userData.totalDeposit) || 0) + parseFloat(amt) 
+            });
+
+            // রেফার কমিশন লজিক
+            const referrer = userData.referrer;
+            if(referrer) {
+                database.ref('admin_settings/referral/percent').once('value').then(rateSnap => {
+                    const percent = rateSnap.val() || 0;
+                    if(percent > 0) {
+                        let commission = (parseFloat(amt) * percent) / 100;
+                        database.ref('users/'+referrer).once('value').then(refSnap => {
+                            const rData = refSnap.val();
+                            database.ref('users/'+referrer).update({
+                                balance: (parseFloat(rData.balance) || 0) + commission,
+                                refCommission: (parseFloat(rData.refCommission) || 0) + commission
+                            });
+                        });
+                    }
+                });
+            }
+            database.ref('deposits/'+id).update({ status: "Success", time: new Date().toISOString() });
+            alert("Approved!");
+        });
+    }
+
+    // ৪. রিয়েলটাইম ডাটা লিসেনার
+    database.ref('users').on('value', snapshot => {
+        const body = document.getElementById('userListBody'); body.innerHTML = "";
+        let total = 0;
+        snapshot.forEach(c => {
+            const u = c.val(); total++;
+            body.innerHTML += `<tr><td>${c.key}</td><td>${u.name}</td><td>৳ ${u.balance}</td><td>${u.referrer || 'None'}</td></tr>`;
+        });
+        document.getElementById('statTotalUsers').innerText = total;
+        updateReferReport();
+    });
+
+    database.ref('deposits').on('value', snapshot => {
+        const depBody = document.getElementById('depositBody'); depBody.innerHTML = "";
+        let tDep = 0;
+        snapshot.forEach(child => {
+            const d = child.val();
+            if(d.status === "Pending") {
+                depBody.innerHTML += `<tr><td>${d.user}</td><td>${d.amount}</td><td>${d.trxID}</td><td><button class="btn btn-success" onclick="approveDep('${child.key}','${d.user}',${d.amount})">Approve</button></td></tr>`;
+            } else if(d.status === "Success") {
+                tDep += parseFloat(d.amount);
+            }
+        });
+        document.getElementById('totalDep').innerText = tDep.toFixed(2);
+    });
+
+    // Login logic
+    function checkAdminLogin() {
+        if(document.getElementById('adminPassInput').value === "123456") {
+            localStorage.setItem("adminLoggedIn", "true"); document.getElementById('loginOverlay').style.display = "none";
+        } else { alert("Wrong Password!"); }
+    }
+    if(localStorage.getItem("adminLoggedIn") === "true") { document.getElementById('loginOverlay').style.display = "none"; }
+    function adminLogout() { localStorage.removeItem("adminLoggedIn"); location.reload(); }
+</script>
+</body>
+  </html>
+
