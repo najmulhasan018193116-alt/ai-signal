@@ -233,22 +233,28 @@
         let todayDepAmt = 0, todayDepCount = 0;
         let todayWithAmt = 0, todayWithCount = 0;
         
-        const todayDate = new Date().toLocaleDateString();
+        // আজকের তারিখ বের করার জন্য সঠিক পদ্ধতি
+        const now = new Date();
+        const todayStr = now.toLocaleDateString('en-US'); // "M/D/YYYY" format
 
         database.ref('deposits').once('value', s => {
             s.forEach(c => { 
                 const d = c.val();
                 if(d.status === "Success") {
-                    tDep += parseFloat(d.amount);
-                    // আজকের দিনের হিসাব
-                    if(d.time && new Date(d.time).toLocaleDateString() === todayDate) {
-                        todayDepAmt += parseFloat(d.amount);
-                        todayDepCount++;
+                    tDep += parseFloat(d.amount || 0);
+                    
+                    // তারিখ চেক করার উন্নত লজিক
+                    if(d.time) {
+                        const dDate = new Date(d.time).toLocaleDateString('en-US');
+                        if(dDate === todayStr) {
+                            todayDepAmt += parseFloat(d.amount || 0);
+                            todayDepCount++;
+                        }
                     }
                 }
             });
-            document.getElementById('totalDep').innerText = tDep;
-            document.getElementById('todayDepAmt').innerText = todayDepAmt;
+            document.getElementById('totalDep').innerText = tDep.toFixed(2);
+            document.getElementById('todayDepAmt').innerText = todayDepAmt.toFixed(2);
             document.getElementById('todayDepCount').innerText = todayDepCount;
         });
 
@@ -256,16 +262,19 @@
             s.forEach(c => { 
                 const w = c.val();
                 if(w.status === "Approved") {
-                    tWith += parseFloat(w.amount);
-                    // আজকের দিনের হিসাব
-                    if(w.time && new Date(w.time).toLocaleDateString() === todayDate) {
-                        todayWithAmt += parseFloat(w.amount);
-                        todayWithCount++;
+                    tWith += parseFloat(w.amount || 0);
+                    
+                    if(w.time) {
+                        const wDate = new Date(w.time).toLocaleDateString('en-US');
+                        if(wDate === todayStr) {
+                            todayWithAmt += parseFloat(w.amount || 0);
+                            todayWithCount++;
+                        }
                     }
                 }
             });
-            document.getElementById('totalWith').innerText = tWith;
-            document.getElementById('todayWithAmt').innerText = todayWithAmt;
+            document.getElementById('totalWith').innerText = tWith.toFixed(2);
+            document.getElementById('todayWithAmt').innerText = todayWithAmt.toFixed(2);
             document.getElementById('todayWithCount').innerText = todayWithCount;
         });
     }
