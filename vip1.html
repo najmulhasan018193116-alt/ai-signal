@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .admin-container { max-width: 900px; margin: auto; }
+        .admin-container { max-width: 1000px; margin: auto; }
         .back-btn { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #11998e; font-weight: bold; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        h2 { color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        h2 { color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; }
         input:focus { border-color: #11998e; }
@@ -20,17 +20,18 @@
         .btn-add:hover { background: #0e867d; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; font-size: 14px; }
         th { background: #11998e; color: white; }
         
         .delete-btn { color: #dc3545; cursor: pointer; font-size: 18px; border: none; background: none; }
         .pkg-img-preview { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #eee; border: 1px solid #ddd; }
+        .user-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <a href="admin.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <a href="admin-panel.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 
     <div class="card">
         <h2><i class="fas fa-gem" style="color: #ff9800;"></i> VIP 1 - নতুন প্যাকেজ যোগ করুন</h2>
@@ -44,7 +45,7 @@
     </div>
 
     <div class="card">
-        <h2><i class="fas fa-list"></i> VIP 1 প্যাকেজসমূহ</h2>
+        <h2><i class="fas fa-list"></i> VIP 1 মার্কেট প্যাকেজসমূহ</h2>
         <table>
             <thead>
                 <tr>
@@ -56,8 +57,23 @@
                     <th>অ্যাকশন</th>
                 </tr>
             </thead>
-            <tbody id="pkgTableBody">
-                </tbody>
+            <tbody id="pkgTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="card" style="border-top: 5px solid #ff9800;">
+        <h2><i class="fas fa-user-check"></i> VIP 1 - ইউজারদের একটিভ প্যাকেজ</h2>
+        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">এখান থেকে ডিলিট করলে ইউজারের ইনকাম বন্ধ হয়ে যাবে।</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>ইউজার ফোন</th>
+                    <th>প্যাকেজ নাম</th>
+                    <th>মেয়াদ শেষ</th>
+                    <th>অ্যাকশন</th>
+                </tr>
+            </thead>
+            <tbody id="activeUserTableBody"></tbody>
         </table>
     </div>
 </div>
@@ -66,7 +82,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-    // আপনার আগের ডাটাবেস কনফিগারেশন
     const firebaseConfig = {
         apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
         databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
@@ -74,7 +89,6 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const database = firebase.database();
 
-    // প্যাকেজ যোগ করার ফাংশন
     function addPackage() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
@@ -87,9 +101,7 @@
             return;
         }
 
-        // VIP 1 এর জন্য আলাদা নোড 'packages_vip1' ব্যবহার করা হয়েছে
-        const pkgRef = database.ref('packages_vip1').push();
-        pkgRef.set({
+        database.ref('packages_vip1').push({
             name: name,
             price: parseInt(price),
             daily: parseInt(daily),
@@ -97,53 +109,64 @@
             image: image || "",
             timestamp: Date.now()
         }).then(() => {
-            alert("VIP 1 প্যাকেজটি সফলভাবে যোগ হয়েছে!");
-            document.getElementById('pName').value = '';
-            document.getElementById('pPrice').value = '';
-            document.getElementById('pDaily').value = '';
-            document.getElementById('pValidity').value = '';
-            document.getElementById('pImage').value = '';
+            alert("VIP 1 প্যাকেজ যোগ হয়েছে!");
+            location.reload();
         });
     }
 
-    // প্যাকেজ লিস্ট দেখানো
+    // মার্কেট প্যাকেজ লিস্ট লোড
     database.ref('packages_vip1').on('value', (snapshot) => {
         const tableBody = document.getElementById('pkgTableBody');
         tableBody.innerHTML = "";
-        
-        if (snapshot.exists()) {
-            snapshot.forEach((childSnapshot) => {
-                const pkg = childSnapshot.val();
-                const key = childSnapshot.key;
-                
-                const imgDisplay = pkg.image 
-                    ? `<img src="${pkg.image}" class="pkg-img-preview" onerror="this.src='https://via.placeholder.com/50'">` 
-                    : `<i class="fas fa-image" style="font-size:30px; color:#ccc;"></i>`;
-
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>${imgDisplay}</td>
-                        <td>${pkg.name}</td>
-                        <td>৳${pkg.price}</td>
-                        <td>৳${pkg.daily}</td>
-                        <td>${pkg.validity} দিন</td>
-                        <td>
-                            <button class="delete-btn" onclick="deletePackage('${key}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        } else {
-            tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>কোনো প্যাকেজ পাওয়া যায়নি।</td></tr>";
-        }
+        snapshot.forEach((child) => {
+            const pkg = child.val();
+            const imgDisplay = pkg.image ? `<img src="${pkg.image}" class="pkg-img-preview">` : `<i class="fas fa-image" style="font-size:30px; color:#ccc;"></i>`;
+            tableBody.innerHTML += `<tr><td>${imgDisplay}</td><td>${pkg.name}</td><td>৳${pkg.price}</td><td>৳${pkg.daily}</td><td>${pkg.validity} দিন</td><td><button class="delete-btn" onclick="deletePackage('${child.key}')"><i class="fas fa-trash"></i></button></td></tr>`;
+        });
     });
 
-    // প্যাকেজ ডিলিট
     function deletePackage(key) {
         if (confirm("আপনি কি নিশ্চিতভাবে এই প্যাকেজটি মুছে ফেলতে চান?")) {
             database.ref('packages_vip1/' + key).remove();
+        }
+    }
+
+    // নতুন ফিচার লজিক: ইউজারদের একটিভ প্যাকেজ দেখানো
+    database.ref('user_subscriptions').on('value', (snapshot) => {
+        const tableBody = document.getElementById('activeUserTableBody');
+        tableBody.innerHTML = "";
+        
+        if (snapshot.exists()) {
+            snapshot.forEach((userSnap) => {
+                const phone = userSnap.key;
+                const subs = userSnap.val();
+                
+                for (let subKey in subs) {
+                    const data = subs[subKey];
+                    const expireDate = new Date(data.expire_time).toLocaleString();
+                    
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><span class="user-tag">${phone}</span></td>
+                            <td>${data.name}</td>
+                            <td>${expireDate}</td>
+                            <td>
+                                <button class="delete-btn" onclick="deleteUserSub('${phone}', '${subKey}')">
+                                    <i class="fas fa-user-minus"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                }
+            });
+        } else {
+            tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>কোনো একটিভ প্যাকেজ নেই।</td></tr>";
+        }
+    });
+
+    // ইউজার সাবস্ক্রিপশন ডিলিট ফাংশন
+    function deleteUserSub(phone, subKey) {
+        if (confirm("ইউজারের এই একটিভ প্যাকেজটি কি ডিলিট করতে চান?")) {
+            database.ref('user_subscriptions/' + phone + '/' + subKey).remove();
         }
     }
 </script>
