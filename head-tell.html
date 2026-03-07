@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Head Tail Lottery Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --dx-yellow: #ffc107; --dx-bg: #f8f9fa; --head-btn: #2196f3; --tail-btn: #ff9800; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: var(--dx-bg); overflow-x: hidden; }
+
+        .header-box { background: var(--dx-yellow); padding: 15px; text-align: center; font-weight: bold; font-size: 18px; color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .wallet-card { background: white; margin: -10px 15px 20px; padding: 20px; text-align: center; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .wallet-card h2 { font-size: 30px; color: #333; }
+
+        .tabs-container { display: flex; gap: 8px; padding: 0 15px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #fff; color: #333; font-weight: bold; cursor: pointer; }
+        .tab-btn.active { background: var(--dx-yellow); color: #000; }
+
+        .info-box { background: #fffef2; margin: 10px 15px; padding: 15px; border-radius: 12px; border: 1px dashed #ffd54f; display: flex; justify-content: space-between; align-items: center; }
+        .info-value { font-size: 17px; font-weight: bold; color: #333; }
+
+        .bet-actions { display: flex; gap: 15px; padding: 15px; position: relative; }
+        .main-btn { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-head { background: var(--head-btn); }
+        .btn-tail { background: var(--tail-btn); }
+        
+        #lockOverlay { display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8); z-index:10; border-radius:12px; align-items:center; justify-content:center; color:red; font-weight:bold; }
+
+        .history-section { background: white; margin: 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 350px; }
+        .history-tabs { display: flex; border-bottom: 1px solid #eee; }
+        .h-tab { flex:1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: #888; }
+        .h-tab.active { color: var(--dx-yellow); border-bottom: 3px solid var(--dx-yellow); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #fff9e6; padding: 12px 5px; font-size: 12px; color: #777; }
+        td { padding: 12px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; font-size: 13px; }
+        
+        .res-num { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .bg-head { background: #2196f3; }
+        .bg-tail { background: #ff9800; }
+        .txt-head { color: #2196f3; font-weight: bold; }
+        .txt-tail { color: #ff9800; font-weight: bold; }
+        .status-win { color: #4caf50; font-weight: bold; }
+        .status-loss { color: #ff4d4d; font-weight: bold; }
+        .status-pending { color: #ff9800; font-weight: bold; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; color: white; }
+        .modal-box input { width: 100%; background: transparent; border: none; border-bottom: 2px solid var(--dx-yellow); color: white; font-size: 26px; padding: 10px 0; margin: 20px 0; outline: none; text-align: center; }
+        
+        #resultPopup { display: none; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 20px 30px; border-radius: 15px; color: white; font-size: 22px; font-weight: bold; z-index: 3000; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <div class="header-box">HEAD TAIL LOTTERY GAME</div>
+
+    <div class="wallet-card">
+        <p style="color:#888; font-size:14px;">Wallet Balance</p>
+        <h2>৳ <span id="balanceDisplay">0.00</span></h2>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="changeMode(30, this)">30s</button>
+        <button class="tab-btn" onclick="changeMode(60, this)">1m</button>
+        <button class="tab-btn" onclick="changeMode(180, this)">3m</button>
+    </div>
+
+    <div class="info-box">
+        <div>
+            <div style="color:#888; font-size:13px;">Period ID</div>
+            <div class="info-value" id="periodId">Loading...</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="color:#888; font-size:13px;">Time Left</div>
+            <div class="info-value" id="timerDisplay">00:00</div>
+        </div>
+    </div>
+
+    <div class="bet-actions">
+        <div id="lockOverlay">BETTING CLOSED</div>
+        <button class="main-btn btn-head" onclick="openBet('Head')">HEAD</button>
+        <button class="main-btn btn-tail" onclick="openBet('Tail')">TAIL</button>
+    </div>
+
+    <div class="history-section">
+        <div class="history-tabs">
+            <div class="h-tab active" id="tabGame" onclick="switchView('game')">Game History</div>
+            <div class="h-tab" id="tabMy" onclick="switchView('my')">My History</div>
+        </div>
+        <table id="mainTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="modal-overlay" id="betModal">
+        <div class="modal-box">
+            <h3 id="betTitle">Bet on</h3>
+            <input type="number" id="betInput" placeholder="Enter amount">
+            <div style="display:flex; justify-content:space-between;">
+                <button onclick="closeBet()" style="background:none; border:none; color:red; font-weight:bold;">CANCEL</button>
+                <button onclick="confirmBet()" style="background:none; border:none; color:#5086ff; font-weight:bold;">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultPopup"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = { apiKey: "YOUR_API_KEY", databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const userPhone = localStorage.getItem("userPhone") || "guest_user";
+
+        let currentMode = 30;
+        let currentPeriod = "";
+        let selectedChoice = "";
+        let historyView = 'game';
+        let gameData = [];
+        let myData = [];
+
+        db.ref('users/' + userPhone + '/balance').on('value', s => {
+            document.getElementById('balanceDisplay').innerText = parseFloat(s.val() || 0).toFixed(2);
+        });
+
+        function runTimer() {
+            const now = new Date();
+            const dateStr = now.getFullYear().toString() + (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
+            const totalSec = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+            const periodCounter = Math.floor(totalSec / currentMode);
+            const newPeriodId = dateStr + currentMode + periodCounter.toString().padStart(4, '0');
+
+            if (currentPeriod !== "" && currentPeriod !== newPeriodId) {
+                processResult(currentPeriod);
+            }
+            currentPeriod = newPeriodId;
+            document.getElementById('periodId').innerText = currentPeriod;
+
+            const remain = currentMode - (totalSec % currentMode);
+            document.getElementById('timerDisplay').innerText = `00:${remain.toString().padStart(2, '0')}`;
+            document.getElementById('lockOverlay').style.display = (remain <= 5) ? 'flex' : 'none';
+        }
+
+        function processResult(pid) {
+            const num = Math.floor(Math.random() * 10);
+            // Even numbers = Head, Odd numbers = Tail
+            const result = (num % 2 === 0) ? "Head" : "Tail";
+
+            db.ref('history/' + currentMode + '/' + pid).set({ 
+                id: pid, num: num, result: result, time: Date.now() 
+            });
+
+            db.ref('user_bets/' + userPhone).orderByChild('period').equalTo(pid).once('value', s => {
+                s.forEach(snap => {
+                    const bet = snap.val();
+                    if(bet.mode == currentMode && bet.status === "Pending") {
+                        const win = (bet.choice === result);
+                        if(win) {
+                            const winAmt = bet.amount * 1.96;
+                            db.ref('users/' + userPhone + '/balance').transaction(b => (parseFloat(b) || 0) + winAmt);
+                            showPopup("WINNER! +৳" + winAmt.toFixed(2), "#4caf50");
+                        } else {
+                            showPopup("LOSS", "#f44336");
+                        }
+                        db.ref('user_bets/' + userPhone + '/' + snap.key).update({ status: win ? "Win" : "Loss" });
+                    }
+                });
+            });
+        }
+
+        function showPopup(msg, bg) {
+            const p = document.getElementById('resultPopup');
+            p.innerText = msg; p.style.backgroundColor = bg; p.style.display = 'block';
+            setTimeout(() => p.style.display = 'none', 3000);
+        }
+
+        function loadData() {
+            db.ref('history/' + currentMode).off();
+            db.ref('history/' + currentMode).orderByChild('time').limitToLast(10).on('value', s => {
+                gameData = [];
+                s.forEach(c => { 
+                    let d = c.val();
+                    if(d.id) gameData.push(d); 
+                });
+                gameData.reverse();
+                if(historyView === 'game') renderTable();
+            });
+
+            db.ref('user_bets/' + userPhone).off();
+            db.ref('user_bets/' + userPhone).limitToLast(10).on('value', s => {
+                myData = [];
+                s.forEach(c => { 
+                    let b = c.val();
+                    if(b.mode == currentMode) myData.push(b);
+                });
+                myData.reverse();
+                if(historyView === 'my') renderTable();
+            });
+        }
+
+        function switchView(view) {
+            historyView = view;
+            document.getElementById('tabGame').classList.toggle('active', view === 'game');
+            document.getElementById('tabMy').classList.toggle('active', view === 'my');
+            renderTable();
+        }
+
+        function renderTable() {
+            const head = document.getElementById('tableHead');
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            
+            if(historyView === 'game') {
+                head.innerHTML = `<tr><th>Period</th><th>Number</th><th>Side</th></tr>`;
+                gameData.slice(0, 10).forEach(d => {
+                    let cls = d.result === "Head" ? "bg-head" : "bg-tail";
+                    body.innerHTML += `<tr><td>...${String(d.id).slice(-4)}</td><td><span class="res-num ${cls}">${d.num}</span></td><td class="txt-${d.result.toLowerCase()}">${d.result}</td></tr>`;
+                });
+            } else {
+                head.innerHTML = `<tr><th>Period</th><th>Side</th><th>Amount</th><th>Status</th></tr>`;
+                myData.slice(0, 10).forEach(d => {
+                    body.innerHTML += `<tr><td>...${String(d.period).slice(-4)}</td><td class="txt-${d.choice.toLowerCase()}">${d.choice}</td><td>৳${d.amount}</td><td class="status-${d.status.toLowerCase()}">${d.status}</td></tr>`;
+                });
+            }
+        }
+
+        function changeMode(m, btn) {
+            currentMode = m;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadData();
+        }
+
+        function openBet(c) {
+            selectedChoice = c;
+            document.getElementById('betTitle').innerText = "Bet on " + c;
+            document.getElementById('betModal').style.display = 'flex';
+        }
+
+        function closeBet() { document.getElementById('betModal').style.display = 'none'; }
+        
+        function confirmBet() {
+            const amt = parseFloat(document.getElementById('betInput').value);
+            const balance = parseFloat(document.getElementById('balanceDisplay').innerText);
+            
+            if(!amt || amt < 10) return showPopup("Min bet ৳10", "#f44336");
+            if(amt > balance) return showPopup("Insufficient Balance", "#f44336");
+            
+            db.ref('user_bets/' + userPhone).push({ 
+                period: currentPeriod, 
+                amount: amt, 
+                choice: selectedChoice, 
+                mode: currentMode, 
+                status: "Pending",
+                time: Date.now()
+            });
+            
+            db.ref('users/' + userPhone + '/balance').transaction(b => b - amt);
+            closeBet();
+            showPopup("Bet Placed Successfully!", "#2196f3");
+        }
+
+        setInterval(runTimer, 1000);
+        loadData();
+    </script>
+</body>
+</html>
+
