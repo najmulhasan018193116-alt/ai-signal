@@ -27,7 +27,6 @@
         .my-plan-card { background: #252525; border: 1px dashed #38ef7d; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .back-btn { position: absolute; top: 15px; left: 15px; color: white; font-size: 20px; }
 
-        /* কাস্টম পপআপ স্টাইল */
         .custom-alert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(30, 30, 30, 0.95); border: 1px solid #38ef7d; color: white; padding: 20px 30px; border-radius: 15px; z-index: 1000; text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: none; min-width: 250px; }
         .timer-text { font-size: 12px; color: #ff9800; margin-top: 5px; font-weight: normal; }
     </style>
@@ -66,7 +65,6 @@
         const database = firebase.database();
         const userPhone = localStorage.getItem("userPhone") || "guest_user";
 
-        // কাস্টম অ্যালার্ট ফাংশন (২ সেকেন্ড পর অটো চলে যাবে)
         function showToast(message) {
             const alertBox = document.getElementById('customAlert');
             alertBox.innerText = message;
@@ -79,25 +77,33 @@
                 document.getElementById('userBalance').innerText = parseFloat(snapshot.val() || 0).toFixed(2);
             });
 
+            // রিয়েল-টাইম প্যাকেজ এবং সাবস্ক্রিপশন চেক
             database.ref('user_subscriptions/' + userPhone).on('value', subSnapshot => {
                 const mySubs = subSnapshot.val() || {};
-                
+                const now = Date.now();
+
+                // ১. মেয়াদোত্তীর্ণ প্যাকেজ অটো ডিলিট লজিক
+                subSnapshot.forEach(child => {
+                    const data = child.val();
+                    if (now >= data.expire_time) {
+                        database.ref('user_subscriptions/' + userPhone + '/' + child.key).remove();
+                    }
+                });
+
+                // ২. মার্কেট প্যাকেজ লোড
                 database.ref('packages_vip1').on('value', pkgSnapshot => {
                     const pkgDisplay = document.getElementById('packageDisplay');
                     pkgDisplay.innerHTML = "";
-                    if(!pkgSnapshot.exists()){
-                        pkgDisplay.innerHTML = "<p style='text-align:center; color:#666;'>No packages available.</p>";
-                        return;
-                    }
+                    
                     pkgSnapshot.forEach(child => {
                         const p = child.val();
                         const pkgKey = child.key;
                         const isBought = mySubs[pkgKey] ? true : false;
-                        const imgTag = p.image ? `<img src="${p.image}">` : `<i class="fas fa-gem" style="font-size:30px; color:#38ef7d;"></i>`;
+                        
                         pkgDisplay.innerHTML += `
                             <div class="package-card">
                                 <span class="price-tag">৳ ${p.price}</span>
-                                <div class="package-img">${imgTag}</div>
+                                <div class="package-img">${p.image ? `<img src="${p.image}">` : `<i class="fas fa-gem" style="font-size:30px; color:#38ef7d;"></i>`}</div>
                                 <div class="package-info">
                                     <h2>${p.name}</h2>
                                     <p style="font-size:12px; color:#bbb;">Daily: ৳${p.daily} | Validity: ${p.validity} Days</p>
@@ -132,21 +138,18 @@
                 startTimer(pkgId, data.last_claim, data.daily_income);
             });
 
-            if(activeCount === 0) {
-                myDisplay.innerHTML = "<p style='color: #666; font-size: 14px;'>No active equipment found.</p>";
-            }
+            if(activeCount === 0) myDisplay.innerHTML = "<p style='color: #666; font-size: 14px;'>No active equipment found.</p>";
         }
 
         function startTimer(pkgId, lastClaim, dailyIncome) {
             const timerElement = document.getElementById(`timer_${pkgId}`);
             const btnElement = document.getElementById(`btn_${pkgId}`);
+            if(!timerElement || !btnElement) return;
 
             const interval = setInterval(() => {
                 const now = Date.now();
                 const oneDay = 24 * 60 * 60 * 1000;
                 const timePassed = now - lastClaim;
-                
-                // কয়দিনের ক্লেম জমা হয়েছে তা বের করা
                 const daysEarned = Math.floor(timePassed / oneDay);
 
                 if (daysEarned >= 1) {
@@ -160,7 +163,6 @@
                     const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
                     const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
                     const seconds = Math.floor((timeLeft / 1000) % 60);
-                    
                     timerElement.innerText = `Next claim in: ${hours}h ${minutes}m ${seconds}s`;
                     btnElement.className = "btn bought-btn";
                     btnElement.innerHTML = "Income Claimed (Wait)";
@@ -181,22 +183,20 @@
                         status: "active", bought_at: startTime
                     });
                     showToast("প্যাকেজটি সফলভাবে সক্রিয় হয়েছে!");
-                } else {
-                    showToast("ব্যালেন্স পর্যাপ্ত নয়!");
-                }
+                } else { showToast("ব্যালেন্স পর্যাপ্ত নয়!"); }
             });
         }
 
         window.claimIncome = function(pkgId, dailyAmount, days) {
             const totalToClaim = dailyAmount * days;
             const extraTime = days * 24 * 60 * 60 * 1000;
-            
             database.ref('users/' + userPhone + '/balance').transaction(current => (parseFloat(current) || 0) + totalToClaim);
             database.ref('user_subscriptions/' + userPhone + '/' + pkgId).once('value', snap => {
-                const oldClaim = snap.val().last_claim;
-                database.ref('user_subscriptions/' + userPhone + '/' + pkgId).update({
-                    last_claim: oldClaim + extraTime
-                });
+                if(snap.exists()){
+                    database.ref('user_subscriptions/' + userPhone + '/' + pkgId).update({
+                        last_claim: snap.val().last_claim + extraTime
+                    });
+                }
             });
             showToast(`৳${totalToClaim} সফলভাবে ক্লেম করা হয়েছে!`);
         }
