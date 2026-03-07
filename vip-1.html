@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Admin Panel - Manage MLM</title>
+    <title>VIP 1 Management - ai-signal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .admin-container { max-width: 900px; margin: auto; }
+        .back-btn { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #11998e; font-weight: bold; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
         h2 { color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; }
+        input:focus { border-color: #11998e; }
         
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-add:hover { background: #218838; }
+        .btn-add { background: #11998e; color: white; }
+        .btn-add:hover { background: #0e867d; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
-        th { background: #007bff; color: white; }
+        th { background: #11998e; color: white; }
         
         .delete-btn { color: #dc3545; cursor: pointer; font-size: 18px; border: none; background: none; }
-        .pkg-img-preview { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #eee; }
+        .pkg-img-preview { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #eee; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
+    <a href="admin.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
     <div class="card">
-        <h2><i class="fas fa-plus-circle"></i> নতুন প্যাকেজ যোগ করুন</h2>
+        <h2><i class="fas fa-gem" style="color: #ff9800;"></i> VIP 1 - নতুন প্যাকেজ যোগ করুন</h2>
         <input type="text" id="pName" placeholder="প্যাকেজের নাম (যেমন: VIP Gold)">
         <input type="number" id="pPrice" placeholder="প্যাকেজের দাম (৳)">
         <input type="number" id="pDaily" placeholder="প্রতিদিনের ইনকাম (৳)">
@@ -40,7 +44,7 @@
     </div>
 
     <div class="card">
-        <h2><i class="fas fa-boxes"></i> বর্তমান প্যাকেজসমূহ</h2>
+        <h2><i class="fas fa-list"></i> VIP 1 প্যাকেজসমূহ</h2>
         <table>
             <thead>
                 <tr>
@@ -62,6 +66,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+    // আপনার আগের ডাটাবেস কনফিগারেশন
     const firebaseConfig = {
         apiKey: "AIzaSyAoZ39EQR-Buy6QJT71P2R4wL0RyiOQaAc",
         databaseURL: "https://ai-signal-75e73-default-rtdb.firebaseio.com"
@@ -69,28 +74,30 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const database = firebase.database();
 
-    // প্যাকেজ যোগ করার ফাংশন (ইমেজসহ)
+    // প্যাকেজ যোগ করার ফাংশন
     function addPackage() {
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
         const daily = document.getElementById('pDaily').value;
         const validity = document.getElementById('pValidity').value;
-        const image = document.getElementById('pImage').value; // ইমেজ ইনপুট নেওয়া
+        const image = document.getElementById('pImage').value;
 
         if (!name || !price || !daily || !validity) {
             alert("সবগুলো ঘর পূরণ করুন!");
             return;
         }
 
-        const pkgRef = database.ref('packages').push();
+        // VIP 1 এর জন্য আলাদা নোড 'packages_vip1' ব্যবহার করা হয়েছে
+        const pkgRef = database.ref('packages_vip1').push();
         pkgRef.set({
             name: name,
             price: parseInt(price),
             daily: parseInt(daily),
             validity: parseInt(validity),
-            image: image || "" // ডাটাবেসে ইমেজ সেভ করা
+            image: image || "",
+            timestamp: Date.now()
         }).then(() => {
-            alert("প্যাকেজটি সফলভাবে যোগ হয়েছে!");
+            alert("VIP 1 প্যাকেজটি সফলভাবে যোগ হয়েছে!");
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
             document.getElementById('pDaily').value = '';
@@ -100,7 +107,7 @@
     }
 
     // প্যাকেজ লিস্ট দেখানো
-    database.ref('packages').on('value', (snapshot) => {
+    database.ref('packages_vip1').on('value', (snapshot) => {
         const tableBody = document.getElementById('pkgTableBody');
         tableBody.innerHTML = "";
         
@@ -109,7 +116,6 @@
                 const pkg = childSnapshot.val();
                 const key = childSnapshot.key;
                 
-                // ইমেজ প্রিভিউ লজিক
                 const imgDisplay = pkg.image 
                     ? `<img src="${pkg.image}" class="pkg-img-preview" onerror="this.src='https://via.placeholder.com/50'">` 
                     : `<i class="fas fa-image" style="font-size:30px; color:#ccc;"></i>`;
@@ -134,9 +140,10 @@
         }
     });
 
+    // প্যাকেজ ডিলিট
     function deletePackage(key) {
         if (confirm("আপনি কি নিশ্চিতভাবে এই প্যাকেজটি মুছে ফেলতে চান?")) {
-            database.ref('packages/' + key).remove();
+            database.ref('packages_vip1/' + key).remove();
         }
     }
 </script>
