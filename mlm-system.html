@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLM Earning - My Plans</title>
+    <title>MLM Earning - VIP 1 Plans</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -15,7 +15,7 @@
         
         /* কার্ড ডিজাইন */
         .package-card { background: #1e1e1e; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; position: relative; }
-        .package-img { width: 80px; height: 80px; border-radius: 12px; overflow: hidden; background: #333; }
+        .package-img { width: 80px; height: 80px; border-radius: 12px; overflow: hidden; background: #333; display: flex; align-items: center; justify-content: center; }
         .package-img img { width: 100%; height: 100%; object-fit: cover; }
         .package-info h2 { font-size: 17px; color: #38ef7d; }
         .price-tag { position: absolute; top: 15px; right: 15px; background: #38ef7d; color: #121212; padding: 2px 10px; border-radius: 10px; font-weight: bold; font-size: 12px; }
@@ -39,14 +39,14 @@
     </div>
 
     <div class="container">
-        <h3 class="section-title">My Equipment</h3>
+        <h3 class="section-title">My Active VIP 1 Equipment</h3>
         <div id="myPlansDisplay">
             <p style="color: #666; font-size: 14px;">No active equipment found.</p>
         </div>
 
-        <h3 class="section-title">Investment Plans</h3>
+        <h3 class="section-title">VIP 1 Investment Plans</h3>
         <div id="packageDisplay">
-            <p style="text-align: center; color: #888;">Fetching packages...</p>
+            <p style="text-align: center; color: #888;">Fetching VIP 1 packages...</p>
         </div>
     </div>
 
@@ -60,101 +60,111 @@
         };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
-        const userPhone = localStorage.getItem("userPhone");
+        const userPhone = localStorage.getItem("userPhone") || "guest_user";
 
         function initApp() {
-            // ব্যালেন্স রিয়েল-টাইম লোড
-            database.ref('users/' + userPhone).on('value', snapshot => {
-                if(snapshot.exists()) {
-                    document.getElementById('userBalance').innerText = parseFloat(snapshot.val().balance || 0).toFixed(2);
-                }
+            // ১. ব্যালেন্স রিয়েল-টাইম লোড
+            database.ref('users/' + userPhone + '/balance').on('value', snapshot => {
+                document.getElementById('userBalance').innerText = parseFloat(snapshot.val() || 0).toFixed(2);
             });
 
-            // প্যাকেজ এবং সাবস্ক্রিপশন লোড
+            // ২. প্যাকেজ এবং সাবস্ক্রিপশন লোড (VIP 1 নোড থেকে)
             database.ref('user_subscriptions/' + userPhone).on('value', subSnapshot => {
                 const mySubs = subSnapshot.val() || {};
                 
-                // ১. মার্কেট প্যাকেজ লোড
-                database.ref('packages').on('value', pkgSnapshot => {
+                // মার্কেট প্যাকেজ লোড (অ্যাডমিন প্যানেলের 'packages_vip1' থেকে)
+                database.ref('packages_vip1').on('value', pkgSnapshot => {
                     const pkgDisplay = document.getElementById('packageDisplay');
                     pkgDisplay.innerHTML = "";
                     
+                    if(!pkgSnapshot.exists()){
+                        pkgDisplay.innerHTML = "<p style='text-align:center; color:#666;'>No packages available in VIP 1.</p>";
+                        return;
+                    }
+
                     pkgSnapshot.forEach(child => {
                         const p = child.val();
-                        const isBought = mySubs[child.key] ? true : false;
-                        // এডমিন প্যানেল থেকে ইমেজ URL না থাকলে ডিফল্ট আইকন দেখাবে
-                        const imgTag = p.image ? `<img src="${p.image}">` : `<i class="fas fa-bolt" style="font-size:30px; color:#38ef7d; margin-top:25px;"></i>`;
+                        const pkgKey = child.key;
+                        const isBought = mySubs[pkgKey] ? true : false;
+                        
+                        const imgTag = p.image ? `<img src="${p.image}">` : `<i class="fas fa-gem" style="font-size:30px; color:#38ef7d;"></i>`;
                         
                         pkgDisplay.innerHTML += `
                             <div class="package-card">
                                 <span class="price-tag">৳ ${p.price}</span>
-                                <div class="package-img" style="text-align:center;">${imgTag}</div>
+                                <div class="package-img">${imgTag}</div>
                                 <div class="package-info">
                                     <h2>${p.name}</h2>
                                     <p style="font-size:12px; color:#bbb;">Daily: ৳${p.daily} | Validity: ${p.validity} Days</p>
                                     ${isBought 
-                                        ? `<button class="btn bought-btn">Already Purchased</button>` 
-                                        : `<button class="btn activate-btn" onclick="buyPackage('${child.key}', ${p.price}, ${p.daily}, ${p.validity}, '${p.name}')">Activate Now</button>`
+                                        ? `<button class="btn bought-btn">Already Active</button>` 
+                                        : `<button class="btn activate-btn" onclick="buyPackage('${pkgKey}', ${p.price}, ${p.daily}, ${p.validity}, '${p.name}')">Activate Now</button>`
                                     }
                                 </div>
                             </div>`;
                     });
                 });
 
-                // ২. মাই ইকুইপমেন্ট আপডেট
+                // ৩. মাই ইকুইপমেন্ট আপডেট
                 const myDisplay = document.getElementById('myPlansDisplay');
                 myDisplay.innerHTML = "";
-                if(subSnapshot.exists()) {
-                    subSnapshot.forEach(child => {
-                        const data = child.val();
-                        const now = Date.now();
-                        const oneDay = 24 * 60 * 60 * 1000;
-                        const canClaim = (now - data.last_claim) >= oneDay;
+                
+                let activeCount = 0;
+                subSnapshot.forEach(child => {
+                    const data = child.val();
+                    activeCount++;
+                    const now = Date.now();
+                    const oneDay = 24 * 60 * 60 * 1000;
+                    const canClaim = (now - data.last_claim) >= oneDay;
 
-                        myDisplay.innerHTML += `
-                            <div class="my-plan-card">
-                                <h3>${data.name}</h3>
-                                <p style="font-size:13px;">Daily Income: <b>৳ ${data.daily_income}</b></p>
-                                <button class="btn ${canClaim ? 'claim-btn' : 'bought-btn'}" 
-                                    onclick="${canClaim ? `claimIncome('${child.key}', ${data.daily_income})` : ''}">
-                                    ${canClaim ? 'Claim Daily Income' : 'Income Claimed (Wait 24h)'}
-                                </button>
-                            </div>`;
-                    });
-                } else {
-                    myDisplay.innerHTML = "<p style='color:#666; font-size:14px;'>You haven't purchased any plan yet.</p>";
+                    myDisplay.innerHTML += `
+                        <div class="my-plan-card">
+                            <h3 style="color:#38ef7d;">${data.name}</h3>
+                            <p style="font-size:13px; color:#ddd;">Daily Income: <b>৳ ${data.daily_income}</b></p>
+                            <button class="btn ${canClaim ? 'claim-btn' : 'bought-btn'}" 
+                                onclick="${canClaim ? `claimIncome('${child.key}', ${data.daily_income})` : ''}">
+                                ${canClaim ? '<i class="fas fa-coins"></i> Claim Daily Income' : 'Income Claimed (Wait 24h)'}
+                            </button>
+                        </div>`;
+                });
+
+                if(activeCount === 0) {
+                    myDisplay.innerHTML = "<p style='color: #666; font-size: 14px;'>No active VIP 1 equipment found.</p>";
                 }
             });
         }
 
         window.buyPackage = function(pkgId, price, daily, validity, name) {
-            database.ref('users/' + userPhone).once('value', snapshot => {
-                const balance = snapshot.val().balance || 0;
+            database.ref('users/' + userPhone + '/balance').once('value', snapshot => {
+                const balance = parseFloat(snapshot.val() || 0);
                 if(balance >= price) {
                     if(confirm(`${name} প্ল্যানটি কি নিশ্চিতভাবে কিনতে চান?`)) {
                         const startTime = Date.now();
+                        // ব্যালেন্স কাটা
                         database.ref('users/' + userPhone).update({ balance: balance - price });
+                        // সাবস্ক্রিপশন যোগ করা
                         database.ref('user_subscriptions/' + userPhone + '/' + pkgId).set({
                             name: name,
                             daily_income: daily,
                             last_claim: startTime,
                             expire_time: startTime + (validity * 24 * 60 * 60 * 1000),
-                            status: "active"
+                            status: "active",
+                            bought_at: startTime
                         });
-                        alert("প্যাকেজটি সফলভাবে সক্রিয় হয়েছে!");
+                        alert("অভিনন্দন! VIP 1 প্যাকেজটি সফলভাবে সক্রিয় হয়েছে।");
                     }
                 } else {
-                    alert("ব্যালেন্স পর্যাপ্ত নয়। রিচার্জ করুন।");
+                    alert("আপনার ব্যালেন্স পর্যাপ্ত নয়। দয়া করে রিচার্জ করুন।");
                 }
             });
         }
 
         window.claimIncome = function(pkgId, amount) {
-            database.ref('users/' + userPhone + '/balance').transaction(current => (current || 0) + amount);
+            database.ref('users/' + userPhone + '/balance').transaction(current => (parseFloat(current) || 0) + amount);
             database.ref('user_subscriptions/' + userPhone + '/' + pkgId).update({
                 last_claim: Date.now()
             });
-            alert(`৳${amount} আপনার মূল ব্যালেন্সে যোগ হয়েছে!`);
+            alert(`৳${amount} আপনার মেইন ব্যালেন্সে সফলভাবে যোগ করা হয়েছে!`);
         }
 
         initApp();
