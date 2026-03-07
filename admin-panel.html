@@ -228,13 +228,16 @@
         if(event) event.currentTarget.classList.add('active');
     }
 
+    // --- এই ফাংশনটি সংশোধন করা হয়েছে আজকের হিসাব দেখানোর জন্য ---
     function updateStats() {
         let tDep = 0, tWith = 0;
         let todayDepAmt = 0, todayDepCount = 0;
         let todayWithAmt = 0, todayWithCount = 0;
         
         const now = new Date();
+        // আজকের দিনের শুরু (রাত ১২টা)
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        // আজকের দিনের শেষ
         const endOfToday = startOfToday + (24 * 60 * 60 * 1000);
 
         database.ref('deposits').once('value', s => {
@@ -243,9 +246,10 @@
                 if(d.status === "Success") {
                     const amount = parseFloat(d.amount || 0);
                     tDep += amount;
+                    
                     if(d.time) {
-                        const dTime = new Date(d.time).getTime();
-                        if(dTime >= startOfToday && dTime < endOfToday) {
+                        const dDate = new Date(d.time).getTime();
+                        if(dDate >= startOfToday && dDate < endOfToday) {
                             todayDepAmt += amount;
                             todayDepCount++;
                         }
@@ -263,9 +267,10 @@
                 if(w.status === "Approved") {
                     const amount = parseFloat(w.amount || 0);
                     tWith += amount;
+                    
                     if(w.time) {
-                        const wTime = new Date(w.time).getTime();
-                        if(wTime >= startOfToday && wTime < endOfToday) {
+                        const wDate = new Date(w.time).getTime();
+                        if(wDate >= startOfToday && wDate < endOfToday) {
                             todayWithAmt += amount;
                             todayWithCount++;
                         }
@@ -353,7 +358,7 @@
         database.ref('users/'+user+'/balance').once('value').then(s => {
             let nBal = (parseFloat(s.val())||0) + parseFloat(amt);
             database.ref('users/'+user).update({ balance: nBal });
-            database.ref('deposits/'+id).update({ status: "Success", time: new Date().toISOString() });
+            database.ref('deposits/'+id).update({ status: "Success", time: new Date().toISOString() }); // ISO format safe for calculation
         });
     }
 
@@ -398,5 +403,5 @@
 </script>
 
 </body>
-                                                                                                  </html>
-    
+            </html>
+            
