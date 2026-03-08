@@ -146,8 +146,6 @@
         document.getElementById("pageTitle").innerText = "Reset Password";
     }
 
-    // --- Firebase Logic Starts Here ---
-
     // Login Function
     window.loginUser = async function() {
         let phone = document.getElementById("loginPhone").value.trim();
@@ -175,15 +173,20 @@
         }
     }
 
-    // Register Function
+    // Register Function (Updated Validation)
     window.registerUser = async function() {
         let phone = document.getElementById("regPhone").value.trim();
         let pass = document.getElementById("regPass").value;
         let confirm = document.getElementById("regConfirm").value;
-        let refID = document.getElementById("referrerInput").value; // রেফারেল কোড নেওয়া
+        let refID = document.getElementById("referrerInput").value;
         let agree = document.getElementById("agree").checked;
 
-        if(phone.length < 11) { showToast("Invalid Phone Number"); return; }
+        // নম্বরটি '01' দিয়ে শুরু এবং ১১ ডিজিট হতে হবে
+        if(!phone.startsWith("01") || phone.length !== 11) { 
+            showToast("Invalid! Phone must start with 01 and be 11 digits."); 
+            return; 
+        }
+        
         if(pass !== confirm) { showToast("Passwords do not match"); return; }
         if(!agree) { showToast("Please agree to privacy policy"); return; }
 
@@ -196,7 +199,7 @@
                 phone: phone, 
                 pass: pass, 
                 balance: 0, 
-                referrerID: refID || "none", // রেফারেল আইডি সেভ করা
+                referrerID: refID || "none",
                 createdAt: new Date().toISOString() 
             });
 
@@ -229,23 +232,20 @@
         }).catch(() => showToast("Invalid OTP"));
     }
 
-    // Initializing Recaptcha and Refer Logic on Load
     window.onload = function() {
-        // ১. রিক্যাপচা সেটআপ
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'normal'
         });
 
-        // ২. রেফারেল লিঙ্ক লজিক
         const urlParams = new URLSearchParams(window.location.search);
         const refCode = urlParams.get('ref');
 
         if (refCode) {
-            showRegister(); // সরাসরি রেজিস্ট্রেশন পেজ দেখাবে
+            showRegister();
             const refField = document.getElementById('referrerInput');
             if (refField) {
                 refField.value = refCode;
-                refField.readOnly = true; // পরিবর্তন করা যাবে না
+                refField.readOnly = true;
                 refField.style.backgroundColor = "#f0f0f0";
             }
         }
@@ -254,3 +254,4 @@
 
 </body>
 </html>
+
