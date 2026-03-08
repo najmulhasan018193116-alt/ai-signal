@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP 3 - Refer & Team Analytics</title>
+    <title>VIP 3 Admin - 3 Level Refer Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f4f7f6; display: flex; color: #333; }
         
-        .sidebar { width: 260px; background: #11998e; height: 100vh; color: white; padding: 25px 15px; position: fixed; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar { width: 260px; background: #11998e; height: 100vh; color: white; padding: 25px 15px; position: fixed; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 100; }
         .sidebar h2 { font-size: 22px; margin-bottom: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; }
         .sidebar nav p { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-size: 15px; }
         .sidebar nav p:hover { background: rgba(255,255,255,0.15); }
@@ -18,25 +18,33 @@
         .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px; }
         .admin-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
-        h2 { color: #11998e; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        h2 { color: #11998e; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 20px; }
         
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #555; }
-        .input-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; transition: 0.3s; font-size: 16px; }
-        .btn-success { background: #11998e; color: white; padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .commission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: #666; }
+        .input-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; transition: 0.3s; font-size: 15px; }
+        .input-group input:focus { border-color: #11998e; }
+        
+        .btn-save { background: #11998e; color: white; padding: 12px 30px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        .btn-save:hover { background: #0e867d; transform: translateY(-2px); }
 
-        .table-container { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .table-container { overflow-x: auto; margin-top: 20px; background: white; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-        th { background: #f8f9fa; color: #11998e; text-transform: uppercase; }
+        th { background: #f8f9fa; color: #11998e; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .member-badge { display: block; font-size: 11px; background: #e8f5e9; border: 1px solid #c8e6c9; margin: 3px 0; padding: 4px 10px; border-radius: 5px; color: #2e7d32; }
-        .count-badge { background: #11998e; color: white; padding: 3px 12px; border-radius: 50px; font-size: 12px; }
+        .level-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
+        .l1 { background: #e3f2fd; color: #1976d2; }
+        .l2 { background: #f3e5f5; color: #7b1fa2; }
+        .l3 { background: #fff3e0; color: #f57c00; }
+
+        .member-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #eee; font-size: 12px; }
         .money-dep { color: #28a745; font-weight: bold; }
         .money-with { color: #dc3545; font-weight: bold; }
 
         @media (max-width: 768px) {
-            .sidebar { width: 70px; }
+            .sidebar { width: 70px; padding: 20px 10px; }
             .sidebar h2, .sidebar nav p span { display: none; }
             .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
         }
@@ -47,47 +55,48 @@
 <div class="sidebar">
     <h2>Admin VIP 3</h2>
     <nav>
-        <p onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> <span>Back to Main</span></p>
-        <p class="active"><i class="fas fa-gem"></i> <span>Refer Control</span></p>
-        <p onclick="location.reload()"><i class="fas fa-sync"></i> <span>Refresh Data</span></p>
+        <p onclick="window.location.href='dashboard.html'"><i class="fas fa-th-large"></i> <span>Dashboard</span></p>
+        <p class="active"><i class="fas fa-users-cog"></i> <span>Refer Control</span></p>
+        <p onclick="location.reload()"><i class="fas fa-sync-alt"></i> <span>Refresh Data</span></p>
     </nav>
 </div>
 
 <div class="main-content">
     
-    <div class="admin-card" style="border-top: 5px solid #e91e63;">
-        <h2><i class="fas fa-percentage"></i> রেফার কমিশন সেটআপ</h2>
-        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-            <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
-                <label>পার্সেন্টেজ (%) লিখুন</label>
-                <input type="number" id="newRefRate" placeholder="যেমন: 10">
+    <div class="admin-card">
+        <h2><i class="fas fa-coins"></i> ৩ লেভেল রেফার কমিশন সেটআপ</h2>
+        <div class="commission-grid">
+            <div class="input-group">
+                <label>লেভেল ১ কমিশন (%)</label>
+                <input type="number" id="lvl1Rate" placeholder="যেমন: 10">
             </div>
-            <button class="btn-success" onclick="saveRefRate()">কমিশন সেভ করুন</button>
+            <div class="input-group">
+                <label>লেভেল ২ কমিশন (%)</label>
+                <input type="number" id="lvl2Rate" placeholder="যেমন: 5">
+            </div>
+            <div class="input-group">
+                <label>লেভেল ৩ কমিশন (%)</label>
+                <input type="number" id="lvl3Rate" placeholder="যেমন: 2">
+            </div>
         </div>
-        <div style="margin-top: 15px; padding: 8px 15px; background: #fdf2f5; border-radius: 8px; display: inline-block;">
-            বর্তমান রেট: <span id="currentRateDisp" style="font-weight:bold; color:#e91e63;">0</span>%
-        </div>
+        <button class="btn-save" onclick="saveAllRates()">কমিশন রেট আপডেট করুন</button>
     </div>
 
     <div class="admin-card">
-        <h2><i class="fas fa-chart-pie"></i> টিম ট্র্যাকিং ও লেনদেন রিপোর্ট</h2>
-        <p style="font-size: 14px; color: #666; margin-bottom: 20px;">কোন লিডারের টিমে কত ডিপোজিট এবং উইথড্র হয়েছে তার বিস্তারিত তালিকা।</p>
-        
-        
-
+        <h2><i class="fas fa-project-diagram"></i> টিম ট্র্যাকিং ও রিপোর্ট (রিয়েল-টাইম)</h2>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>লিডার (ফোন নম্বর)</th>
-                        <th>মোট মেম্বার</th>
-                        <th>টিম ডিপোজিট</th>
-                        <th>টিম উইথড্র</th>
-                        <th>মেম্বারদের তালিকা</th>
+                        <th>লিডার তথ্য</th>
+                        <th>টিম মেম্বার</th>
+                        <th>মোট ডিপোজিট</th>
+                        <th>মোট উইথড্র</th>
+                        <th>ডাউনলাইন মেম্বার লিস্ট</th>
                     </tr>
                 </thead>
                 <tbody id="referTrackerBody">
-                    <tr><td colspan="5" style="text-align:center; padding: 30px;">ডেটা লোড হচ্ছে...</td></tr>
+                    <tr><td colspan="5" style="text-align:center; padding: 30px;">ডেটা প্রসেসিং হচ্ছে...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -106,81 +115,84 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    function saveRefRate() {
-        const rate = document.getElementById('newRefRate').value;
-        if(rate === "" || rate < 0) { alert("সঠিক সংখ্যা দিন!"); return; }
-        database.ref('admin_settings/referral').update({ percent: parseFloat(rate) })
-        .then(() => { alert("সেভ হয়েছে!"); document.getElementById('newRefRate').value = ""; });
+    // ৩ স্তরের কমিশন সেভ করার ফাংশন
+    function saveAllRates() {
+        const l1 = document.getElementById('lvl1Rate').value;
+        const l2 = document.getElementById('lvl2Rate').value;
+        const l3 = document.getElementById('lvl3Rate').value;
+
+        if(l1 === "" || l2 === "" || l3 === "") { alert("সবগুলো লেভেলের জন্য সংখ্যা দিন!"); return; }
+
+        database.ref('admin_settings/referral_levels').set({
+            level1: parseFloat(l1),
+            level2: parseFloat(l2),
+            level3: parseFloat(l3)
+        }).then(() => {
+            alert("কমিশন রেট সফলভাবে আপডেট হয়েছে!");
+        }).catch(e => alert("Error: " + e.message));
     }
 
-    database.ref('admin_settings/referral/percent').on('value', s => {
-        document.getElementById('currentRateDisp').innerText = s.val() || 0;
+    // বর্তমান কমিশন রেট লোড করা
+    database.ref('admin_settings/referral_levels').on('value', s => {
+        const rates = s.val();
+        if(rates) {
+            document.getElementById('lvl1Rate').value = rates.level1 || 0;
+            document.getElementById('lvl2Rate').value = rates.level2 || 0;
+            document.getElementById('lvl3Rate').value = rates.level3 || 0;
+        }
     });
 
+    // টিম ট্র্যাকিং লজিক
     function loadReferralTracker() {
-        const trackerBody = document.getElementById('referTrackerBody');
-
         database.ref('users').on('value', snapshot => {
-            const allUsers = snapshot.val();
-            let teamMap = {}; 
+            const users = snapshot.val();
+            if(!users) return;
 
-            if(!allUsers) {
-                trackerBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>কোনো ডাটা নেই।</td></tr>";
-                return;
-            }
+            let leaders = {};
 
-            // ডেটা প্রসেসিং
-            Object.keys(allUsers).forEach(userPhone => {
-                const userData = allUsers[userPhone];
-                const leaderPhone = userData.referrer;
+            // ১. সকল ইউজারকে প্রসেস করে লিডার অনুযায়ী টিম সাজানো
+            Object.keys(users).forEach(phone => {
+                const user = users[phone];
+                const rid = user.referrerID; // এটিই এখন রেফারারের ফোন নম্বর
 
-                if (leaderPhone && leaderPhone !== "None" && leaderPhone !== "") {
-                    if (!teamMap[leaderPhone]) {
-                        teamMap[leaderPhone] = {
-                            members: [],
-                            totalDep: 0,
-                            totalWith: 0
-                        };
-                    }
-                    // টিমের মেম্বার যোগ করা
-                    teamMap[leaderPhone].members.push({
-                        phone: userPhone,
-                        name: userData.name || 'No Name'
-                    });
-                    // মেম্বারের ডিপোজিট ও উইথড্র যোগ করা
-                    teamMap[leaderPhone].totalDep += parseFloat(userData.totalDeposit || 0);
-                    teamMap[leaderPhone].totalWith += parseFloat(userData.totalWithdraw || 0);
+                if(rid && rid !== "none" && users[rid]) {
+                    if(!leaders[rid]) leaders[rid] = { members: [], tDep: 0, tWith: 0 };
+                    
+                    leaders[rid].members.push({ phone: phone, name: user.name, dep: user.totalDeposit || 0 });
+                    leaders[rid].tDep += parseFloat(user.totalDeposit || 0);
+                    leaders[rid].tWith += parseFloat(user.totalWithdraw || 0);
                 }
             });
 
+            const body = document.getElementById('referTrackerBody');
             let html = "";
-            let hasTeams = false;
 
-            for (let leaderPhone in teamMap) {
-                hasTeams = true;
-                const leaderData = allUsers[leaderPhone];
-                const leaderName = leaderData ? leaderData.name : "Unknown";
-                const team = teamMap[leaderPhone];
-                
-                const memberListHtml = team.members.map(m => `
-                    <span class="member-badge"><i class="fas fa-user"></i> ${m.phone} (${m.name})</span>
+            Object.keys(leaders).forEach(lPhone => {
+                const team = leaders[lPhone];
+                const lName = users[lPhone].name || "No Name";
+
+                let memberListHtml = team.members.map(m => `
+                    <div class="member-item">
+                        <span>${m.phone} (${m.name || 'User'})</span>
+                        <span class="money-dep">৳${m.dep}</span>
+                    </div>
                 `).join("");
 
                 html += `
                     <tr>
                         <td>
-                            <b style="color:#11998e;">${leaderPhone}</b><br>
-                            <small>${leaderName}</small>
+                            <strong style="color:#11998e;">${lPhone}</strong><br>
+                            <small>${lName}</small>
                         </td>
-                        <td style="text-align:center;"><span class="count-badge">${team.members.length} জন</span></td>
-                        <td class="money-dep">৳ ${team.totalDep.toFixed(2)}</td>
-                        <td class="money-with">৳ ${team.totalWith.toFixed(2)}</td>
-                        <td><div style="max-height: 100px; overflow-y:auto;">${memberListHtml}</div></td>
+                        <td><span style="background:#11998e; color:white; padding:2px 8px; border-radius:10px;">${team.members.length} জন</span></td>
+                        <td class="money-dep">৳ ${team.tDep.toFixed(2)}</td>
+                        <td class="money-with">৳ ${team.tWith.toFixed(2)}</td>
+                        <td><div style="max-height:80px; overflow-y:auto; border:1px solid #eee; padding:5px; border-radius:5px;">${memberListHtml}</div></td>
                     </tr>
                 `;
-            }
+            });
 
-            trackerBody.innerHTML = hasTeams ? html : "<tr><td colspan='5' style='text-align:center;'>কোনো টিম পাওয়া যায়নি।</td></tr>";
+            body.innerHTML = html || "<tr><td colspan='5' style='text-align:center;'>এখনো কোনো টিম তৈরি হয়নি।</td></tr>";
         });
     }
 
