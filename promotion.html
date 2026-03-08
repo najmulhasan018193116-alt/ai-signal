@@ -7,24 +7,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f0f2f5; padding: 20px; }
+        body { background: #f0f2f5; padding: 20px; color: #333; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        h3 { color: #11998e; margin-bottom: 15px; font-size: 18px; }
         .input-group { display: flex; gap: 10px; margin-top: 10px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; background: #f9f9f9; font-size: 14px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #11998e; color: white; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; background: #f9f9f9; font-size: 14px; color: #555; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #11998e; color: white; transition: 0.3s; }
+        .btn:hover { background: #0e867d; }
+        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .stat-box { background: #11998e; color: white; padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-box h4 { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .stat-box h2 { font-size: 22px; }
+
+        .team-section { margin-top: 20px; overflow: hidden; }
+        .level-tag { font-size: 10px; background: #e8f5e9; padding: 2px 8px; border-radius: 10px; color: #2e7d32; margin-left: 5px; font-weight: bold; border: 1px solid #c8e6c9; }
         
-        .team-section { margin-top: 20px; }
-        .level-tag { font-size: 10px; background: #eee; padding: 2px 6px; border-radius: 4px; color: #666; margin-left: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; min-width: 300px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
-        th { background: #f8f9fa; color: #11998e; }
+        th { background: #f8f9fa; color: #11998e; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
 
         #toast {
-            visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
-            text-align: center; border-radius: 8px; padding: 16px; position: fixed;
-            z-index: 1; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px;
+            visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 8px; padding: 12px; position: fixed;
+            z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px;
         }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -37,7 +46,7 @@
 
     <div class="card">
         <h3>আপনার রেফারেল লিঙ্ক</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 5px;">আপনার ৯ সংখ্যার কোড: <span id="myRefIdDisplay">লোড হচ্ছে...</span></p>
+        <p style="font-size: 12px; color: #666; margin-bottom: 5px;">আপনার রেফারেল কোড: <span id="myRefIdDisplay" style="font-weight: bold; color: #11998e;">লোড হচ্ছে...</span></p>
         <div class="input-group">
             <input type="text" id="referLink" readonly>
             <button class="btn" onclick="copyLink()"><i class="fas fa-copy"></i> কপি</button>
@@ -51,18 +60,20 @@
 
     <div class="card team-section">
         <h3>আপনার টিম (৩ লেভেল পর্যন্ত)</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>নাম ও লেভেল</th>
-                    <th>আইডি নম্বর</th>
-                    <th>ডিপোজিট</th>
-                </tr>
-            </thead>
-            <tbody id="teamBody">
-                <tr><td colspan="3" style="text-align:center;">লোড হচ্ছে...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>নাম ও লেভেল</th>
+                        <th>আইডি নম্বর</th>
+                        <th>ডিপোজিট</th>
+                    </tr>
+                </thead>
+                <tbody id="teamBody">
+                    <tr><td colspan="3" style="text-align:center; padding: 20px; color: #999;">লোড হচ্ছে...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -81,34 +92,27 @@
         window.location.href = "login.html";
     }
 
-    // ৯ সংখ্যার ইউনিক কোড জেনারেটর এবং সেভার
-    function getOrGenerateRefID() {
-        database.ref('users/' + userPhone).once('value', s => {
-            let userData = s.val();
-            let myId = userData.myReferralID;
+    // ইউনিক কোডের পরিবর্তে এখন ফোন নম্বর ব্যবহার হবে
+    function initializeReferral() {
+        // ফোন নম্বরই রেফার আইডি
+        const myId = userPhone;
+        document.getElementById('myRefIdDisplay').innerText = myId;
 
-            if(!myId) {
-                myId = Math.floor(100000000 + Math.random() * 900000000);
-                database.ref('users/' + userPhone).update({ myReferralID: myId });
-            }
-
-            document.getElementById('myRefIdDisplay').innerText = myId;
-
-            // --- নতুন লজিক: index.html পাথ ঠিক করা ---
-            let currentUrl = window.location.href;
-            let baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-            // যেহেতু রেজিস্ট্রেশন index.html এ, তাই এখানে register.html এর বদলে index.html টার্গেট করা হয়েছে
-            const fullLink = baseUrl + "/index.html?ref=" + myId; 
-            
-            document.getElementById('referLink').value = fullLink;
-            
-            loadTeamData(myId);
-        });
+        // ডোমেইন পাথ ঠিক করা (index.html?ref=017...)
+        let currentUrl = window.location.href;
+        let baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+        const fullLink = baseUrl + "/index.html?ref=" + myId; 
+        
+        document.getElementById('referLink').value = fullLink;
+        
+        // টিম ডাটা লোড
+        loadTeamData(myId);
     }
 
     function copyLink() {
         const copyText = document.getElementById("referLink");
         copyText.select();
+        copyText.setSelectionRange(0, 99999); // মোবাইল ডিভাইসের জন্য
         document.execCommand("copy");
         
         var x = document.getElementById("toast");
@@ -120,25 +124,28 @@
         let teamList = [];
         let totalCount = 0;
 
+        // লেভেল ১: যারা সরাসরি আমার ফোন নম্বর (referrerID) ব্যবহার করে জয়েন করেছে
         database.ref('users').orderByChild('referrerID').equalTo(myId).once('value', s1 => {
-            if(s1.numChildren() === 0) { document.getElementById('teamBody').innerHTML = "<tr><td colspan='3' style='text-align:center;'>কোনো টিম মেম্বার নেই</td></tr>"; }
+            if(!s1.exists()) { 
+                document.getElementById('teamBody').innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px;'>কোনো টিম মেম্বার নেই</td></tr>"; 
+            }
 
             s1.forEach(child1 => {
                 const u1 = child1.val();
-                const id1 = child1.key;
-                const refId1 = u1.myReferralID;
+                const phone1 = child1.key; // মেম্বারের ফোন নম্বর
                 totalCount++;
-                teamList.push({ name: u1.name, id: id1, dep: u1.totalDeposit || 0, level: 1 });
+                teamList.push({ name: u1.name, id: phone1, dep: u1.totalDeposit || 0, level: 1 });
 
-                database.ref('users').orderByChild('referrerID').equalTo(refId1).once('value', s2 => {
+                // লেভেল ২: যারা লেভেল ১ মেম্বারের ফোন নম্বর রেফারার হিসেবে ব্যবহার করেছে
+                database.ref('users').orderByChild('referrerID').equalTo(phone1).once('value', s2 => {
                     s2.forEach(child2 => {
                         const u2 = child2.val();
-                        const id2 = child2.key;
-                        const refId2 = u2.myReferralID;
+                        const phone2 = child2.key;
                         totalCount++;
-                        teamList.push({ name: u2.name, id: id2, dep: u2.totalDeposit || 0, level: 2 });
+                        teamList.push({ name: u2.name, id: phone2, dep: u2.totalDeposit || 0, level: 2 });
 
-                        database.ref('users').orderByChild('referrerID').equalTo(refId2).once('value', s3 => {
+                        // লেভেল ৩: যারা লেভেল ২ মেম্বারের ফোন নম্বর রেফারার হিসেবে ব্যবহার করেছে
+                        database.ref('users').orderByChild('referrerID').equalTo(phone2).once('value', s3 => {
                             s3.forEach(child3 => {
                                 const u3 = child3.val();
                                 totalCount++;
@@ -147,7 +154,7 @@
                             renderTable(teamList, totalCount);
                         });
                     });
-                    if(s2.numChildren() === 0) renderTable(teamList, totalCount);
+                    if(!s2.exists()) renderTable(teamList, totalCount);
                 });
             });
         });
@@ -155,6 +162,7 @@
 
     function renderTable(list, count) {
         let html = "";
+        // লেভেল অনুযায়ী সাজানো (১ থেকে ৩)
         list.sort((a, b) => a.level - b.level);
         list.forEach(item => {
             html += `<tr>
@@ -167,11 +175,14 @@
         document.getElementById('totalRef').innerText = count;
     }
 
+    // রিয়েলটাইম কমিশন প্রদর্শন
     database.ref('users/' + userPhone + '/refCommission').on('value', s => {
         document.getElementById('totalComm').innerText = s.val() || 0;
     });
 
-    getOrGenerateRefID();
+    // পেজ লোড হলে কল হবে
+    initializeReferral();
 </script>
 </body>
 </html>
+
