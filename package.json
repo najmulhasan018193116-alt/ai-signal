@@ -1,0 +1,11 @@
+{
+  "name": "ai-signal-minify",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npx html-minifier-terser --input-dir . --output-dir dist --collapse-whitespace --remove-comments --minify-css true --minify-js true --file-ext html && cp -r .vcode .devcontainer dist/ 2>/dev/null || true"
+  },
+  "devDependencies": {
+    "html-minifier-terser": "^7.2.0"
+  }
+}
+
