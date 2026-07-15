@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "node build.js"
+    "build": "vite build"
   },
-  "dependencies": {
-    "javascript-obfuscator": "^4.1.1",
-    "html-minifier-terser": "^7.2.0"
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "terser": "^5.24.0",
+    "vite-plugin-javascript-obfuscator": "^3.2.2"
   }
 }
