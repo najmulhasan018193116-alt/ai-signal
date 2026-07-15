@@ -1,6 +1,5 @@
 {
   "cleanUrls": true,
-  "public": false,
   "rewrites": [
     {
       "source": "/(.*)",
@@ -30,4 +29,3 @@
     }
   ]
 }
-
